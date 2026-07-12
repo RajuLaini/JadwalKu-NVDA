@@ -1,5 +1,6 @@
 {
   "version": "1.0.0",
   "changelog": "Rilis awal JadwalKu dengan fitur pengingat agenda, pengingat waktu berkala (hourly/interval chime), dan integrasi antarmuka Combo Box/Checkbox ramah NVDA.",
-  "download_url": "https://github.com/USERNAME/JadwalKu-NVDA/releases/latest/download/JadwalKu-1.0.0.nvda-addon"
+  "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/latest/download/JadwalKu-1.0.0.nvda-addon"
 }
+

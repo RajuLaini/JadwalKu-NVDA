@@ -54,7 +54,12 @@ class UpdateChecker:
 			return
 
 		try:
-			req = urllib.request.Request(update_url, headers={'User-Agent': 'NVDA-JadwalKu-Addon/1.0'})
+			headers = {'User-Agent': 'NVDA-JadwalKu-Addon/1.0'}
+			token = self.config.data.get("update_token", "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").strip()
+			if token and ("github.com" in update_url or "githubusercontent.com" in update_url):
+				headers['Authorization'] = f"token {token}"
+			
+			req = urllib.request.Request(update_url, headers=headers)
 			with urllib.request.urlopen(req, timeout=12) as response:
 				data = json.loads(response.read().decode('utf-8'))
 			
@@ -122,7 +127,12 @@ class UpdateChecker:
 
 	def _download_and_install_direct(self, download_url):
 		try:
-			req = urllib.request.Request(download_url, headers={'User-Agent': 'NVDA-JadwalKu-Addon/1.0'})
+			headers = {'User-Agent': 'NVDA-JadwalKu-Addon/1.0'}
+			token = self.config.data.get("update_token", "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").strip()
+			if token and ("github.com" in download_url or "githubusercontent.com" in download_url):
+				headers['Authorization'] = f"token {token}"
+			
+			req = urllib.request.Request(download_url, headers=headers)
 			with urllib.request.urlopen(req, timeout=35) as response:
 				data = response.read()
 			

@@ -14,6 +14,7 @@ DATA_FILE = os.path.join(CONFIG_DIR, "jadwalku_data.json")
 
 DEFAULT_DATA = {
 	"update_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/version.json",
+	"update_token": "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",
 	"time_reminder": {
 		"enabled": False,
 		"interval": 60,         # Pilihan: 5, 10, 15, 30, 60 (menit)
@@ -69,6 +70,9 @@ class ConfigManager:
 					self.data["time_reminder"] = DEFAULT_DATA["time_reminder"].copy()
 				if "schedules" not in self.data:
 					self.data["schedules"] = DEFAULT_DATA["schedules"].copy()
+				if "update_token" not in self.data:
+					self.data["update_token"] = DEFAULT_DATA["update_token"]
+					self.save_data()
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
 				self.data = DEFAULT_DATA.copy()
