@@ -24,6 +24,7 @@ class HelpDialog(wx.Dialog):
 			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
 			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
 			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
+			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
 			"- Spasi : Hentikan suara notifikasi/chime yang sedang berbunyi.\n"
 			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
 			"- Escape : Keluar dari mode perintah JadwalKu.\n\n"

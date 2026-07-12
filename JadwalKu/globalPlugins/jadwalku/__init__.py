@@ -78,6 +78,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:j": "nextAgenda",
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
+			"kb:u": "checkUpdate",
 			"kb:space": "stopAudio",
 			"kb:b": "help",
 			"kb:f1": "help",
@@ -297,6 +298,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_help(self, gesture):
 		wx.CallAfter(self.show_help_dialog)
 
+	def script_checkUpdate(self, gesture):
+		if self.updater:
+			ui.message("Memeriksa pembaruan JadwalKu ke server...")
+			self.updater.check_update_manual()
+		else:
+			ui.message("Fitur pemeriksa pembaruan tidak aktif.")
 
 	def script_exitLayer(self, gesture):
 		pass
