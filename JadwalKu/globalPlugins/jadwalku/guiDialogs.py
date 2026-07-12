@@ -5,10 +5,54 @@ import logHandler
 import ui
 import gui
 
+class HelpDialog(wx.Dialog):
+	def __init__(self, parent):
+		super().__init__(parent, title="Panduan & Bantuan JadwalKu", size=(580, 460), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Gunakan Panah Atas/Bawah untuk membaca per baris, atau Panah Kiri/Kanan untuk mengeja teks:")
+		sizer.Add(info_label, 0, wx.ALL, 8)
+		
+		help_text = (
+			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU ===\n\n"
+			"1. DAFTAR SHORTCUT UTAMA:\n"
+			"- NVDA + Shift + J : Langsung membuka Dialog Utama Manajemen Jadwal & Pengaturan tanpa melalui mode perintah.\n"
+			"- NVDA + / : Masuk ke Mode Perintah JadwalKu.\n\n"
+			"2. DAFTAR PERINTAH DALAM MODE JADWALKU (Setelah menekan NVDA + /):\n"
+			"- L atau Enter : Buka Dialog Utama Manajemen Jadwal.\n"
+			"- W atau T : Bacakan jam saat ini dan status pengingat waktu berkala (Time Reminder).\n"
+			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
+			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
+			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
+			"- Spasi : Hentikan suara notifikasi/chime yang sedang berbunyi.\n"
+			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
+			"- Escape : Keluar dari mode perintah JadwalKu.\n\n"
+			"3. TIPS NAVIGASI DI DIALOG UTAMA:\n"
+			"- Di dalam daftar agenda (ListBox), Anda dapat menekan tombol Spasi untuk dengan cepat mengaktifkan (Check) atau menonaktifkan (Uncheck) agenda yang dipilih.\n"
+			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah atau mengedit agenda untuk mendengarkan sampel suara chime/alarm yang Anda pilih.\n"
+			"- Gunakan tombol 'Cek Pembaruan...' untuk memeriksa versi terbaru add-on dari server GitHub secara langsung tanpa perlu membuka browser.\n"
+		)
+		
+		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
+		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnClose = wx.Button(self, wx.ID_CLOSE, label="&Tutup")
+		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CLOSE))
+		btnSizer.AddButton(self.btnClose)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.textCtrl.SetFocus()
+
+
 class AgendaDialog(wx.Dialog):
-	def __init__(self, parent, schedule_data=None):
-		super().__init__(parent, title="Formulir Agenda JadwalKu", size=(500, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+	def __init__(self, parent, schedule_data=None, audio_manager=None):
+		super().__init__(parent, title="Formulir Agenda JadwalKu", size=(520, 490), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 		self.schedule_data = schedule_data or {}
+		self.audio_manager = audio_manager
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -55,6 +99,7 @@ class AgendaDialog(wx.Dialog):
 		
 		# 5. Suara Audio
 		sizer.Add(wx.StaticText(self, label="&Suara Chime/Alarm:"), 0, wx.ALL, 5)
+		audio_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		audio_choices = ["chime.wav (Chime Lembut)", "bell.wav (Bel Singkat)", "alarm.wav (Alarm Nada Dering)", "Tanpa Suara Audio"]
 		self.cb_audio = wx.ComboBox(self, choices=audio_choices, style=wx.CB_READONLY)
 		cur_audio = self.schedule_data.get("audio_file", "chime.wav")
@@ -62,7 +107,14 @@ class AgendaDialog(wx.Dialog):
 		elif "bell" in cur_audio: self.cb_audio.SetSelection(1)
 		elif "alarm" in cur_audio: self.cb_audio.SetSelection(2)
 		else: self.cb_audio.SetSelection(3)
-		sizer.Add(self.cb_audio, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		audio_sizer.Add(self.cb_audio, 1, wx.EXPAND | wx.RIGHT, 5)
+		
+		if self.audio_manager:
+			self.btnTestSound = wx.Button(self, label="&Tes Suara")
+			self.btnTestSound.Bind(wx.EVT_BUTTON, self.onTestSound)
+			audio_sizer.Add(self.btnTestSound, 0, wx.ALIGN_CENTER_VERTICAL)
+		
+		sizer.Add(audio_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 6. Checkboxes
 		self.chk_speech = wx.CheckBox(self, label="Bacakan pesan dengan &Suara NVDA (Speech)")
@@ -106,6 +158,20 @@ class AgendaDialog(wx.Dialog):
 			"active": self.chk_active.GetValue(),
 			"last_triggered_date": self.schedule_data.get("last_triggered_date", "")
 		}
+
+	def onTestSound(self, event):
+		if not self.audio_manager:
+			return
+		sel = self.cb_audio.GetSelection()
+		if sel == 0: audio_file = "chime.wav"
+		elif sel == 1: audio_file = "bell.wav"
+		elif sel == 2: audio_file = "alarm.wav"
+		else:
+			ui.message("Anda memilih opsi Tanpa Suara Audio.")
+			return
+		
+		ui.message(f"Memutar tes suara: {audio_file}")
+		self.audio_manager.play_sound(audio_file)
 
 
 class TimeReminderDialog(wx.Dialog):
@@ -237,6 +303,10 @@ class JadwalKuDialog(wx.Dialog):
 		self.btnTimeRemind.Bind(wx.EVT_BUTTON, self.onTimeReminder)
 		btnSizer2.Add(self.btnTimeRemind, 0, wx.ALL, 4)
 		
+		self.btnHelp = wx.Button(self, label="&Bantuan...")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onHelp)
+		btnSizer2.Add(self.btnHelp, 0, wx.ALL, 4)
+		
 		if self.updater:
 			self.btnCheckUp = wx.Button(self, label="&Cek Pembaruan...")
 			self.btnCheckUp.Bind(wx.EVT_BUTTON, self.onCheckUpdate)
@@ -277,7 +347,7 @@ class JadwalKuDialog(wx.Dialog):
 	def onAdd(self, event):
 		gui.mainFrame.prePopup()
 		try:
-			dlg = AgendaDialog(self, {})
+			dlg = AgendaDialog(self, {}, audio_manager=self.audio)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				new_data = dlg.get_result()
@@ -297,7 +367,7 @@ class JadwalKuDialog(wx.Dialog):
 		item = self.schedules[sel]
 		gui.mainFrame.prePopup()
 		try:
-			dlg = AgendaDialog(self, item.copy())
+			dlg = AgendaDialog(self, item.copy(), audio_manager=self.audio)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
@@ -356,4 +426,14 @@ class JadwalKuDialog(wx.Dialog):
 		if self.updater:
 			ui.message("Memeriksa pembaruan ke server...")
 			self.updater.check_update_manual()
+
+	def onHelp(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			dlg = HelpDialog(self)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			gui.mainFrame.postPopup()
+
 

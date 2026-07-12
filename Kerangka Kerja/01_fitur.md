@@ -5,6 +5,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 ## 1. Manajemen Agenda Rutin (Harian / Mingguan)
 - **Daftar Agenda Aktif**: Menampilkan semua jadwal dalam `ListBox` yang mudah dinavigasi menggunakan panah atas/bawah.
 - **Input Berbasis Combo Box**: Saat menambah atau mengedit jadwal, pengguna tidak perlu mengetik format waktu manual. Cukup pilih **Jam (00 - 23)**, **Menit (00 - 59)**, dan **Frekuensi (Setiap Hari / Hari tertentu)** melalui dropdown/combo box.
+- **Tombol Tes Suara (`Alt + T`)**: Di dalam formulir tambah/edit agenda (`AgendaDialog`), pengguna dapat menekan tombol `[ &Tes Suara ]` untuk langsung mendengarkan sampel suara dari opsi yang dipilih di Combo Box sebelum menyimpan.
 - **Status Check/Uncheck Cepat**: Pengguna dapat mengaktifkan atau menonaktifkan suatu agenda dengan cepat melalui tombol `[ Check / Uncheck Status ]` atau langsung menekan Spasi di daftar agenda.
 
 ## 2. Pengingat Waktu Berkala (*Time Reminder / Hourly Chime*)
@@ -24,18 +25,17 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
   - **`H`**: Bacakan seluruh daftar agenda aktif hari ini.
   - **`A`**: Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.
   - **`Spasi`**: Hentikan suara audio/chime yang sedang berbunyi.
-  - **`B` / `F1`**: Bacakan bantuan daftar perintah cepat.
+  - **`B` / `F1`**: Buka **Dialog Panduan Bantuan Read-Only (`HelpDialog`)**.
   - **`Escape`**: Keluar dari mode JadwalKu.
 
-## 4. Sistem Audio & Notifikasi Mandiri (`audioManager.py`)
-- Menggunakan modul `nvwave` bawaan NVDA untuk memutar file `.wav` di latar belakang secara non-blocking (tanpa membuat NVDA macet).
-- Dilengkapi 5 suara bawaan berkualitas tinggi:
-  - `chime.wav`: Suara pengingat waktu berkala yang lembut.
-  - `bell.wav`: Suara pengingat agenda rutin standar.
-  - `alarm.wav`: Suara pengingat agenda penting.
-  - `on.wav` & `off.wav`: Suara indikator saat masuk dan keluar dari Mode Perintah JadwalKu.
+## 4. Dialog Bantuan Read-Only Aksesibel (`HelpDialog`)
+- **Navigasi Panah Atas/Bawah & Eja Karakter**: Saat tombol `Bantuan...` (`Alt + B`) di dialog utama atau tombol `B`/`F1` di mode perintah ditekan, akan muncul dialog dengan multiline read-only text control (`wx.TE_MULTILINE | wx.TE_READONLY`).
+- Pengguna dapat membaca panduan secara nyaman per baris menggunakan panah atas/bawah, atau mengeja huruf dengan panah kiri/kanan tepat seperti *read-only mode* standar NVDA.
 
-## 5. Pemeriksa Pembaruan Otomatis dengan Unduh Langsung (*Direct Background Downloader*)
-- **Pemeriksaan Latar Belakang**: Secara otomatis mengecek file `version.json` dari repositori GitHub Private setiap beberapa jam tanpa mengganggu performa NVDA.
+## 5. Sistem Audio & Notifikasi Mandiri (`audioManager.py`)
+- Menggunakan modul `nvwave` bawaan NVDA untuk memutar file `.wav` di latar belakang secara non-blocking (tanpa membuat NVDA macet).
+- Dilengkapi 5 suara bawaan berkualitas tinggi: `chime.wav`, `bell.wav`, `alarm.wav`, `on.wav`, `off.wav`.
+
+## 6. Pemeriksa Pembaruan Otomatis dengan Unduh Langsung (*Direct Background Downloader*)
+- **Pemeriksaan Latar Belakang**: Secara otomatis mengecek file `version.json` dari repositori GitHub Private tanpa mengganggu performa NVDA.
 - **Pemasangan Langsung Tanpa Browser**: Jika pengguna menekan `Yes / Ya` saat ada pembaruan baru, add-on akan mengunduh file `.nvda-addon` di latar belakang (*background thread*) lalu memicu dialog resmi pemasangan add-on NVDA secara langsung (`os.startfile`).
-- **Opsi Batal Sesi (*Session-based Dismissal*)**: Jika pengguna memilih `No / Tidak`, pemeriksaan otomatis langsung dihentikan hingga sesi NVDA dimulai ulang (*restart*).

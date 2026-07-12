@@ -10,7 +10,7 @@ import scriptHandler
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -162,6 +162,20 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
+	def show_help_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = HelpDialog(gui.mainFrame)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+
 	def getScript(self, gesture):
 		if self.switch:
 			script_name = None
@@ -281,17 +295,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			ui.message("Suara notifikasi dihentikan.")
 
 	def script_help(self, gesture):
-		help_msg = (
-			"Daftar Perintah JadwalKu: "
-			"L atau Enter: Buka dialog utama manajemen jadwal. "
-			"W atau T: Tampilkan informasi jam sekarang dan status pengingat berkala. "
-			"J: Tampilkan jadwal agenda terdekat berikutnya. "
-			"H: Tampilkan seluruh jadwal aktif hari ini. "
-			"A: Cepat Check atau Uncheck pengingat waktu berkala. "
-			"Spasi: Hentikan suara audio yang berbunyi. "
-			"Escape: Keluar dari mode JadwalKu."
-		)
-		ui.message(help_msg)
+		wx.CallAfter(self.show_help_dialog)
+
 
 	def script_exitLayer(self, gesture):
 		pass

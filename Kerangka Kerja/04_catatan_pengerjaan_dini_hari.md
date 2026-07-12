@@ -15,26 +15,29 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
   - `L` / `Enter`: Buka dialog layout.
   - `W` / `T`: Bacakan jam saat ini dan status pengingat berkala.
   - `J`: Bacakan jadwal terdekat berikutnya beserta hitungan mundur (*countdown*).
-  - `H`: Bacakan seluruh jadwal aktif hari ini.
+  - `H`: Bacakan seluruh daftar agenda aktif hari ini.
   - `A`: Check / Uncheck pengingat waktu berkala secara instan.
   - `Spasi`: Hentikan suara audio/chime.
-  - `B` / `F1`: Bantuan cepat.
+  - `B` / `F1`: Buka **Dialog Panduan Bantuan Read-Only (`HelpDialog`)**.
 
 ### 3. Pembuatan Script Otomatis `build_and_install.py`
-- Menggantikan ketergantungan pada perintah terminal yang rumit dengan satu script Python bersih:
-  - Membungkus folder `manifest.ini`, `globalPlugins`, dan `doc` menjadi paket standar **`JadwalKu-1.0.nvda-addon`**.
-  - Menyalin langsung file-file add-on ke folder `%appdata%\nvda\addons\JadwalKu` sehingga pengguna bisa langsung mengujinya hanya dengan menekan `NVDA + Ctrl + F3` (memuat ulang NVDA).
+- Membungkus folder `manifest.ini`, `globalPlugins`, dan `doc` menjadi paket standar **`JadwalKu-1.0.nvda-addon`**.
+- Menyalin langsung file-file add-on ke folder `%appdata%\nvda\addons\JadwalKu` sehingga pengguna bisa langsung mengujinya hanya dengan menekan `NVDA + Ctrl + F3` (memuat ulang NVDA).
 
-### 4. Implementasi Fitur Pemeriksa Pembaruan Otomatis (`updateChecker.py`)
+### 4. Tombol Tes Suara di Formulir Tambah & Edit Agenda (`AgendaDialog`)
+- Menambahkan tombol `[ &Tes Suara ]` (`Alt + T`) di samping Combo Box pilihan audio.
+- Saat ditekan, sistem langsung memutar file audio yang dipilih (`chime.wav`, `bell.wav`, atau `alarm.wav`) melalui `AudioManager.play_sound()`, memungkinkan pengguna mendengarkan sampel suara sebelum menyimpan agenda.
+
+### 5. Dialog Panduan Bantuan Read-Only Aksesibel (`HelpDialog`)
+- Menjawab kebutuhan akan navigasi panduan yang nyaman, kita menciptakan dialog bantuan berbasis `wx.TextCtrl(style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)`.
+- Pengguna dapat membaca teks panduan secara tepat per baris menggunakan panah bawah/atas dan mengeja per huruf menggunakan panah kiri/kanan layaknya *read-only mode* standar NVDA. Dialog ini dapat diakses via tombol `[ &Bantuan... ]` (`Alt + B`) di dialog utama maupun via tombol `B`/`F1` di Mode Perintah `NVDA + /`.
+
+### 6. Implementasi Fitur Pemeriksa Pembaruan Otomatis (`updateChecker.py`) & Unduh Langsung
 - Menambahkan sistem auto-check di latar belakang yang menembak ke URL spesifikasi JSON (`version.json`).
-- Menyetel mekanisme penolakan sesi (*session dismissal*): jika pengguna menekan `No / Tidak` saat diminta memperbarui, add-on otomatis berhenti mengecek hingga NVDA dimuat ulang (*restart*).
+- Menyetel mekanisme penolakan sesi (*session dismissal*): jika pengguna menekan `No / Tidak`, add-on otomatis berhenti mengecek hingga NVDA dimuat ulang.
+- **Direct Background Downloader (Tanpa Membuka Browser)**: Ketika pengguna memilih `Yes / Ya` pada prompt pembaruan, add-on mengunduh file `.nvda-addon` secara diam-diam di latar belakang ke folder sementara (`tempfile`), lalu memanggil `os.startfile(temp_path)`. NVDA langsung memunculkan dialog asli pemasangan add-on di layar tanpa pernah membuka peramban web (*browser*).
 
-### 5. Inovasi "Direct Background Downloader" (Tanpa Membuka Browser)
-- Atas ide cemerlang pengguna (*"setahuku NVDA bisa langsung download update tanpa membuka browser"*), kita merombak total fungsi di `updateChecker.py`.
-- Ketika pengguna memilih `Yes / Ya` pada prompt pembaruan, sistem tidak lagi membuka peramban web (*browser*). Sebaliknya, add-on mengunduh file `.nvda-addon` secara diam-diam di latar belakang ke folder sementara (`tempfile`), lalu memanggil `os.startfile(temp_path)`.
-- Hasilnya: NVDA langsung menampilkan dialog asli pemasangan add-on (*"Apakah Anda ingin memasang add-on ini?"*) di layar, memberikan pengalaman pembaruan yang 100% mulus, profesional, dan ramah pengguna awam!
-
-### 6. Pengaturan Git dan Unggah Langsung ke GitHub Private (`RajuLaini/JadwalKu-NVDA`)
+### 7. Pengaturan Git dan Unggah Langsung ke GitHub Private (`RajuLaini/JadwalKu-NVDA`)
 - Menginisialisasi repositori Git lokal dan menyetel berkas `.gitignore`.
 - Mengkonfigurasi remote origin secara permanen menggunakan token akses pribadi (*PAT*) milik pengguna (`RajuLaini`).
-- Berhasil melakukan *commit* dan *push* seluruh struktur proyek (termasuk direct background downloader) langsung ke *branch* `main` di GitHub Private pengguna tanpa kendala.
+- Berhasil melakukan *commit* dan *push* seluruh struktur proyek langsung ke *branch* `main` di GitHub Private pengguna tanpa kendala.
