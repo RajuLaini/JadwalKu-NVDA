@@ -8,6 +8,7 @@ import logHandler
 import ui
 import gui
 import os
+import tempfile
 
 CURRENT_VERSION = "1.0.0"
 
@@ -106,8 +107,8 @@ class UpdateChecker:
 			
 			if res == wx.YES:
 				if download_url:
-					ui.message("Membuka tautan unduhan di browser Anda...")
-					webbrowser.open(download_url)
+					ui.message("Mengunduh pembaruan JadwalKu di latar belakang tanpa membuka browser... Mohon tunggu.")
+					threading.Thread(target=self._download_and_install_direct, args=(download_url,), daemon=True).start()
 				else:
 					ui.message("Tautan unduhan tidak tersedia di server.")
 			else:
@@ -118,3 +119,23 @@ class UpdateChecker:
 			if self.plugin:
 				self.plugin.is_dialog_open = False
 			gui.mainFrame.postPopup()
+
+	def _download_and_install_direct(self, download_url):
+		try:
+			req = urllib.request.Request(download_url, headers={'User-Agent': 'NVDA-JadwalKu-Addon/1.0'})
+			with urllib.request.urlopen(req, timeout=35) as response:
+				data = response.read()
+			
+			temp_dir = tempfile.gettempdir()
+			temp_file = os.path.join(temp_dir, "JadwalKu-update.nvda-addon")
+			with open(temp_file, "wb") as f:
+				f.write(data)
+			
+			logHandler.log.info(f"JadwalKu: Pembaruan berhasil diunduh ke {temp_file}")
+			wx.CallAfter(ui.message, "Unduhan selesai! Menampilkan dialog pemasangan add-on NVDA...")
+			wx.CallAfter(os.startfile, temp_file)
+		except Exception as e:
+			logHandler.log.warning(f"JadwalKu: Unduhan langsung di latar belakang gagal ({e}). Mengalihkan ke browser...")
+			wx.CallAfter(ui.message, "Mengalihkan tautan unduhan ke browser...")
+			wx.CallAfter(webbrowser.open, download_url)
+
