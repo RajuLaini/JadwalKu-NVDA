@@ -71,6 +71,10 @@ class AudioManager:
 		self.active_alarm_info = None
 		self.snoozed_alarms = []
 
+	def has_active_playback(self):
+		with self._lock:
+			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0
+
 	def has_active_sounds(self):
 		with self._lock:
 			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
@@ -251,6 +255,20 @@ class AudioManager:
 			try:
 				if path.lower().endswith(".mp3"):
 					wav_equiv = os.path.splitext(path)[0] + ".wav"
+					if not os.path.exists(wav_equiv):
+						try:
+							import pygame, wave
+							if not pygame.mixer.get_init():
+								pygame.mixer.init()
+							s = pygame.mixer.Sound(path)
+							w = wave.open(wav_equiv, 'wb')
+							w.setnchannels(2)
+							w.setsampwidth(2)
+							w.setframerate(44100)
+							w.writeframes(s.get_raw())
+							w.close()
+						except Exception as ex:
+							logHandler.log.warning(f"JadwalKu: Gagal konversi MP3 ke WAV on the fly: {ex}")
 					if os.path.exists(wav_equiv):
 						path = wav_equiv
 						self.last_played_file = path
@@ -335,7 +353,7 @@ class AudioManager:
 		
 		def _looper():
 			while self.is_alarm_ringing:
-				if not self.has_active_sounds():
+				if not self.has_active_playback():
 					self.play_sound(audio_file)
 				time.sleep(0.5)
 		
