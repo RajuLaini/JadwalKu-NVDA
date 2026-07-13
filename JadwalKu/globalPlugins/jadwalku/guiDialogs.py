@@ -4,6 +4,7 @@ import datetime
 import logHandler
 import ui
 import gui
+import os
 
 class HelpDialog(wx.Dialog):
 	def __init__(self, parent):
