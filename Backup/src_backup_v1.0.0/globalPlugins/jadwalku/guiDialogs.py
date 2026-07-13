@@ -16,6 +16,7 @@ class HelpDialog(wx.Dialog):
 		help_text = (
 			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU ===\n\n"
 			"1. DAFTAR SHORTCUT UTAMA:\n"
+			"- NVDA + Shift + J : Langsung membuka Dialog Utama Manajemen Jadwal & Pengaturan tanpa melalui mode perintah.\n"
 			"- NVDA + / : Masuk ke Mode Perintah JadwalKu.\n\n"
 			"2. DAFTAR PERINTAH DALAM MODE JADWALKU (Setelah menekan NVDA + /):\n"
 			"- L atau Enter : Buka Dialog Utama Manajemen Jadwal.\n"
@@ -23,7 +24,6 @@ class HelpDialog(wx.Dialog):
 			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
 			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
 			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
-			"- S : Buka Pengaturan Audio Manager (Speaker & Suara).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
 			"- Spasi : Hentikan suara notifikasi/chime yang sedang berbunyi.\n"
 			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
@@ -49,132 +49,6 @@ class HelpDialog(wx.Dialog):
 		self.textCtrl.SetFocus()
 
 
-class CustomDaysDialog(wx.Dialog):
-	def __init__(self, parent, current_days=None):
-		super().__init__(parent, title="Pilih Gabungan Hari JadwalKu", size=(420, 380), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-		self.current_days = current_days or []
-		
-		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.Add(wx.StaticText(self, label="&Centang hari-hari saat jadwal ini akan berbunyi:"), 0, wx.ALL, 8)
-		
-		self.days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
-		self.checkboxes = {}
-		for d in self.days:
-			chk = wx.CheckBox(self, label=d)
-			chk.SetValue(d in self.current_days)
-			sizer.Add(chk, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
-			self.checkboxes[d] = chk
-		
-		btnSizer = wx.StdDialogButtonSizer()
-		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
-		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
-		btnSizer.AddButton(self.btnOk)
-		btnSizer.AddButton(self.btnCancel)
-		btnSizer.Realize()
-		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
-		
-		self.SetSizer(sizer)
-		self.Centre()
-		self.checkboxes["Senin"].SetFocus()
-
-	def get_selected_days(self):
-		return [d for d in self.days if self.checkboxes[d].GetValue()]
-
-
-class AudioManagerDialog(wx.Dialog):
-	def __init__(self, parent, audio_manager, config_manager):
-		super().__init__(parent, title="JadwalKu Audio Manager - Pengaturan Speaker & Suara", size=(560, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-		self.audio = audio_manager
-		self.config = config_manager
-		
-		sizer = wx.BoxSizer(wx.VERTICAL)
-		
-		# 1. Pilih Perangkat Output Audio (Speaker yang Berbeda)
-		sizer.Add(wx.StaticText(self, label="&Pilih Perangkat Output Audio (Speaker / Kartu Suara):"), 0, wx.ALL, 6)
-		device_names = ["Default (Microsoft Sound Mapper)"]
-		try:
-			import nvwave
-			if hasattr(nvwave, "getOutputDeviceNames"):
-				names = nvwave.getOutputDeviceNames()
-				if names:
-					device_names = [str(n) for n in names if n]
-		except Exception as e:
-			logHandler.log.warning(f"JadwalKu: Gagal memuat nama perangkat dari nvwave: {e}")
-		
-		self.cb_device = wx.ComboBox(self, choices=device_names, style=wx.CB_READONLY)
-		cur_dev = self.config.get_audio_device()
-		if cur_dev in device_names:
-			self.cb_device.SetValue(cur_dev)
-		else:
-			self.cb_device.SetSelection(0)
-		sizer.Add(self.cb_device, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
-		
-		self.btnTestDevice = wx.Button(self, label="&Tes Suara di Speaker Ini")
-		self.btnTestDevice.Bind(wx.EVT_BUTTON, self.onTestDevice)
-		sizer.Add(self.btnTestDevice, 0, wx.ALL, 6)
-		
-		# 2. Daftar Aset Suara & Alarm yang Tersedia
-		sizer.Add(wx.StaticText(self, label="&Daftar File Suara di Folder Add-on:"), 0, wx.ALL, 6)
-		self.lb_sounds = wx.ListBox(self)
-		self.refresh_sounds_list()
-		sizer.Add(self.lb_sounds, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
-		
-		self.btnTestFile = wx.Button(self, label="T&es File Suara Terpilih")
-		self.btnTestFile.Bind(wx.EVT_BUTTON, self.onTestFile)
-		sizer.Add(self.btnTestFile, 0, wx.ALL, 6)
-		
-		# Tombol Simpan & Batal
-		btnSizer = wx.StdDialogButtonSizer()
-		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
-		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
-		btnSizer.AddButton(self.btnOk)
-		btnSizer.AddButton(self.btnCancel)
-		btnSizer.Realize()
-		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
-		
-		self.SetSizer(sizer)
-		self.Centre()
-		self.cb_device.SetFocus()
-
-	def refresh_sounds_list(self):
-		self.lb_sounds.Clear()
-		sounds_dir = os.path.join(os.path.dirname(__file__), "sounds")
-		if os.path.exists(sounds_dir):
-			files = sorted(os.listdir(sounds_dir))
-			for f in files:
-				if (f.lower().endswith(".wav") or f.lower().endswith(".mp3")) and f not in ["on.wav", "off.wav"]:
-					self.lb_sounds.Append(f)
-
-	def onTestDevice(self, event):
-		sel_dev = self.cb_device.GetValue()
-		old_dev = self.config.get_audio_device()
-		try:
-			self.config.set_audio_device(sel_dev)
-			ui.message(f"Menguji speaker: {sel_dev}")
-			self.audio.play_sound("chime.wav")
-		finally:
-			self.config.set_audio_device(old_dev)
-
-	def onTestFile(self, event):
-		sel = self.lb_sounds.GetStringSelection()
-		if not sel:
-			ui.message("Pilih file suara dari daftar terlebih dahulu.")
-			return
-		sel_dev = self.cb_device.GetValue()
-		old_dev = self.config.get_audio_device()
-		try:
-			self.config.set_audio_device(sel_dev)
-			ui.message(f"Memutar {sel} di speaker {sel_dev}")
-			self.audio.play_sound(sel)
-		finally:
-			self.config.set_audio_device(old_dev)
-
-	def get_result(self):
-		return {
-			"audio_device": self.cb_device.GetValue()
-		}
-
-
 class AgendaDialog(wx.Dialog):
 	def __init__(self, parent, schedule_data=None, audio_manager=None):
 		super().__init__(parent, title="Formulir Agenda JadwalKu", size=(520, 490), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
@@ -188,33 +62,19 @@ class AgendaDialog(wx.Dialog):
 		self.txt_name = wx.TextCtrl(self, value=self.schedule_data.get("name", ""))
 		sizer.Add(self.txt_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
-		self.custom_days = self.schedule_data.get("custom_days", [])
-		
-		# 2. Frekuensi / Hari & Tombol Pilih Hari
+		# 2. Frekuensi / Hari
 		sizer.Add(wx.StaticText(self, label="&Frekuensi / Hari:"), 0, wx.ALL, 5)
-		freq_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		freq_choices = [
 			"Setiap Hari", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu",
-			"Hari Kerja (Senin - Jumat)", "Akhir Pekan (Sabtu - Minggu)",
-			"Sesuaikan Hari (Pilih Hari Spesifik...)", "Sekali Waktu (Tanggal Spesifik)"
+			"Hari Kerja (Senin - Jumat)", "Akhir Pekan (Sabtu - Minggu)", "Sekali Waktu (Tanggal Spesifik)"
 		]
 		self.cb_freq = wx.ComboBox(self, choices=freq_choices, style=wx.CB_READONLY)
 		current_freq = self.schedule_data.get("frequency", "Setiap Hari")
-		if current_freq in freq_choices or current_freq.startswith("Sesuaikan Hari"):
-			if current_freq.startswith("Sesuaikan Hari"):
-				if not self.custom_days and ":" in current_freq:
-					self.custom_days = [d.strip() for d in current_freq.split(":", 1)[1].split(",") if d.strip()]
-				self.cb_freq.SetValue(current_freq)
-			else:
-				self.cb_freq.SetValue(current_freq)
+		if current_freq in freq_choices:
+			self.cb_freq.SetValue(current_freq)
 		else:
 			self.cb_freq.SetSelection(0)
-		freq_sizer.Add(self.cb_freq, 1, wx.EXPAND | wx.RIGHT, 5)
-		
-		self.btnCustomDays = wx.Button(self, label="&Pilih Hari (Checklist)...")
-		self.btnCustomDays.Bind(wx.EVT_BUTTON, self.onSelectCustomDays)
-		freq_sizer.Add(self.btnCustomDays, 0, wx.ALIGN_CENTER_VERTICAL)
-		sizer.Add(freq_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		sizer.Add(self.cb_freq, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 3. Tanggal Spesifik (jika pilih Sekali Waktu)
 		sizer.Add(wx.StaticText(self, label="&Tanggal Spesifik (Format: YYYY-MM-DD, misal 2026-07-15):"), 0, wx.ALL, 5)
@@ -241,41 +101,13 @@ class AgendaDialog(wx.Dialog):
 		# 5. Suara Audio
 		sizer.Add(wx.StaticText(self, label="&Suara Chime/Alarm:"), 0, wx.ALL, 5)
 		audio_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		
-		self.audio_files_map = []
-		audio_choices = []
-		
-		# Aset standar
-		std_items = [
-			("chime.wav", "chime.wav (Chime Lembut)"),
-			("bell.wav", "bell.wav (Bel Singkat)"),
-			("alarm.wav", "alarm.wav (Alarm Nada Dering)"),
-			("wind-up-clock-alarm-bell.mp3", "wind-up-clock-alarm-bell.mp3 (Alarm Jam Weker)")
-		]
-		for filename, label in std_items:
-			self.audio_files_map.append(filename)
-			audio_choices.append(label)
-		
-		# Scan tambahan dari folder sounds
-		sounds_dir = os.path.join(os.path.dirname(__file__), "sounds")
-		if os.path.exists(sounds_dir):
-			for f in sorted(os.listdir(sounds_dir)):
-				if (f.lower().endswith(".wav") or f.lower().endswith(".mp3")) and f not in ["on.wav", "off.wav"] and f not in self.audio_files_map:
-					self.audio_files_map.append(f)
-					audio_choices.append(f"{f} (Suara Kustom)")
-		
-		self.audio_files_map.append("")
-		audio_choices.append("Tanpa Suara Audio")
-		
+		audio_choices = ["chime.wav (Chime Lembut)", "bell.wav (Bel Singkat)", "alarm.wav (Alarm Nada Dering)", "Tanpa Suara Audio"]
 		self.cb_audio = wx.ComboBox(self, choices=audio_choices, style=wx.CB_READONLY)
 		cur_audio = self.schedule_data.get("audio_file", "chime.wav")
-		if not self.schedule_data.get("audio_enabled", True) or not cur_audio:
-			self.cb_audio.SetSelection(len(audio_choices) - 1)
-		elif cur_audio in self.audio_files_map:
-			self.cb_audio.SetSelection(self.audio_files_map.index(cur_audio))
-		else:
-			self.cb_audio.SetSelection(0)
-		
+		if "chime" in cur_audio: self.cb_audio.SetSelection(0)
+		elif "bell" in cur_audio: self.cb_audio.SetSelection(1)
+		elif "alarm" in cur_audio: self.cb_audio.SetSelection(2)
+		else: self.cb_audio.SetSelection(3)
 		audio_sizer.Add(self.cb_audio, 1, wx.EXPAND | wx.RIGHT, 5)
 		
 		if self.audio_manager:
@@ -307,29 +139,17 @@ class AgendaDialog(wx.Dialog):
 		self.Centre()
 		self.txt_name.SetFocus()
 
-	def onSelectCustomDays(self, event):
-		dlg = CustomDaysDialog(self, getattr(self, "custom_days", []))
-		if dlg.ShowModal() == wx.ID_OK:
-			self.custom_days = dlg.get_selected_days()
-			if self.custom_days:
-				self.cb_freq.SetValue("Sesuaikan Hari: " + ", ".join(self.custom_days))
-			else:
-				self.cb_freq.SetValue("Setiap Hari")
-		dlg.Destroy()
-
 	def get_result(self):
-		sel = self.cb_audio.GetSelection()
-		if 0 <= sel < len(self.audio_files_map):
-			audio_file = self.audio_files_map[sel]
-		else:
-			audio_file = "chime.wav"
-		audio_enabled = bool(audio_file)
+		audio_sel = self.cb_audio.GetSelection()
+		if audio_sel == 0: audio_file = "chime.wav"; audio_enabled = True
+		elif audio_sel == 1: audio_file = "bell.wav"; audio_enabled = True
+		elif audio_sel == 2: audio_file = "alarm.wav"; audio_enabled = True
+		else: audio_file = ""; audio_enabled = False
 		
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
 			"frequency": self.cb_freq.GetValue(),
-			"custom_days": getattr(self, "custom_days", []),
 			"date": self.txt_date.GetValue().strip(),
 			"hour": int(self.cb_hour.GetValue()),
 			"minute": int(self.cb_minute.GetValue()),
@@ -344,12 +164,15 @@ class AgendaDialog(wx.Dialog):
 		if not self.audio_manager:
 			return
 		sel = self.cb_audio.GetSelection()
-		if 0 <= sel < len(self.audio_files_map) and self.audio_files_map[sel]:
-			audio_file = self.audio_files_map[sel]
-			ui.message(f"Memutar tes suara: {audio_file}")
-			self.audio_manager.play_sound(audio_file)
+		if sel == 0: audio_file = "chime.wav"
+		elif sel == 1: audio_file = "bell.wav"
+		elif sel == 2: audio_file = "alarm.wav"
 		else:
 			ui.message("Anda memilih opsi Tanpa Suara Audio.")
+			return
+		
+		ui.message(f"Memutar tes suara: {audio_file}")
+		self.audio_manager.play_sound(audio_file)
 
 
 class TimeReminderDialog(wx.Dialog):
@@ -481,10 +304,6 @@ class JadwalKuDialog(wx.Dialog):
 		self.btnTimeRemind.Bind(wx.EVT_BUTTON, self.onTimeReminder)
 		btnSizer2.Add(self.btnTimeRemind, 0, wx.ALL, 4)
 		
-		self.btnAudio = wx.Button(self, label="Pengaturan &Audio Manager (Speaker)...")
-		self.btnAudio.Bind(wx.EVT_BUTTON, self.onAudioManager)
-		btnSizer2.Add(self.btnAudio, 0, wx.ALL, 4)
-		
 		self.btnHelp = wx.Button(self, label="&Bantuan...")
 		self.btnHelp.Bind(wx.EVT_BUTTON, self.onHelp)
 		btnSizer2.Add(self.btnHelp, 0, wx.ALL, 4)
@@ -608,19 +427,6 @@ class JadwalKuDialog(wx.Dialog):
 		if self.updater:
 			ui.message("Memeriksa pembaruan ke server...")
 			self.updater.check_update_manual()
-
-	def onAudioManager(self, event):
-		gui.mainFrame.prePopup()
-		try:
-			dlg = AudioManagerDialog(self, self.audio, self.config)
-			res = dlg.ShowModal()
-			if res == wx.ID_OK:
-				updated = dlg.get_result()
-				self.config.set_audio_device(updated["audio_device"])
-				ui.message(f"Perangkat speaker JadwalKu disimpan: {updated['audio_device']}")
-			dlg.Destroy()
-		finally:
-			gui.mainFrame.postPopup()
 
 	def onHelp(self, event):
 		gui.mainFrame.prePopup()

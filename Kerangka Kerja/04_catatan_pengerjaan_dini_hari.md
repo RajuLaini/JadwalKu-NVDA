@@ -41,3 +41,21 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 - Menginisialisasi repositori Git lokal dan menyetel berkas `.gitignore`.
 - Mengkonfigurasi remote origin secara permanen menggunakan token akses pribadi (*PAT*) milik pengguna (`RajuLaini`).
 - Berhasil melakukan *commit* dan *push* seluruh struktur proyek langsung ke *branch* `main` di GitHub Private pengguna tanpa kendala.
+
+### 8. Pembersihan Shortcut (`NVDA + Shift + J` Dihapus) & Penyempurnaan Mode Perintah (`NVDA + /`)
+- Menghapus shortcut `NVDA + Shift + J` untuk mencegah bentrok/tumpang tindih dengan add-on NVDA lain.
+- Semua perintah kini terpusat dengan rapi pada satu gerbang mode perintah (`NVDA + /`), dengan penambahan shortcut baru **`S`** untuk langsung membuka **JadwalKu Audio Manager**.
+
+### 9. Fitur Audio Manager & Pemilihan Speaker Kustom (`AudioManagerDialog`)
+- Memungkinkan pemutaran suara chime dan alarm di perangkat speaker/kartu suara khusus tanpa mengikuti aturan default system soundcard (`Default (Microsoft Sound Mapper)` atau speaker eksternal khusus seperti *USB Audio / Headphone / IslamicPedia Speaker*).
+- Menambahkan **Audio Manager Dialog** (`Alt + P` di dialog utama atau tombol `S` di mode perintah `NVDA + /`) yang memungkinkan pengguna memilih perangkat output audio, mengetes speaker terpilih, serta mengecek/mengetes seluruh koleksi file suara yang ada di folder add-on.
+
+### 10. Fitur Alarm Jam Weker & Dukungan Pemutaran MP3 (`mciSendStringW`)
+- Menambahkan dukungan pemutaran file `.mp3` native di Windows (menggunakan `ctypes.windll.winmm.mciSendStringW`) agar file baru **`wind-up-clock-alarm-bell.mp3`** dapat diputar langsung sebagai suara alarm jam weker.
+- Pemilihan suara di formulir agenda kini memuat daftar dinamis yang mencakup `chime.wav`, `bell.wav`, `alarm.wav`, `wind-up-clock-alarm-bell.mp3`, dan suara kustom lainnya dari folder `sounds/`.
+
+### 11. Fitur Gabungan Hari Spesifik (`Sesuaikan Hari` - Checkbox Dialog)
+- Menambahkan opsi frekuensi **"Sesuaikan Hari (Pilih Hari Spesifik...)"** pada formulir tambah/edit agenda (`AgendaDialog`).
+- Menyediakan tombol **`[ &Pilih Hari (Checklist)... ]`** yang membuka dialog khusus berisi 7 Checkbox (`Senin` sampai `Minggu`).
+- Penjadwalan latar belakang (`scheduler.py`) kini memverifikasi kombinasi hari yang dicentang secara presisi di setiap pergantian menit.
+

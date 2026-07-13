@@ -7,3 +7,9 @@ semua bisa dibuat dengan pengaturan yang memiliki combo box atau dropdown, dan m
 Kamu bisa mencontohnya dari kumpulan Addon yang ada di %appdata% NVDA\addon. Kamu aku izinkan untuk melihat files itu.
 misal: Kita bisa menekan NVDA + /, untuk membuka layourd dan barulah aturan ada di sana. contoh yang jelas ada di islamic pedia yang ada di add-on.
 Apakah Kamu punya idea?
+
+
+url: https://github.com/RajuLaini/JadwalKu-NVDA.git
+
+token:
+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

@@ -10,7 +10,7 @@ import scriptHandler
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, AudioManagerDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -35,10 +35,6 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		self.btnOpenTime.Bind(wx.EVT_BUTTON, self.onOpenTime)
 		btnSizer.Add(self.btnOpenTime, 0, wx.ALL, 5)
 		
-		self.btnOpenAudio = wx.Button(self, label="Pengaturan &Audio Manager (Speaker)...")
-		self.btnOpenAudio.Bind(wx.EVT_BUTTON, self.onOpenAudio)
-		btnSizer.Add(self.btnOpenAudio, 0, wx.ALL, 5)
-		
 		settingsSizer.Add(btnSizer, 0, wx.ALL, 5)
 
 	def onOpenLayout(self, event):
@@ -50,11 +46,6 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		global _plugin_instance
 		if _plugin_instance:
 			wx.CallAfter(_plugin_instance.show_time_reminder_dialog)
-
-	def onOpenAudio(self, event):
-		global _plugin_instance
-		if _plugin_instance:
-			wx.CallAfter(_plugin_instance.show_audio_manager_dialog)
 
 	def onSave(self):
 		pass
@@ -69,7 +60,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		_plugin_instance = self
 		
 		self.config = ConfigManager()
-		self.audio = AudioManager(self.config)
+		self.audio = AudioManager()
 		self.scheduler = Scheduler(self.config, self.audio)
 		self.scheduler.start()
 		
@@ -87,7 +78,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:j": "nextAgenda",
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
-			"kb:s": "openAudioManager",
 			"kb:u": "checkUpdate",
 			"kb:space": "stopAudio",
 			"kb:b": "help",
@@ -173,23 +163,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
-	def show_audio_manager_dialog(self):
-		if not self.check_dialog_open():
-			return
-		self.is_dialog_open = True
-		gui.mainFrame.prePopup()
-		try:
-			dlg = AudioManagerDialog(gui.mainFrame, self.audio, self.config)
-			res = dlg.ShowModal()
-			if res == wx.ID_OK:
-				updated = dlg.get_result()
-				self.config.set_audio_device(updated["audio_device"])
-				ui.message(f"Perangkat speaker JadwalKu disimpan: {updated['audio_device']}")
-			dlg.Destroy()
-		finally:
-			self.is_dialog_open = False
-			gui.mainFrame.postPopup()
-
 	def show_help_dialog(self):
 		if not self.check_dialog_open():
 			return
@@ -244,11 +217,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, W info waktu sekarang, J jadwal berikutnya, atau B untuk bantuan.")
 		self.switch = True
 
-	def script_openLayout(self, gesture):
+	@scriptHandler.script(
+		description="Langsung membuka Dialog Layout Manajemen JadwalKu",
+		gesture="kb:NVDA+shift+j"
+	)
+	def script_directOpenLayout(self, gesture):
 		wx.CallAfter(self.show_main_dialog)
 
-	def script_openAudioManager(self, gesture):
-		wx.CallAfter(self.show_audio_manager_dialog)
+	def script_openLayout(self, gesture):
+		wx.CallAfter(self.show_main_dialog)
 
 	def script_announceTime(self, gesture):
 		now = datetime.datetime.now()

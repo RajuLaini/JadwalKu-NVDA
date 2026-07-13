@@ -121,10 +121,6 @@ class Scheduler:
 					match = True
 				elif freq == "Akhir Pekan (Sabtu - Minggu)" and weekday in (5, 6):
 					match = True
-				elif freq.startswith("Sesuaikan Hari") or agenda.get("custom_days"):
-					custom_days = agenda.get("custom_days", [])
-					if days_map.get(weekday) in custom_days:
-						match = True
 				elif freq == "Sekali Waktu (Tanggal Spesifik)":
 					target_date = agenda.get("date", "")
 					if target_date == today_date_str:

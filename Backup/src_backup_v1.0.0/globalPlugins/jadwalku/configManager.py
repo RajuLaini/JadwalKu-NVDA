@@ -15,7 +15,6 @@ DATA_FILE = os.path.join(CONFIG_DIR, "jadwalku_data.json")
 DEFAULT_DATA = {
 	"update_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/version.json",
 	"update_token": "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",
-	"audio_device": "Default (Microsoft Sound Mapper)",
 	"time_reminder": {
 		"enabled": False,
 		"interval": 60,         # Pilihan: 5, 10, 15, 30, 60 (menit)
@@ -73,9 +72,7 @@ class ConfigManager:
 					self.data["schedules"] = DEFAULT_DATA["schedules"].copy()
 				if "update_token" not in self.data:
 					self.data["update_token"] = DEFAULT_DATA["update_token"]
-				if "audio_device" not in self.data:
-					self.data["audio_device"] = DEFAULT_DATA["audio_device"]
-				self.save_data()
+					self.save_data()
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
 				self.data = DEFAULT_DATA.copy()
@@ -144,11 +141,4 @@ class ConfigManager:
 		if "time_reminder" not in self.data:
 			self.data["time_reminder"] = {}
 		self.data["time_reminder"].update(updated_dict)
-		self.save_data()
-
-	def get_audio_device(self):
-		return self.data.get("audio_device", "Default (Microsoft Sound Mapper)")
-
-	def set_audio_device(self, device_name):
-		self.data["audio_device"] = device_name
 		self.save_data()

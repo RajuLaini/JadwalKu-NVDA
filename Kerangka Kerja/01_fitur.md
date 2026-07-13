@@ -17,14 +17,14 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Rentang Jam Aktif (*Quiet Hours*)**: Pengguna dapat mengatur Jam Mulai (misal jam `06:00`) dan Jam Selesai (misal jam `22:00`) agar pengingat tidak berbunyi di tengah malam saat tidur.
 
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
-- **`NVDA + Shift + J`**: Langsung membuka **Dialog Utama Manajemen Jadwal & Pengaturan** tanpa lewat mode perintah.
-- **`NVDA + /`**: Masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
+- **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
   - **`L` / `Enter`**: Buka Dialog Layout Utama.
   - **`W` / `T`**: Bacakan informasi jam sekarang dan status pengingat waktu berkala (*Current Time & Status*).
   - **`J`**: Bacakan jadwal agenda terdekat berikutnya beserta sisa waktu menuju agenda tersebut.
   - **`H`**: Bacakan seluruh daftar agenda aktif hari ini.
   - **`A`**: Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.
-  - **`Spasi`**: Hentikan suara audio/chime yang sedang berbunyi.
+  - **`S`**: Buka **JadwalKu Audio Manager** (Pengaturan Speaker & Suara).
+  - **`Spasi`**: Hentikan suara audio/chime/alarm yang sedang berbunyi.
   - **`B` / `F1`**: Buka **Dialog Panduan Bantuan Read-Only (`HelpDialog`)**.
   - **`Escape`**: Keluar dari mode JadwalKu.
 
@@ -32,10 +32,15 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Navigasi Panah Atas/Bawah & Eja Karakter**: Saat tombol `Bantuan...` (`Alt + B`) di dialog utama atau tombol `B`/`F1` di mode perintah ditekan, akan muncul dialog dengan multiline read-only text control (`wx.TE_MULTILINE | wx.TE_READONLY`).
 - Pengguna dapat membaca panduan secara nyaman per baris menggunakan panah atas/bawah, atau mengeja huruf dengan panah kiri/kanan tepat seperti *read-only mode* standar NVDA.
 
-## 5. Sistem Audio & Notifikasi Mandiri (`audioManager.py`)
-- Menggunakan modul `nvwave` bawaan NVDA untuk memutar file `.wav` di latar belakang secara non-blocking (tanpa membuat NVDA macet).
-- Dilengkapi 5 suara bawaan berkualitas tinggi: `chime.wav`, `bell.wav`, `alarm.wav`, `on.wav`, `off.wav`.
+## 5. Sistem Audio Manager & Pengaturan Perangkat Speaker Khusus (`audioManager.py` & `AudioManagerDialog`)
+- **Pemutaran Mandiri di Speaker Berbeda**: Pengguna dapat memilih perangkat output audio khusus (kartu suara terpisah, *headphone USB*, atau *speaker eksternal* seperti pada IslamicPedia) tanpa mengikuti aturan default system soundcard.
+- **Dukungan Alarm Jam Weker MP3 & WAV (`mciSendStringW` & `nvwave`)**: Memungkinkan pemutaran file `.wav` berkualitas tinggi serta file `.mp3` seperti `wind-up-clock-alarm-bell.mp3` secara native.
+- **Daftar Suara Dinamis**: Memuat otomatis seluruh file suara (`.wav` dan `.mp3`) yang ada di dalam folder `sounds/` add-on.
 
-## 6. Pemeriksa Pembaruan Otomatis dengan Unduh Langsung (*Direct Background Downloader*)
+## 6. Penjadwalan Gabungan Hari Kustom (`Sesuaikan Hari`)
+- Menggunakan dialog khusus dengan 7 Checkbox (`Senin` - `Minggu`) yang memungkinkan pengguna menggabungkan hari tertentu (misal: Senin, Rabu, Jumat saja) sesuai kebutuhan jadwal secara akurat dan fleksibel.
+
+## 7. Pemeriksa Pembaruan Otomatis dengan Unduh Langsung (*Direct Background Downloader*)
 - **Pemeriksaan Latar Belakang**: Secara otomatis mengecek file `version.json` dari repositori GitHub Private tanpa mengganggu performa NVDA.
 - **Pemasangan Langsung Tanpa Browser**: Jika pengguna menekan `Yes / Ya` saat ada pembaruan baru, add-on akan mengunduh file `.nvda-addon` di latar belakang (*background thread*) lalu memicu dialog resmi pemasangan add-on NVDA secara langsung (`os.startfile`).
+
