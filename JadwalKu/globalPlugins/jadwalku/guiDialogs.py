@@ -110,7 +110,20 @@ class AudioManagerDialog(wx.Dialog):
 		self.btnTestDevice.Bind(wx.EVT_BUTTON, self.onTestDevice)
 		sizer.Add(self.btnTestDevice, 0, wx.ALL, 6)
 		
-		# 2. Daftar Aset Suara & Alarm yang Tersedia
+		# 2. Pengaturan Volume Audio (Maksimal 600%)
+		cur_vol = self.config.get_audio_volume() if self.config else 100
+		self.lbl_volume = wx.StaticText(self, label=f"&Volume Audio Suara ({cur_vol}%):")
+		sizer.Add(self.lbl_volume, 0, wx.ALL, 6)
+		
+		self.slider_volume = wx.Slider(self, value=cur_vol, minValue=1, maxValue=600, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_volume.Bind(wx.EVT_SLIDER, self.onVolumeScroll)
+		sizer.Add(self.slider_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
+		
+		self.btnResetVolume = wx.Button(self, label="&Reset Volume ke Normal (100%)")
+		self.btnResetVolume.Bind(wx.EVT_BUTTON, self.onResetVolume)
+		sizer.Add(self.btnResetVolume, 0, wx.ALL, 6)
+		
+		# 3. Daftar Aset Suara & Alarm yang Tersedia
 		sizer.Add(wx.StaticText(self, label="&Daftar File Suara di Folder Add-on:"), 0, wx.ALL, 6)
 		self.lb_sounds = wx.ListBox(self)
 		self.refresh_sounds_list()
@@ -132,6 +145,53 @@ class AudioManagerDialog(wx.Dialog):
 		self.SetSizer(sizer)
 		self.Centre()
 		self.cb_device.SetFocus()
+		self.Bind(wx.EVT_CLOSE, self.onClose)
+
+	def onVolumeScroll(self, event):
+		val = self.slider_volume.GetValue()
+		self.lbl_volume.SetLabel(f"&Volume Audio Suara ({val}%):")
+		if self.audio:
+			self.audio._override_volume = val
+		
+		if not hasattr(self, "_volume_timer"):
+			self._volume_timer = wx.Timer(self)
+			self.Bind(wx.EVT_TIMER, self._onPlayVolumePreview, self._volume_timer)
+		self._volume_timer.Start(150, wx.TIMER_ONE_SHOT)
+
+	def _onPlayVolumePreview(self, event):
+		if not self.audio:
+			return
+		sel = self.lb_sounds.GetStringSelection() if hasattr(self, "lb_sounds") else ""
+		if not sel or sel == "Tanpa Suara Audio":
+			sel = "chime.wav"
+		sel_dev = self.cb_device.GetValue()
+		old_dev = self.config.get_audio_device()
+		try:
+			self.config.set_audio_device(sel_dev)
+			self.audio.stop_sound()
+			self.audio.play_sound(sel)
+		finally:
+			self.config.set_audio_device(old_dev)
+
+	def onResetVolume(self, event):
+		self.slider_volume.SetValue(100)
+		self.lbl_volume.SetLabel("&Volume Audio Suara (100%):")
+		if self.audio:
+			self.audio._override_volume = 100
+			self.audio.stop_sound()
+			self.audio.play_sound("chime.wav")
+		ui.message("Volume direset ke 100%.")
+
+	def onClose(self, event):
+		if hasattr(self, "_volume_timer") and self._volume_timer.IsRunning():
+			self._volume_timer.Stop()
+		if hasattr(self, "_test_timer") and self._test_timer.IsRunning():
+			self._test_timer.Stop()
+		if self.audio and hasattr(self.audio, "_override_volume"):
+			self.audio._override_volume = None
+		if self.audio:
+			self.audio.stop_sound()
+		event.Skip()
 
 	def refresh_sounds_list(self):
 		self.lb_sounds.Clear()
@@ -208,7 +268,8 @@ class AudioManagerDialog(wx.Dialog):
 
 	def get_result(self):
 		return {
-			"audio_device": self.cb_device.GetValue()
+			"audio_device": self.cb_device.GetValue(),
+			"audio_volume": self.slider_volume.GetValue()
 		}
 
 
@@ -939,7 +1000,10 @@ class JadwalKuDialog(wx.Dialog):
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
 				self.config.set_audio_device(updated["audio_device"])
-				ui.message(f"Perangkat speaker JadwalKu disimpan: {updated['audio_device']}")
+				self.config.set_audio_volume(updated.get("audio_volume", 100))
+				ui.message(f"Speaker ({updated['audio_device']}) & Volume ({updated.get('audio_volume', 100)}%) disimpan.")
+			if hasattr(self.audio, "_override_volume"):
+				self.audio._override_volume = None
 			dlg.Destroy()
 		finally:
 			gui.mainFrame.postPopup()

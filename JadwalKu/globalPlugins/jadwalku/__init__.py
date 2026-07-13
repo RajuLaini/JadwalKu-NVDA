@@ -187,7 +187,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
 				self.config.set_audio_device(updated["audio_device"])
-				ui.message(f"Perangkat speaker JadwalKu disimpan: {updated['audio_device']}")
+				self.config.set_audio_volume(updated.get("audio_volume", 100))
+				ui.message(f"Speaker ({updated['audio_device']}) & Volume ({updated.get('audio_volume', 100)}%) disimpan.")
+			if hasattr(self.audio, "_override_volume"):
+				self.audio._override_volume = None
 			dlg.Destroy()
 		finally:
 			self.is_dialog_open = False

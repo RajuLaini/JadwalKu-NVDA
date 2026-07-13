@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
-  "changelog": "Versi 1.3.0:\n- Fitur Timer Mundur Cepat (Quick Timer) via shortcut NVDA + / lalu 1: dukung presisi satuan Detik, Menit (default), atau Jam dengan pilihan suara & tes suara.\n- Fitur Alarm Sekali Pakai (One-Time Alarm) via shortcut NVDA + / lalu 2: dukung pemilihan Jam, Menit, dan Detik secara akurat beserta mode Alarm Weker/Snooze 10 menit.\n- Pengecekan real-time presisi tiap 1 detik pada scheduler untuk timer & alarm seketika.\n- Folder Backup/v1.2.0 untuk pencadangan riwayat rilis sebelumnya.",
-  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.3.0.nvda-addon"
+  "version": "1.4.0",
+  "changelog": "Versi 1.4.0:\n- Fitur Pengaturan Volume Audio Super hingga 600% (1% - 600%) di Audio Manager.\n- Pratinjau Suara Real-time interaktif saat menggeser slider volume menggunakan panah kiri/kanan/atas/bawah dengan sistem debounce halus antistutter.\n- Tombol cepat Reset Volume ke Normal (100%).\n- Perbaikan dan optimalisasi pemutaran suara secara bersamaan (overlapping audio) serta konversi MP3 ke WAV otomatis di perangkat output khusus.",
+  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.4.0.nvda-addon"
 }

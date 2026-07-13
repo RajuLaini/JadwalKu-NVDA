@@ -16,6 +16,7 @@ DEFAULT_DATA = {
 	"update_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/version.json",
 	"update_token": "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",
 	"audio_device": "Default (Microsoft Sound Mapper)",
+	"audio_volume": 100,
 	"time_reminder": {
 		"enabled": False,
 		"interval": 60,         # Pilihan: 5, 10, 15, 30, 60 (menit)
@@ -75,6 +76,8 @@ class ConfigManager:
 					self.data["update_token"] = DEFAULT_DATA["update_token"]
 				if "audio_device" not in self.data:
 					self.data["audio_device"] = DEFAULT_DATA["audio_device"]
+				if "audio_volume" not in self.data:
+					self.data["audio_volume"] = DEFAULT_DATA["audio_volume"]
 				self.save_data()
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
@@ -152,3 +155,11 @@ class ConfigManager:
 	def set_audio_device(self, device_name):
 		self.data["audio_device"] = device_name
 		self.save_data()
+
+	def get_audio_volume(self):
+		return self.data.get("audio_volume", 100)
+
+	def set_audio_volume(self, volume):
+		self.data["audio_volume"] = int(volume)
+		self.save_data()
+

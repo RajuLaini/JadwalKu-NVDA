@@ -162,6 +162,23 @@ class AudioManager:
 			sampwidth = wf.getsampwidth()
 			frames = wf.readframes(wf.getnframes())
 			wf.close()
+			
+			volume = getattr(self, "_override_volume", None)
+			if volume is None:
+				volume = self.config.get_audio_volume() if self.config else 100
+			if sampwidth == 2 and volume != 100:
+				factor = float(volume) / 100.0
+				try:
+					import numpy as np
+					arr = np.frombuffer(frames, dtype=np.int16).astype(np.float32)
+					arr = np.clip(arr * factor, -32768, 32767).astype(np.int16)
+					frames = arr.tobytes()
+				except Exception:
+					try:
+						import audioop
+						frames = audioop.mul(frames, 2, factor)
+					except Exception:
+						pass
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Gagal membaca file wave '{filepath}': {e}")
 			return False
