@@ -1,6 +1,5 @@
 {
-  "version": "1.0.0",
-  "changelog": "Rilis awal JadwalKu dengan fitur pengingat agenda, pengingat waktu berkala (hourly/interval chime), dan integrasi antarmuka Combo Box/Checkbox ramah NVDA.",
-  "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/latest/download/JadwalKu-1.0.0.nvda-addon"
+  "version": "1.1.0",
+  "changelog": "Versi 1.1.0:\n- Peningkatan akurasi penyaluran audio ke speaker/kartu suara khusus (Audio Manager) menggunakan low-level Windows Multimedia (WinMM) engine eksklusif.\n- Fitur Penggabungan Hari (Sesuaikan Hari) pada formulir tambah & edit agenda jadwal dengan Checkbox ramah NVDA.\n- Dukungan pemutaran file MP3 otomatis dikonversi ke PCM WAV agar penyaluran speaker selalu akurat.\n- Peningkatan kestabilan pemuat ulang add-on (installTasks) saat proses update otomatis.",
+  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.1.0.nvda-addon"
 }
-
