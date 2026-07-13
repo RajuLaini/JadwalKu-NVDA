@@ -1,5 +1,9 @@
 # -*- coding: UTF-8 -*-
 import os
+import wave
+import threading
+import time
+import ctypes
 import logHandler
 import nvwave
 import ui
@@ -11,6 +15,8 @@ class AudioManager:
 		self.config = config_manager
 		self.last_played_file = None
 		self._mp3_alias = "jadwalku_alarm_mp3"
+		self._active_wave_out = None
+		self._is_playing = False
 
 	def get_sound_path(self, filename):
 		if not filename:
@@ -86,6 +92,87 @@ class AudioManager:
 			logHandler.log.warning(f"JadwalKu: Gagal mendapatkan ID perangkat audio ({device_name}): {e}")
 		return getattr(nvwave, "outputDeviceID", -1)
 
+	def _play_wav_winmm(self, filepath, device_id):
+		self.stop_sound()
+		try:
+			wf = wave.open(filepath, 'rb')
+			nchannels = wf.getnchannels()
+			framerate = wf.getframerate()
+			sampwidth = wf.getsampwidth()
+			frames = wf.readframes(wf.getnframes())
+			wf.close()
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Gagal membaca file wave '{filepath}': {e}")
+			return False
+
+		winmm = ctypes.windll.winmm
+		class WAVEFORMATEX(ctypes.Structure):
+			_fields_ = [
+				('wFormatTag', ctypes.c_ushort),
+				('nChannels', ctypes.c_ushort),
+				('nSamplesPerSec', ctypes.c_ulong),
+				('nAvgBytesPerSec', ctypes.c_ulong),
+				('nBlockAlign', ctypes.c_ushort),
+				('wBitsPerSample', ctypes.c_ushort),
+				('cbSize', ctypes.c_ushort)
+			]
+
+		class WAVEHDR(ctypes.Structure):
+			_fields_ = [
+				('lpData', ctypes.c_char_p),
+				('dwBufferLength', ctypes.c_ulong),
+				('dwBytesRecorded', ctypes.c_ulong),
+				('dwUser', ctypes.c_ulong),
+				('dwFlags', ctypes.c_ulong),
+				('dwLoops', ctypes.c_ulong),
+				('lpNext', ctypes.c_void_p),
+				('reserved', ctypes.c_ulong)
+			]
+
+		wfx = WAVEFORMATEX()
+		wfx.wFormatTag = 1 # PCM
+		wfx.nChannels = nchannels
+		wfx.nSamplesPerSec = framerate
+		wfx.wBitsPerSample = sampwidth * 8
+		wfx.nBlockAlign = wfx.nChannels * sampwidth
+		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign
+		wfx.cbSize = 0
+
+		hWaveOut = ctypes.c_void_p()
+		res = winmm.waveOutOpen(ctypes.byref(hWaveOut), device_id, ctypes.byref(wfx), 0, 0, 0)
+		if res != 0:
+			logHandler.log.warning(f"JadwalKu: waveOutOpen gagal (kode {res}) untuk device {device_id}")
+			return False
+
+		self._active_wave_out = hWaveOut
+		self._is_playing = True
+
+		def worker():
+			try:
+				hdr = WAVEHDR()
+				hdr.lpData = frames
+				hdr.dwBufferLength = len(frames)
+				hdr.dwFlags = 0
+
+				winmm.waveOutPrepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				winmm.waveOutWrite(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+
+				while self._is_playing and not (hdr.dwFlags & 1): # WHDR_DONE
+					time.sleep(0.05)
+
+				winmm.waveOutReset(hWaveOut)
+				winmm.waveOutUnprepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				winmm.waveOutClose(hWaveOut)
+			except Exception as e:
+				logHandler.log.error(f"JadwalKu: Error saat pemutaran audio di thread: {e}")
+			finally:
+				self._is_playing = False
+				if self._active_wave_out == hWaveOut:
+					self._active_wave_out = None
+
+		threading.Thread(target=worker, daemon=True).start()
+		return True
+
 	def play_sound(self, filename):
 		if not filename or filename == "Tanpa Suara Audio":
 			return False
@@ -96,43 +183,40 @@ class AudioManager:
 		if path and os.path.exists(path):
 			dev_id = self.get_output_device_id()
 			try:
-				if path.lower().endswith(".wav"):
-					try:
-						# Pemutaran WAV pada speaker khusus jika didukung oleh versi NVDA
-						nvwave.playWaveFile(path, outputDevice=dev_id)
-					except TypeError:
-						try:
-							wp = nvwave.WavePlayer(channels=2, samplesPerSec=44100, bitsPerSample=16, outputDevice=dev_id)
-							wp.feed(open(path, 'rb').read())
-							wp.idle()
-						except Exception:
-							nvwave.playWaveFile(path)
-					self.last_played_file = path
-					return True
-				elif path.lower().endswith(".mp3"):
-					import ctypes
-					# Hentikan/tutup pemutaran MP3 sebelumnya jika ada
-					ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
-					cmd_open = f'open "{path}" type mpegvideo alias {self._mp3_alias}'
-					res = ctypes.windll.winmm.mciSendStringW(cmd_open, None, 0, None)
-					if res == 0:
-						ctypes.windll.winmm.mciSendStringW(f"play {self._mp3_alias}", None, 0, None)
+				if path.lower().endswith(".mp3"):
+					wav_equiv = os.path.splitext(path)[0] + ".wav"
+					if os.path.exists(wav_equiv):
+						path = wav_equiv
 						self.last_played_file = path
-						return True
+						return self._play_wav_winmm(path, dev_id)
 					else:
-						logHandler.log.error(f"JadwalKu: Gagal membuka MP3 via mciSendString (kode {res})")
+						ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
+						cmd_open = f'open "{path}" type mpegvideo alias {self._mp3_alias}'
+						res = ctypes.windll.winmm.mciSendStringW(cmd_open, None, 0, None)
+						if res == 0:
+							ctypes.windll.winmm.mciSendStringW(f"play {self._mp3_alias}", None, 0, None)
+							self.last_played_file = path
+							return True
+				elif path.lower().endswith(".wav"):
+					self.last_played_file = path
+					return self._play_wav_winmm(path, dev_id)
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
 		return False
 
 	def stop_sound(self):
 		try:
+			self._is_playing = False
+			if self._active_wave_out:
+				try:
+					ctypes.windll.winmm.waveOutReset(self._active_wave_out)
+				except Exception:
+					pass
 			try:
 				nvwave.playWaveFile("")
 			except Exception:
 				pass
 			try:
-				import ctypes
 				ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
 			except Exception:
 				pass
