@@ -1,10 +1,11 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.0.0
+# Daftar Fitur Lengkap Add-on JadwalKu v1.2.0
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
 ## 1. Manajemen Agenda Rutin (Harian / Mingguan)
 - **Daftar Agenda Aktif**: Menampilkan semua jadwal dalam `ListBox` yang mudah dinavigasi menggunakan panah atas/bawah.
 - **Input Berbasis Combo Box**: Saat menambah atau mengedit jadwal, pengguna tidak perlu mengetik format waktu manual. Cukup pilih **Jam (00 - 23)**, **Menit (00 - 59)**, dan **Frekuensi (Setiap Hari / Hari tertentu)** melalui dropdown/combo box.
+- **Mode Pemberitahuan (Chime vs Alarm Weker)**: Memungkinkan agenda diputar sekali bunyi (*chime*) atau berdering terus-menerus tanpa henti (*Alarm Jam Weker*) dengan fitur Tunda/Snooze 10 menit (`Z` / `Alt+T`).
 - **Tombol Tes Suara (`Alt + T`)**: Di dalam formulir tambah/edit agenda (`AgendaDialog`), pengguna dapat menekan tombol `[ &Tes Suara ]` untuk langsung mendengarkan sampel suara dari opsi yang dipilih di Combo Box sebelum menyimpan.
 - **Status Check/Uncheck Cepat**: Pengguna dapat mengaktifkan atau menonaktifkan suatu agenda dengan cepat melalui tombol `[ Check / Uncheck Status ]` atau langsung menekan Spasi di daftar agenda.
 

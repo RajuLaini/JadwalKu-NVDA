@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
-  "changelog": "Versi 1.1.0:\n- Peningkatan akurasi penyaluran audio ke speaker/kartu suara khusus (Audio Manager) menggunakan low-level Windows Multimedia (WinMM) engine eksklusif.\n- Fitur Penggabungan Hari (Sesuaikan Hari) pada formulir tambah & edit agenda jadwal dengan Checkbox ramah NVDA.\n- Dukungan pemutaran file MP3 otomatis dikonversi ke PCM WAV agar penyaluran speaker selalu akurat.\n- Peningkatan kestabilan pemuat ulang add-on (installTasks) saat proses update otomatis.",
-  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.1.0.nvda-addon"
+  "version": "1.2.0",
+  "changelog": "Versi 1.2.0:\n- Fitur Alarm Jam Weker Berdering Berulang (Alarm Looper Engine continuous audio) dan dialog peringatan prioritas tinggi.\n- Fitur Tunda Sementara (Snooze Alarm 10 menit) melalui tombol dialog atau shortcut cepat Z di Mode Perintah.\n- Pilihan Mode Pemberitahuan (Chime vs Alarm Weker) pada formulir tambah & edit agenda jadwal.\n- Pemutakhiran panduan bantuan read-only dan kestabilan penyaluran audio WinMM.",
+  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.2.0.nvda-addon"
 }

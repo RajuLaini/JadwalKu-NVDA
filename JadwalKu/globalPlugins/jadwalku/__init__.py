@@ -89,6 +89,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
 			"kb:u": "checkUpdate",
+			"kb:z": "snoozeAlarm",
 			"kb:space": "stopAudio",
 			"kb:b": "help",
 			"kb:f1": "help",
@@ -234,14 +235,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L untuk Layout, W untuk Waktu, J untuk Agenda berikutnya, Spasi untuk stop audio)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, W Waktu, J Agenda berikutnya, Z Tunda Alarm, Spasi Matikan Alarm)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, W info waktu sekarang, J jadwal berikutnya, atau B untuk bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, W info waktu sekarang, J jadwal berikutnya, Z untuk tunda alarm, atau Spasi untuk matikan alarm.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
@@ -315,8 +316,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		ui.message(f"Pengingat waktu berkala tiap {cfg.get('interval', 60)} menit sekarang {status_str}.")
 
 	def script_stopAudio(self, gesture):
-		if self.audio.stop_sound():
+		if getattr(self.audio, "is_alarm_ringing", False):
+			self.audio.stop_alarm()
+		elif self.audio.stop_sound():
 			ui.message("Suara notifikasi dihentikan.")
+
+	def script_snoozeAlarm(self, gesture):
+		if getattr(self.audio, "is_alarm_ringing", False) or getattr(self.audio, "active_alarm_info", None):
+			self.audio.snooze_alarm()
+		else:
+			ui.message("Tidak ada alarm yang sedang berbunyi untuk ditunda.")
 
 	def script_help(self, gesture):
 		wx.CallAfter(self.show_help_dialog)

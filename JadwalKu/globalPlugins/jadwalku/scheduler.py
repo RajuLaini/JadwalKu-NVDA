@@ -31,6 +31,8 @@ class Scheduler:
 
 			self.check_time_reminder(now)
 			self.check_schedules(now)
+			if hasattr(self.audio, "check_snoozed_alarms"):
+				self.audio.check_snoozed_alarms(now)
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
 
@@ -139,8 +141,9 @@ class Scheduler:
 					speech = agenda.get("speech_enabled", True)
 					audio = agenda.get("audio_enabled", True)
 					a_file = agenda.get("audio_file", "chime.wav")
+					is_alarm = agenda.get("is_alarm", False)
 
-					self.audio.notify(title, msg, speech_enabled=speech, audio_enabled=audio, audio_file=a_file)
+					self.audio.notify(title, msg, speech_enabled=speech, audio_enabled=audio, audio_file=a_file, is_alarm=is_alarm)
 
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")

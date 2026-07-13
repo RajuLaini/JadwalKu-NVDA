@@ -10,7 +10,7 @@ import gui
 import os
 import tempfile
 
-CURRENT_VERSION = "1.1.0"
+CURRENT_VERSION = "1.2.0"
 
 class UpdateChecker:
 	def __init__(self, config_manager, plugin_instance=None):

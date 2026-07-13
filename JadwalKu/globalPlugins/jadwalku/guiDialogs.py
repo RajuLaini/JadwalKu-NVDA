@@ -26,10 +26,12 @@ class HelpDialog(wx.Dialog):
 			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
 			"- S : Buka Pengaturan Audio Manager (Speaker & Suara).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
-			"- Spasi : Hentikan suara notifikasi/chime yang sedang berbunyi.\n"
+			"- Z : Tunda (Snooze) alarm yang sedang berbunyi selama 10 menit ke depan.\n"
+			"- Spasi : Hentikan suara notifikasi/chime atau matikan alarm weker yang sedang berdering.\n"
 			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
 			"- Escape : Keluar dari mode perintah JadwalKu.\n\n"
-			"3. TIPS NAVIGASI DI DIALOG UTAMA:\n"
+			"3. TIPS FITUR ALARM WEKER & NAVIGASI DI DIALOG UTAMA:\n"
+			"- Saat menambah atau mengedit agenda, Anda dapat memilih Mode Pemberitahuan: 'Pemberitahuan Singkat (Chime)' atau 'Alarm Jam Weker'. Jika Anda memilih Alarm Jam Weker, suara akan berdering terus-menerus tanpa henti sampai Anda mematikannya (Spasi) atau menundanya (Z / Alt+T).\n"
 			"- Di dalam daftar agenda (ListBox), Anda dapat menekan tombol Spasi untuk dengan cepat mengaktifkan (Check) atau menonaktifkan (Uncheck) agenda yang dipilih.\n"
 			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah atau mengedit agenda untuk mendengarkan sampel suara chime/alarm yang Anda pilih.\n"
 			"- Gunakan tombol 'Cek Pembaruan...' untuk memeriksa versi terbaru add-on dari server GitHub secara langsung tanpa perlu membuka browser.\n"
@@ -231,7 +233,20 @@ class AgendaDialog(wx.Dialog):
 		time_sizer.Add(self.cb_minute, 0, wx.ALL, 5)
 		sizer.Add(time_sizer, 0, wx.ALL, 5)
 		
-		# 5. Suara Audio
+		# 5. Mode Pemberitahuan (Chime vs Alarm Weker)
+		sizer.Add(wx.StaticText(self, label="&Mode Pemberitahuan:"), 0, wx.ALL, 5)
+		alarm_modes = [
+			"Pemberitahuan Singkat (Sekali Bunyi / Chime)",
+			"Alarm Jam Weker (Berdering Berulang + Fitur Tunda / Snooze)"
+		]
+		self.cb_alarm_mode = wx.ComboBox(self, choices=alarm_modes, style=wx.CB_READONLY)
+		if self.schedule_data.get("is_alarm", False) or self.schedule_data.get("alarm_mode") == alarm_modes[1]:
+			self.cb_alarm_mode.SetSelection(1)
+		else:
+			self.cb_alarm_mode.SetSelection(0)
+		sizer.Add(self.cb_alarm_mode, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# 6. Suara Audio
 		sizer.Add(wx.StaticText(self, label="&Suara Chime/Alarm:"), 0, wx.ALL, 5)
 		audio_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		
@@ -318,6 +333,7 @@ class AgendaDialog(wx.Dialog):
 			audio_file = "chime.wav"
 		audio_enabled = bool(audio_file)
 		
+		is_alarm_sel = (self.cb_alarm_mode.GetSelection() == 1)
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
@@ -328,6 +344,8 @@ class AgendaDialog(wx.Dialog):
 			"minute": int(self.cb_minute.GetValue()),
 			"audio_file": audio_file,
 			"audio_enabled": audio_enabled,
+			"is_alarm": is_alarm_sel,
+			"alarm_mode": self.cb_alarm_mode.GetValue(),
 			"speech_enabled": self.chk_speech.GetValue(),
 			"active": self.chk_active.GetValue(),
 			"last_triggered_date": self.schedule_data.get("last_triggered_date", "")
