@@ -143,16 +143,42 @@ class AudioManagerDialog(wx.Dialog):
 					self.lb_sounds.Append(f)
 
 	def onTestDevice(self, event):
+		if getattr(self, "_is_test_playing", False) or "Hentikan" in self.btnTestDevice.GetLabel():
+			self.audio.stop_sound()
+			self.btnTestDevice.SetLabel("&Tes Suara di Speaker Ini")
+			self.btnTestFile.SetLabel("T&es File Suara Terpilih")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
+			ui.message("Tes suara dihentikan.")
+			return
+
 		sel_dev = self.cb_device.GetValue()
 		old_dev = self.config.get_audio_device()
 		try:
 			self.config.set_audio_device(sel_dev)
 			ui.message(f"Menguji speaker: {sel_dev}")
+			self.btnTestDevice.SetLabel("&Hentikan Tes di Speaker Ini")
+			self._is_test_playing = True
 			self.audio.play_sound("chime.wav")
+			if not hasattr(self, "_test_timer"):
+				self._test_timer = wx.Timer(self)
+				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
+			self._test_timer.Start(250)
 		finally:
 			self.config.set_audio_device(old_dev)
 
 	def onTestFile(self, event):
+		if getattr(self, "_is_test_playing", False) or "Hentikan" in self.btnTestFile.GetLabel():
+			self.audio.stop_sound()
+			self.btnTestDevice.SetLabel("&Tes Suara di Speaker Ini")
+			self.btnTestFile.SetLabel("T&es File Suara Terpilih")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
+			ui.message("Tes suara dihentikan.")
+			return
+
 		sel = self.lb_sounds.GetStringSelection()
 		if not sel:
 			ui.message("Pilih file suara dari daftar terlebih dahulu.")
@@ -162,9 +188,23 @@ class AudioManagerDialog(wx.Dialog):
 		try:
 			self.config.set_audio_device(sel_dev)
 			ui.message(f"Memutar {sel} di speaker {sel_dev}")
+			self.btnTestFile.SetLabel("H&entikan Tes File Terpilih")
+			self._is_test_playing = True
 			self.audio.play_sound(sel)
+			if not hasattr(self, "_test_timer"):
+				self._test_timer = wx.Timer(self)
+				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
+			self._test_timer.Start(250)
 		finally:
 			self.config.set_audio_device(old_dev)
+
+	def _onCheckTestStatus(self, event):
+		if not self.audio or not self.audio.has_active_sounds():
+			self.btnTestDevice.SetLabel("&Tes Suara di Speaker Ini")
+			self.btnTestFile.SetLabel("T&es File Suara Terpilih")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
 
 	def get_result(self):
 		return {
@@ -356,13 +396,35 @@ class AgendaDialog(wx.Dialog):
 	def onTestSound(self, event):
 		if not self.audio_manager:
 			return
+		if getattr(self, "_is_test_playing", False) or "Hentikan" in self.btnTestSound.GetLabel():
+			self.audio_manager.stop_sound()
+			self.btnTestSound.SetLabel("&Tes Suara")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
+			ui.message("Suara tes dihentikan.")
+			return
+
 		sel = self.cb_audio.GetSelection()
 		if 0 <= sel < len(self.audio_files_map) and self.audio_files_map[sel]:
 			audio_file = self.audio_files_map[sel]
 			ui.message(f"Memutar tes suara: {audio_file}")
+			self.btnTestSound.SetLabel("&Hentikan Suara Tes")
+			self._is_test_playing = True
 			self.audio_manager.play_sound(audio_file)
+			if not hasattr(self, "_test_timer"):
+				self._test_timer = wx.Timer(self)
+				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
+			self._test_timer.Start(250)
 		else:
 			ui.message("Anda memilih opsi Tanpa Suara Audio.")
+
+	def _onCheckTestStatus(self, event):
+		if not self.audio_manager or not self.audio_manager.has_active_sounds():
+			self.btnTestSound.SetLabel("&Tes Suara")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
 
 
 class QuickTimerDialog(wx.Dialog):
@@ -434,11 +496,33 @@ class QuickTimerDialog(wx.Dialog):
 	def onTestSound(self, event):
 		if not self.audio_manager:
 			return
+		if getattr(self, "_is_test_playing", False) or "Hentikan" in self.btnTestSound.GetLabel():
+			self.audio_manager.stop_sound()
+			self.btnTestSound.SetLabel("&Tes Suara (Alt+T)")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
+			ui.message("Suara tes dihentikan.")
+			return
+
 		sel = self.cb_audio.GetSelection()
 		if 0 <= sel < len(self.audio_files_map) and self.audio_files_map[sel]:
 			audio_file = self.audio_files_map[sel]
 			ui.message(f"Memutar tes suara: {audio_file}")
+			self.btnTestSound.SetLabel("&Hentikan Suara Tes (Alt+T)")
+			self._is_test_playing = True
 			self.audio_manager.play_sound(audio_file)
+			if not hasattr(self, "_test_timer"):
+				self._test_timer = wx.Timer(self)
+				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
+			self._test_timer.Start(250)
+
+	def _onCheckTestStatus(self, event):
+		if not self.audio_manager or not self.audio_manager.has_active_sounds():
+			self.btnTestSound.SetLabel("&Tes Suara (Alt+T)")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
 
 	def get_result(self):
 		dur_str = self.txt_duration.GetValue().strip()
@@ -548,11 +632,33 @@ class OneTimeAlarmDialog(wx.Dialog):
 	def onTestSound(self, event):
 		if not self.audio_manager:
 			return
+		if getattr(self, "_is_test_playing", False) or "Hentikan" in self.btnTestSound.GetLabel():
+			self.audio_manager.stop_sound()
+			self.btnTestSound.SetLabel("&Tes Suara (Alt+T)")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
+			ui.message("Suara tes dihentikan.")
+			return
+
 		sel = self.cb_audio.GetSelection()
 		if 0 <= sel < len(self.audio_files_map) and self.audio_files_map[sel]:
 			audio_file = self.audio_files_map[sel]
 			ui.message(f"Memutar tes suara: {audio_file}")
+			self.btnTestSound.SetLabel("&Hentikan Suara Tes (Alt+T)")
+			self._is_test_playing = True
 			self.audio_manager.play_sound(audio_file)
+			if not hasattr(self, "_test_timer"):
+				self._test_timer = wx.Timer(self)
+				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
+			self._test_timer.Start(250)
+
+	def _onCheckTestStatus(self, event):
+		if not self.audio_manager or not self.audio_manager.has_active_sounds():
+			self.btnTestSound.SetLabel("&Tes Suara (Alt+T)")
+			self._is_test_playing = False
+			if hasattr(self, "_test_timer"):
+				self._test_timer.Stop()
 
 	def get_result(self):
 		sel = self.cb_audio.GetSelection()

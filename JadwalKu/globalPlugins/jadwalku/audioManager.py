@@ -63,11 +63,17 @@ class AudioManager:
 		self.config = config_manager
 		self.last_played_file = None
 		self._mp3_alias = "jadwalku_alarm_mp3"
-		self._active_wave_out = None
+		self._active_wave_outs = set()
+		self._active_mp3_aliases = set()
+		self._lock = threading.Lock()
 		self._is_playing = False
 		self.is_alarm_ringing = False
 		self.active_alarm_info = None
 		self.snoozed_alarms = []
+
+	def has_active_sounds(self):
+		with self._lock:
+			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
 
 	def get_sound_path(self, filename):
 		if not filename:
@@ -195,31 +201,40 @@ class AudioManager:
 			logHandler.log.warning(f"JadwalKu: waveOutOpen gagal (kode {res}) untuk device {device_id}")
 			return False
 
-		self._active_wave_out = hWaveOut
+		with self._lock:
+			self._active_wave_outs.add(hWaveOut.value or ctypes.addressof(hWaveOut))
 		self._is_playing = True
 
-		def worker():
+		def worker(hw=hWaveOut):
 			try:
 				hdr = WAVEHDR()
 				hdr.lpData = frames
 				hdr.dwBufferLength = len(frames)
 				hdr.dwFlags = 0
 
-				winmm.waveOutPrepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
-				winmm.waveOutWrite(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				winmm.waveOutPrepareHeader(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				winmm.waveOutWrite(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
 
-				while self._is_playing and not (hdr.dwFlags & 1): # WHDR_DONE
+				handle_val = hw.value or ctypes.addressof(hw)
+				while True:
+					with self._lock:
+						if handle_val not in self._active_wave_outs:
+							break
+					if (hdr.dwFlags & 1): # WHDR_DONE
+						break
 					time.sleep(0.05)
 
-				winmm.waveOutReset(hWaveOut)
-				winmm.waveOutUnprepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
-				winmm.waveOutClose(hWaveOut)
+				winmm.waveOutReset(hw)
+				winmm.waveOutUnprepareHeader(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				winmm.waveOutClose(hw)
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Error saat pemutaran audio di thread: {e}")
 			finally:
-				self._is_playing = False
-				if self._active_wave_out == hWaveOut:
-					self._active_wave_out = None
+				handle_val = hw.value or ctypes.addressof(hw)
+				with self._lock:
+					self._active_wave_outs.discard(handle_val)
+					if len(self._active_wave_outs) == 0 and len(self._active_mp3_aliases) == 0:
+						self._is_playing = False
 
 		threading.Thread(target=worker, daemon=True).start()
 		return True
@@ -241,12 +256,37 @@ class AudioManager:
 						self.last_played_file = path
 						return self._play_wav_winmm(path, dev_id)
 					else:
-						ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
-						cmd_open = f'open "{path}" type mpegvideo alias {self._mp3_alias}'
+						import random
+						alias = f"jk_mp3_{int(time.time()*1000)}_{random.randint(100,999)}"
+						cmd_open = f'open "{path}" type mpegvideo alias {alias}'
 						res = ctypes.windll.winmm.mciSendStringW(cmd_open, None, 0, None)
 						if res == 0:
-							ctypes.windll.winmm.mciSendStringW(f"play {self._mp3_alias}", None, 0, None)
+							ctypes.windll.winmm.mciSendStringW(f"play {alias}", None, 0, None)
+							with self._lock:
+								self._active_mp3_aliases.add(alias)
+							self._is_playing = True
 							self.last_played_file = path
+
+							def mp3_worker(al=alias):
+								try:
+									buf = ctypes.create_unicode_buffer(128)
+									while True:
+										with self._lock:
+											if al not in self._active_mp3_aliases:
+												break
+										ctypes.windll.winmm.mciSendStringW(f"status {al} mode", buf, 128, None)
+										mode = buf.value.lower()
+										if mode in ["stopped", "not ready", ""]:
+											break
+										time.sleep(0.1)
+								finally:
+									ctypes.windll.winmm.mciSendStringW(f"close {al}", None, 0, None)
+									with self._lock:
+										self._active_mp3_aliases.discard(al)
+										if len(self._active_wave_outs) == 0 and len(self._active_mp3_aliases) == 0:
+											self._is_playing = False
+
+							threading.Thread(target=mp3_worker, daemon=True).start()
 							return True
 				elif path.lower().endswith(".wav"):
 					self.last_played_file = path
@@ -259,17 +299,28 @@ class AudioManager:
 		try:
 			self.is_alarm_ringing = False
 			self._is_playing = False
-			if self._active_wave_out:
+			with self._lock:
+				wave_handles = list(self._active_wave_outs)
+				mp3_aliases = list(self._active_mp3_aliases)
+				self._active_wave_outs.clear()
+				self._active_mp3_aliases.clear()
+
+			for hw in wave_handles:
 				try:
-					ctypes.windll.winmm.waveOutReset(self._active_wave_out)
+					ctypes.windll.winmm.waveOutReset(ctypes.c_void_p(hw))
+				except Exception:
+					pass
+			for al in mp3_aliases:
+				try:
+					ctypes.windll.winmm.mciSendStringW(f"close {al}", None, 0, None)
 				except Exception:
 					pass
 			try:
-				nvwave.playWaveFile("")
+				ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
 			except Exception:
 				pass
 			try:
-				ctypes.windll.winmm.mciSendStringW(f"close {self._mp3_alias}", None, 0, None)
+				nvwave.playWaveFile("")
 			except Exception:
 				pass
 			logHandler.log.info("JadwalKu: Audio dihentikan.")
@@ -284,7 +335,7 @@ class AudioManager:
 		
 		def _looper():
 			while self.is_alarm_ringing:
-				if not self._is_playing:
+				if not self.has_active_sounds():
 					self.play_sound(audio_file)
 				time.sleep(0.5)
 		
