@@ -3,6 +3,8 @@ import wx
 import datetime
 import logHandler
 import ui
+import os
+import random
 
 class Scheduler:
 	def __init__(self, config_manager, audio_manager):
@@ -47,13 +49,32 @@ class Scheduler:
 			return
 		remaining = []
 		for item in self.quick_timers:
-			if now >= item["trigger_time"]:
+			diff_sec = (item["trigger_time"] - now).total_seconds()
+			if diff_sec <= 0:
 				title = "Timer JadwalKu Habis!"
 				msg = f"Timer {item['duration']} {item['unit']} telah selesai."
 				self.audio.notify(title, msg, speech_enabled=True, audio_enabled=True, audio_file=item["audio_file"], is_alarm=True)
 			else:
+				sec_left = int(diff_sec) + 1
+				if 1 <= sec_left <= 10 and sec_left != item.get("last_ticked_sec", -1):
+					item["last_ticked_sec"] = sec_left
+					self.play_random_clock_tick()
 				remaining.append(item)
 		self.quick_timers = remaining
+
+	def play_random_clock_tick(self):
+		try:
+			if not hasattr(self.audio, "play_sound"):
+				return
+			s_dir = os.path.join(os.path.dirname(__file__), "sounds", "WaitingClock")
+			if os.path.exists(s_dir):
+				files = [f for f in sorted(os.listdir(s_dir)) if f.lower().endswith((".mp3", ".wav"))]
+				if files:
+					chosen = random.choice(files)
+					rel_path = os.path.join("WaitingClock", chosen)
+					self.audio.play_sound(rel_path)
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Error memutar suara hitung mundur WaitingClock: {e}")
 
 	def add_one_time_alarm(self, hour, minute, second, audio_file, is_alarm=True):
 		now = datetime.datetime.now()

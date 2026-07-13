@@ -20,7 +20,7 @@ class HelpDialog(wx.Dialog):
 			"- NVDA + / : Masuk ke Mode Perintah JadwalKu.\n\n"
 			"2. DAFTAR PERINTAH DALAM MODE JADWALKU (Setelah menekan NVDA + /):\n"
 			"- L atau Enter : Buka Dialog Utama Manajemen Jadwal.\n"
-			"- 1 : Buka Dialog Pasang Timer Mundur Cepat (Quick Timer).\n"
+			"- 1 : Buka Dialog Pasang Timer Mundur Cepat (Quick Timer dengan detak jam acak di 10 detik terakhir).\n"
 			"- 2 : Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm).\n"
 			"- W atau T : Bacakan jam saat ini dan status pengingat waktu berkala (Time Reminder).\n"
 			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
