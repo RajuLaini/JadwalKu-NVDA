@@ -20,12 +20,60 @@ class AudioManager:
 			return path
 		return None
 
+	def get_available_output_devices(self):
+		devices = ["Default (Microsoft Sound Mapper)"]
+		# Coba dari nvwave terlebih dahulu
+		try:
+			if hasattr(nvwave, "getOutputDeviceNames"):
+				names = nvwave.getOutputDeviceNames()
+				if names and len(names) > 1:
+					return [str(n) for n in names if n]
+		except Exception:
+			pass
+		
+		# Gunakan WinMM API untuk mengambil seluruh speaker aktif pada Windows
+		try:
+			import ctypes
+			class WAVEOUTCAPSW(ctypes.Structure):
+				_fields_ = [
+					('wMid', ctypes.c_ushort),
+					('wPid', ctypes.c_ushort),
+					('vDriverVersion', ctypes.c_uint),
+					('szPname', ctypes.c_wchar * 32),
+					('dwFormats', ctypes.c_ulong),
+					('wChannels', ctypes.c_ushort),
+					('wReserved1', ctypes.c_ushort),
+					('dwSupport', ctypes.c_ulong)
+				]
+			num = ctypes.windll.winmm.waveOutGetNumDevs()
+			for i in range(num):
+				caps = WAVEOUTCAPSW()
+				res = ctypes.windll.winmm.waveOutGetDevCapsW(i, ctypes.byref(caps), ctypes.sizeof(caps))
+				if res == 0:
+					name = caps.szPname.strip()
+					if name:
+						devices.append(f"{i}: {name}")
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Gagal mengambil daftar audio device WinMM: {e}")
+			
+		return devices
+
 	def get_output_device_id(self):
 		if not self.config:
 			return getattr(nvwave, "outputDeviceID", -1)
 		device_name = self.config.get_audio_device()
-		if not device_name or device_name == "Default (Microsoft Sound Mapper)":
+		if not device_name or device_name.startswith("Default") or device_name == "Default (Microsoft Sound Mapper)":
 			return getattr(nvwave, "outputDeviceID", -1)
+		
+		# Jika formatnya "0: Speakers (F999X)", ambil angka di depannya
+		if ":" in device_name:
+			try:
+				prefix = device_name.split(":", 1)[0].strip()
+				if prefix.lstrip("-").isdigit():
+					return int(prefix)
+			except Exception:
+				pass
+		
 		try:
 			if hasattr(nvwave, "outputDeviceNameToID"):
 				return nvwave.outputDeviceNameToID(device_name, True)

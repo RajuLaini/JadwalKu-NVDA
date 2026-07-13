@@ -92,15 +92,7 @@ class AudioManagerDialog(wx.Dialog):
 		
 		# 1. Pilih Perangkat Output Audio (Speaker yang Berbeda)
 		sizer.Add(wx.StaticText(self, label="&Pilih Perangkat Output Audio (Speaker / Kartu Suara):"), 0, wx.ALL, 6)
-		device_names = ["Default (Microsoft Sound Mapper)"]
-		try:
-			import nvwave
-			if hasattr(nvwave, "getOutputDeviceNames"):
-				names = nvwave.getOutputDeviceNames()
-				if names:
-					device_names = [str(n) for n in names if n]
-		except Exception as e:
-			logHandler.log.warning(f"JadwalKu: Gagal memuat nama perangkat dari nvwave: {e}")
+		device_names = self.audio.get_available_output_devices() if self.audio else ["Default (Microsoft Sound Mapper)"]
 		
 		self.cb_device = wx.ComboBox(self, choices=device_names, style=wx.CB_READONLY)
 		cur_dev = self.config.get_audio_device()
