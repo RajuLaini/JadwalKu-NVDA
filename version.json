@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
-  "changelog": "Versi 1.2.0:\n- Fitur Alarm Jam Weker Berdering Berulang (Alarm Looper Engine continuous audio) dan dialog peringatan prioritas tinggi.\n- Fitur Tunda Sementara (Snooze Alarm 10 menit) melalui tombol dialog atau shortcut cepat Z di Mode Perintah.\n- Pilihan Mode Pemberitahuan (Chime vs Alarm Weker) pada formulir tambah & edit agenda jadwal.\n- Pemutakhiran panduan bantuan read-only dan kestabilan penyaluran audio WinMM.",
-  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.2.0.nvda-addon"
+  "version": "1.3.0",
+  "changelog": "Versi 1.3.0:\n- Fitur Timer Mundur Cepat (Quick Timer) via shortcut NVDA + / lalu 1: dukung presisi satuan Detik, Menit (default), atau Jam dengan pilihan suara & tes suara.\n- Fitur Alarm Sekali Pakai (One-Time Alarm) via shortcut NVDA + / lalu 2: dukung pemilihan Jam, Menit, dan Detik secara akurat beserta mode Alarm Weker/Snooze 10 menit.\n- Pengecekan real-time presisi tiap 1 detik pada scheduler untuk timer & alarm seketika.\n- Folder Backup/v1.2.0 untuk pencadangan riwayat rilis sebelumnya.",
+  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-1.3.0.nvda-addon"
 }

@@ -11,8 +11,6 @@ class Scheduler:
 		self.timer = wx.Timer()
 		self.timer.Bind(wx.EVT_TIMER, self.on_tick)
 		self.last_check_minute = -1
-		self.quick_timers = []
-		self.one_time_alarms = []
 
 	def start(self):
 		self.timer.Start(1000)
@@ -23,81 +21,18 @@ class Scheduler:
 			self.timer.Stop()
 		logHandler.log.info("JadwalKu: Scheduler berhenti.")
 
-	def add_quick_timer(self, duration, unit, audio_file):
-		now = datetime.datetime.now()
-		if unit == "Detik":
-			delta = datetime.timedelta(seconds=duration)
-		elif unit == "Jam":
-			delta = datetime.timedelta(hours=duration)
-		else:  # "Menit" (default)
-			delta = datetime.timedelta(minutes=duration)
-		trigger_time = now + delta
-		item = {
-			"trigger_time": trigger_time,
-			"duration": duration,
-			"unit": unit,
-			"audio_file": audio_file
-		}
-		self.quick_timers.append(item)
-		ui.message(f"Timer {duration} {unit} dimulai. Akan berbunyi pada {trigger_time.strftime('%H:%M:%S')}.")
-		return item
-
-	def check_quick_timers(self, now):
-		if not self.quick_timers:
-			return
-		remaining = []
-		for item in self.quick_timers:
-			if now >= item["trigger_time"]:
-				title = "Timer JadwalKu Habis!"
-				msg = f"Timer {item['duration']} {item['unit']} telah selesai."
-				self.audio.notify(title, msg, speech_enabled=True, audio_enabled=True, audio_file=item["audio_file"], is_alarm=True)
-			else:
-				remaining.append(item)
-		self.quick_timers = remaining
-
-	def add_one_time_alarm(self, hour, minute, second, audio_file, is_alarm=True):
-		now = datetime.datetime.now()
-		target = now.replace(hour=hour, minute=minute, second=second, microsecond=0)
-		if target <= now:
-			target += datetime.timedelta(days=1)
-		item = {
-			"trigger_time": target,
-			"audio_file": audio_file,
-			"is_alarm": is_alarm,
-			"time_str": f"{hour:02d}:{minute:02d}:{second:02d}"
-		}
-		self.one_time_alarms.append(item)
-		ui.message(f"Alarm sekali pakai dipasang untuk pukul {item['time_str']} ({target.strftime('%d-%m-%Y')}).")
-		return item
-
-	def check_one_time_alarms(self, now):
-		if not self.one_time_alarms:
-			return
-		remaining = []
-		for item in self.one_time_alarms:
-			if now >= item["trigger_time"]:
-				title = "Alarm Sekali Pakai JadwalKu!"
-				msg = f"Waktu alarm pukul {item['time_str']} telah tiba."
-				self.audio.notify(title, msg, speech_enabled=True, audio_enabled=True, audio_file=item["audio_file"], is_alarm=item.get("is_alarm", True))
-			else:
-				remaining.append(item)
-		self.one_time_alarms = remaining
-
 	def on_tick(self, event):
 		try:
 			now = datetime.datetime.now()
-			self.check_quick_timers(now)
-			self.check_one_time_alarms(now)
-			if hasattr(self.audio, "check_snoozed_alarms"):
-				self.audio.check_snoozed_alarms(now)
-
-			# Pengecekan hanya dilakukan tepat satu kali saat menit berganti untuk agenda rutin & time reminder
+			# Pengecekan hanya dilakukan tepat satu kali saat menit berganti
 			if now.minute == self.last_check_minute:
 				return
 			self.last_check_minute = now.minute
 
 			self.check_time_reminder(now)
 			self.check_schedules(now)
+			if hasattr(self.audio, "check_snoozed_alarms"):
+				self.audio.check_snoozed_alarms(now)
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
 

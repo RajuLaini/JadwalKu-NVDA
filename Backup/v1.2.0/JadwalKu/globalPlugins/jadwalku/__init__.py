@@ -10,7 +10,7 @@ import scriptHandler
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, AudioManagerDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -82,8 +82,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.commandLayerGestures = {
 			"kb:l": "openLayout",
 			"kb:enter": "openLayout",
-			"kb:1": "openQuickTimer",
-			"kb:2": "openOneTimeAlarm",
 			"kb:w": "announceTime",
 			"kb:t": "announceTime",
 			"kb:j": "nextAgenda",
@@ -206,38 +204,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
-	def show_quick_timer_dialog(self):
-		if not self.check_dialog_open():
-			return
-		self.is_dialog_open = True
-		gui.mainFrame.prePopup()
-		try:
-			dlg = QuickTimerDialog(gui.mainFrame, audio_manager=self.audio)
-			if dlg.ShowModal() == wx.ID_OK:
-				res = dlg.get_result()
-				if self.scheduler:
-					self.scheduler.add_quick_timer(res["duration"], res["unit"], res["audio_file"])
-			dlg.Destroy()
-		finally:
-			self.is_dialog_open = False
-			gui.mainFrame.postPopup()
-
-	def show_one_time_alarm_dialog(self):
-		if not self.check_dialog_open():
-			return
-		self.is_dialog_open = True
-		gui.mainFrame.prePopup()
-		try:
-			dlg = OneTimeAlarmDialog(gui.mainFrame, audio_manager=self.audio)
-			if dlg.ShowModal() == wx.ID_OK:
-				res = dlg.get_result()
-				if self.scheduler:
-					self.scheduler.add_one_time_alarm(res["hour"], res["minute"], res["second"], res["audio_file"], is_alarm=res["is_alarm"])
-			dlg.Destroy()
-		finally:
-			self.is_dialog_open = False
-			gui.mainFrame.postPopup()
-
 
 	def getScript(self, gesture):
 		if self.switch:
@@ -269,24 +235,18 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm Sekali Pakai, W Waktu, J Agenda, Z Snooze, Spasi Stop)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, W Waktu, J Agenda berikutnya, Z Tunda Alarm, Spasi Matikan Alarm)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, 1 untuk Quick Timer, 2 untuk Alarm Sekali Pakai, W info waktu, atau B untuk bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, W info waktu sekarang, J jadwal berikutnya, Z untuk tunda alarm, atau Spasi untuk matikan alarm.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
 		wx.CallAfter(self.show_main_dialog)
-
-	def script_openQuickTimer(self, gesture):
-		wx.CallAfter(self.show_quick_timer_dialog)
-
-	def script_openOneTimeAlarm(self, gesture):
-		wx.CallAfter(self.show_one_time_alarm_dialog)
 
 	def script_openAudioManager(self, gesture):
 		wx.CallAfter(self.show_audio_manager_dialog)

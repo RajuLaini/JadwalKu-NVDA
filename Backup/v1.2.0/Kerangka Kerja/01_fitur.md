@@ -20,8 +20,6 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
   - **`L` / `Enter`**: Buka Dialog Layout Utama.
-  - **`1`**: Buka Dialog Pasang Timer Mundur Cepat (Quick Timer) dengan satuan Detik, Menit (default), atau Jam.
-  - **`2`**: Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm) dengan presisi Jam, Menit, dan Detik.
   - **`W` / `T`**: Bacakan informasi jam sekarang dan status pengingat waktu berkala (*Current Time & Status*).
   - **`J`**: Bacakan jadwal agenda terdekat berikutnya beserta sisa waktu menuju agenda tersebut.
   - **`H`**: Bacakan seluruh daftar agenda aktif hari ini.

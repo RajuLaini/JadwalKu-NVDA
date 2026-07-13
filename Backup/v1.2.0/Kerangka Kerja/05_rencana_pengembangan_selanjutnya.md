@@ -20,6 +20,3 @@ Dokumen ini berisi daftar ide dan konsep fitur yang dapat kita kembangkan di ses
 ## 5. Profil Pengingat Waktu Berkala (*Time Reminder Profiles*)
 - **Fitur**: Memungkinkan pengguna membuat beberapa profil waktu berkala (misal Profil *Kerja*: chime tiap 30 menit dari jam 08:00 s/d 16:00; Profil *Santai*: chime tiap 1 jam dari jam 17:00 s/d 21:00).
 - **Konsep**: Pengguna dapat berganti profil dengan cepat melalui shortcut di Mode Perintah tanpa perlu mengatur ulang jam mulai dan jam selesai setiap kali.
-
-## 6. [SELESAI di v1.3.0] Timer Mundur Cepat & Alarm Sekali Pakai Presisi Detik
-- **Status**: Telah berhasil diterapkan di versi 1.3.0! Pengguna dapat menekan `NVDA + /` lalu `1` untuk memasang Quick Timer (satuan Detik, Menit, Jam), atau `2` untuk memasang Alarm Sekali Pakai (dengan presisi Jam, Menit, Detik, serta opsi suara & snooze lengkap).
