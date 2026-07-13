@@ -153,6 +153,28 @@ class AudioManager:
 			logHandler.log.warning(f"JadwalKu: Gagal mendapatkan ID perangkat audio ({device_name}): {e}")
 		return getattr(nvwave, "outputDeviceID", -1)
 
+	def _boost_pcm_16bit(self, frames, factor):
+		if factor == 1.0 or not frames:
+			return frames
+		try:
+			import array
+			arr = array.array('h')
+			arr.frombytes(frames)
+			num_samples = len(arr)
+			f_int = int(factor * 256)
+			for i in range(num_samples):
+				val = (arr[i] * f_int) >> 8
+				if val > 32767:
+					arr[i] = 32767
+				elif val < -32768:
+					arr[i] = -32768
+				else:
+					arr[i] = val
+			return arr.tobytes()
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
+			return frames
+
 	def _play_wav_winmm(self, filepath, device_id):
 		self.stop_sound()
 		try:
@@ -168,17 +190,19 @@ class AudioManager:
 				volume = self.config.get_audio_volume() if self.config else 100
 			if sampwidth == 2 and volume != 100:
 				factor = float(volume) / 100.0
+				frames = self._boost_pcm_16bit(frames, factor)
+			elif sampwidth == 1 and volume != 100:
+				factor = float(volume) / 100.0
 				try:
-					import numpy as np
-					arr = np.frombuffer(frames, dtype=np.int16).astype(np.float32)
-					arr = np.clip(arr * factor, -32768, 32767).astype(np.int16)
+					import array
+					arr = array.array('B')
+					arr.frombytes(frames)
+					for i in range(len(arr)):
+						val = int((arr[i] - 128) * factor) + 128
+						arr[i] = 255 if val > 255 else (0 if val < 0 else val)
 					frames = arr.tobytes()
 				except Exception:
-					try:
-						import audioop
-						frames = audioop.mul(frames, 2, factor)
-					except Exception:
-						pass
+					pass
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Gagal membaca file wave '{filepath}': {e}")
 			return False
@@ -296,6 +320,10 @@ class AudioManager:
 						cmd_open = f'open "{path}" type mpegvideo alias {alias}'
 						res = ctypes.windll.winmm.mciSendStringW(cmd_open, None, 0, None)
 						if res == 0:
+							vol = getattr(self, "_override_volume", None)
+							if vol is None:
+								vol = self.config.get_audio_volume() if self.config else 100
+							ctypes.windll.winmm.mciSendStringW(f"setaudio {alias} volume to {min(1000, int(vol * 10))}", None, 0, None)
 							ctypes.windll.winmm.mciSendStringW(f"play {alias}", None, 0, None)
 							with self._lock:
 								self._active_mp3_aliases.add(alias)

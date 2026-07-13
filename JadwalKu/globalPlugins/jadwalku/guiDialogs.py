@@ -220,6 +220,8 @@ class AudioManagerDialog(wx.Dialog):
 			ui.message(f"Menguji speaker: {sel_dev}")
 			self.btnTestDevice.SetLabel("&Hentikan Tes di Speaker Ini")
 			self._is_test_playing = True
+			if self.audio:
+				self.audio._override_volume = self.slider_volume.GetValue()
 			self.audio.play_sound("chime.wav")
 			if not hasattr(self, "_test_timer"):
 				self._test_timer = wx.Timer(self)
@@ -250,6 +252,8 @@ class AudioManagerDialog(wx.Dialog):
 			ui.message(f"Memutar {sel} di speaker {sel_dev}")
 			self.btnTestFile.SetLabel("H&entikan Tes File Terpilih")
 			self._is_test_playing = True
+			if self.audio:
+				self.audio._override_volume = self.slider_volume.GetValue()
 			self.audio.play_sound(sel)
 			if not hasattr(self, "_test_timer"):
 				self._test_timer = wx.Timer(self)
