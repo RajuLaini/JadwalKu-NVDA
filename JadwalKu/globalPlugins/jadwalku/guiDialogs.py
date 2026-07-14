@@ -222,7 +222,7 @@ class AudioManagerDialog(wx.Dialog):
 			self._is_test_playing = True
 			if self.audio:
 				self.audio._override_volume = self.slider_volume.GetValue()
-			self.audio.play_sound("chime.wav")
+			self.audio.play_sound("chime.wav", allow_overlap=False)
 			if not hasattr(self, "_test_timer"):
 				self._test_timer = wx.Timer(self)
 				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)
@@ -254,7 +254,7 @@ class AudioManagerDialog(wx.Dialog):
 			self._is_test_playing = True
 			if self.audio:
 				self.audio._override_volume = self.slider_volume.GetValue()
-			self.audio.play_sound(sel)
+			self.audio.play_sound(sel, allow_overlap=False)
 			if not hasattr(self, "_test_timer"):
 				self._test_timer = wx.Timer(self)
 				self.Bind(wx.EVT_TIMER, self._onCheckTestStatus, self._test_timer)

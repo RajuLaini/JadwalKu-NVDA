@@ -10,7 +10,28 @@ import gui
 import os
 import tempfile
 
-CURRENT_VERSION = "1.3.0"
+def get_current_version():
+	try:
+		import addonHandler
+		addon = addonHandler.getCodeAddon()
+		if addon and addon.manifest:
+			v = str(addon.manifest.get("version", "")).strip()
+			if v:
+				return v
+	except Exception:
+		pass
+	try:
+		manifest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "manifest.ini")
+		if os.path.exists(manifest_path):
+			with open(manifest_path, "r", encoding="utf-8") as f:
+				for line in f:
+					if line.strip().startswith("version"):
+						return line.split("=")[1].strip().strip('"').strip("'")
+	except Exception:
+		pass
+	return "1.4.1"
+
+CURRENT_VERSION = get_current_version()
 
 class UpdateChecker:
 	def __init__(self, config_manager, plugin_instance=None):
@@ -54,14 +75,20 @@ class UpdateChecker:
 			return
 
 		try:
-			headers = {'User-Agent': 'NVDA-JadwalKu-Addon/1.0'}
-			token = self.config.data.get("update_token", "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").strip()
-			if token and ("github.com" in update_url or "githubusercontent.com" in update_url):
-				headers['Authorization'] = f"token {token}"
-			
+			headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) NVDA-JadwalKu-Addon'}
 			req = urllib.request.Request(update_url, headers=headers)
-			with urllib.request.urlopen(req, timeout=12) as response:
-				data = json.loads(response.read().decode('utf-8'))
+			try:
+				with urllib.request.urlopen(req, timeout=12) as response:
+					data = json.loads(response.read().decode('utf-8'))
+			except Exception as e_pub:
+				token = self.config.data.get("update_token", "").strip()
+				if token and token != "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":
+					headers['Authorization'] = f"token {token}"
+					req2 = urllib.request.Request(update_url, headers=headers)
+					with urllib.request.urlopen(req2, timeout=12) as response:
+						data = json.loads(response.read().decode('utf-8'))
+				else:
+					raise e_pub
 			
 			remote_ver = str(data.get("version", "")).strip()
 			changelog = str(data.get("changelog", "Perbaikan bug dan peningkatan performa.")).strip()
@@ -72,13 +99,13 @@ class UpdateChecker:
 					wx.CallAfter(ui.message, "Informasi versi dari server tidak valid.")
 				return
 
-			# Perbandingan sederhana versi (misal "1.1.0" > "1.0.0")
-			if self._is_newer_version(remote_ver, CURRENT_VERSION):
+			local_ver = get_current_version()
+			if self._is_newer_version(remote_ver, local_ver):
 				if not self.update_dismissed_this_session:
-					wx.CallAfter(self._show_update_prompt, remote_ver, changelog, download_url)
+					wx.CallAfter(self._show_update_prompt, remote_ver, changelog, download_url, local_ver)
 			else:
 				if is_manual:
-					wx.CallAfter(ui.message, f"JadwalKu Anda sudah menggunakan versi terbaru ({CURRENT_VERSION}).")
+					wx.CallAfter(ui.message, f"JadwalKu Anda sudah menggunakan versi terbaru ({local_ver}).")
 
 		except Exception as e:
 			logHandler.log.warning(f"JadwalKu: Gagal memeriksa pembaruan: {e}")
@@ -93,7 +120,9 @@ class UpdateChecker:
 		except Exception:
 			return remote_ver != local_ver and remote_ver > local_ver
 
-	def _show_update_prompt(self, remote_ver, changelog, download_url):
+	def _show_update_prompt(self, remote_ver, changelog, download_url, local_ver=None):
+		if local_ver is None:
+			local_ver = get_current_version()
 		if self.plugin and not self.plugin.check_dialog_open():
 			return
 		
@@ -103,7 +132,7 @@ class UpdateChecker:
 		try:
 			prompt_text = (
 				f"Tersedia pembaruan baru untuk add-on JadwalKu!\n\n"
-				f"Versi Terbaru: {remote_ver} (Versi saat ini: {CURRENT_VERSION})\n\n"
+				f"Versi Terbaru: {remote_ver} (Versi saat ini: {local_ver})\n\n"
 				f"Catatan Perubahan:\n{changelog}\n\n"
 				f"Apakah Anda ingin mengunduh dan memperbarui sekarang?\n\n"
 				f"(Catatan: Jika Anda memilih 'No / Tidak', pemeriksaan pembaruan otomatis akan dihentikan sementara hingga NVDA dimuat ulang)."
@@ -127,14 +156,20 @@ class UpdateChecker:
 
 	def _download_and_install_direct(self, download_url):
 		try:
-			headers = {'User-Agent': 'NVDA-JadwalKu-Addon/1.0'}
-			token = self.config.data.get("update_token", "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").strip()
-			if token and ("github.com" in download_url or "githubusercontent.com" in download_url):
-				headers['Authorization'] = f"token {token}"
-			
+			headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) NVDA-JadwalKu-Addon'}
 			req = urllib.request.Request(download_url, headers=headers)
-			with urllib.request.urlopen(req, timeout=35) as response:
-				data = response.read()
+			try:
+				with urllib.request.urlopen(req, timeout=35) as response:
+					data = response.read()
+			except Exception as e_pub:
+				token = self.config.data.get("update_token", "").strip()
+				if token and token != "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":
+					headers['Authorization'] = f"token {token}"
+					req2 = urllib.request.Request(download_url, headers=headers)
+					with urllib.request.urlopen(req2, timeout=35) as response:
+						data = response.read()
+				else:
+					raise e_pub
 			
 			temp_dir = tempfile.gettempdir()
 			temp_file = os.path.join(temp_dir, "JadwalKu-update.nvda-addon")

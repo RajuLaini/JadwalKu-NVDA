@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
-  "changelog": "Versi 1.4.0:\n- Fitur Pengaturan Volume Audio Super hingga 600% (1% - 600%) di Audio Manager.\n- Pratinjau Suara Real-time interaktif saat menggeser slider volume menggunakan panah kiri/kanan/atas/bawah dengan sistem debounce halus antistutter.\n- Tombol cepat Reset Volume ke Normal (100%).\n- Perbaikan dan optimalisasi pemutaran suara secara bersamaan (overlapping audio) serta konversi MP3 ke WAV otomatis di perangkat output khusus.",
-  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.4.0.nvda-addon"
+  "version": "1.4.1",
+  "changelog": "Versi 1.4.1 (Hotfix):\n- Perbaikan sistem Auto Updater agar mendeteksi versi aktif secara dinamis dari manifest dan menghindari permintaan update berulang saat versi terbaru sudah terinstal.\n- Perbaikan unduhan add-on agar dapat diakses dari repositori publik GitHub tanpa kendala token otentikasi (401 Unauthorized).\n- Perbaikan pemutaran suara hitung mundur timer dan bunyi alarm pada detik ke-0 (overlapping audio/tumpang tindih), memastikan alarm langsung berbunyi dengan lantang tepat saat timer selesai tanpa terinterupsi.\n- Mempertahankan sistem penguat volume audio super (1%-600%) tanpa ketergantungan eksternal.",
+  "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.4.1.nvda-addon"
 }

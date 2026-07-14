@@ -175,8 +175,9 @@ class AudioManager:
 			logHandler.log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
 			return frames
 
-	def _play_wav_winmm(self, filepath, device_id):
-		self.stop_sound()
+	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False):
+		if not allow_overlap:
+			self.stop_sound(stop_alarm=stop_alarm)
 		try:
 			wf = wave.open(filepath, 'rb')
 			nchannels = wf.getnchannels()
@@ -284,7 +285,7 @@ class AudioManager:
 		threading.Thread(target=worker, daemon=True).start()
 		return True
 
-	def play_sound(self, filename):
+	def play_sound(self, filename, allow_overlap=True, stop_alarm=False):
 		if not filename or filename == "Tanpa Suara Audio":
 			return False
 		path = self.get_sound_path(filename)
@@ -313,8 +314,10 @@ class AudioManager:
 					if os.path.exists(wav_equiv):
 						path = wav_equiv
 						self.last_played_file = path
-						return self._play_wav_winmm(path, dev_id)
+						return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm)
 					else:
+						if not allow_overlap:
+							self.stop_sound(stop_alarm=stop_alarm)
 						import random
 						alias = f"jk_mp3_{int(time.time()*1000)}_{random.randint(100,999)}"
 						cmd_open = f'open "{path}" type mpegvideo alias {alias}'
@@ -353,14 +356,15 @@ class AudioManager:
 							return True
 				elif path.lower().endswith(".wav"):
 					self.last_played_file = path
-					return self._play_wav_winmm(path, dev_id)
+					return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm)
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
 		return False
 
-	def stop_sound(self):
+	def stop_sound(self, stop_alarm=True):
 		try:
-			self.is_alarm_ringing = False
+			if stop_alarm:
+				self.is_alarm_ringing = False
 			self._is_playing = False
 			with self._lock:
 				wave_handles = list(self._active_wave_outs)
@@ -393,14 +397,16 @@ class AudioManager:
 			return False
 
 	def start_alarm_loop(self, audio_file, title, message):
+		self.stop_alarm()
 		self.is_alarm_ringing = True
 		self.active_alarm_info = (audio_file, title, message)
+		self.play_sound(audio_file, allow_overlap=False, stop_alarm=False)
 		
 		def _looper():
 			while self.is_alarm_ringing:
 				if not self.has_active_playback():
-					self.play_sound(audio_file)
-				time.sleep(0.5)
+					self.play_sound(audio_file, allow_overlap=False, stop_alarm=False)
+				time.sleep(0.3)
 		
 		threading.Thread(target=_looper, daemon=True).start()
 		
@@ -423,7 +429,7 @@ class AudioManager:
 	def stop_alarm(self):
 		self.is_alarm_ringing = False
 		self.active_alarm_info = None
-		self.stop_sound()
+		self.stop_sound(stop_alarm=True)
 		ui.message("Alarm dimatikan.")
 
 	def snooze_alarm(self, minutes=10):
@@ -433,7 +439,7 @@ class AudioManager:
 		audio_file, title, message = self.active_alarm_info
 		self.is_alarm_ringing = False
 		self.active_alarm_info = None
-		self.stop_sound()
+		self.stop_sound(stop_alarm=True)
 		
 		import datetime
 		trigger_time = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
