@@ -81,7 +81,7 @@ class UpdateChecker:
 				with urllib.request.urlopen(req, timeout=12) as response:
 					data = json.loads(response.read().decode('utf-8'))
 			except Exception as e_pub:
-				token = self.config.data.get("update_token", "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").strip()
+				token = self.config.data.get("update_token", "").strip()
 				if token:
 					headers['Authorization'] = f"token {token}"
 					req2 = urllib.request.Request(update_url, headers=headers)
@@ -162,7 +162,7 @@ class UpdateChecker:
 				with urllib.request.urlopen(req, timeout=35) as response:
 					data = response.read()
 			except Exception as e_pub:
-				token = self.config.data.get("update_token", "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").strip()
+				token = self.config.data.get("update_token", "").strip()
 				if token:
 					headers['Authorization'] = f"token {token}"
 					req2 = urllib.request.Request(download_url, headers=headers)

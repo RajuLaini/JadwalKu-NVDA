@@ -14,7 +14,7 @@ DATA_FILE = os.path.join(CONFIG_DIR, "jadwalku_data.json")
 
 DEFAULT_DATA = {
 	"update_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/version.json",
-	"update_token": "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",
+	"update_token": "",
 	"audio_device": "Default (Microsoft Sound Mapper)",
 	"audio_volume": 100,
 	"time_reminder": {
