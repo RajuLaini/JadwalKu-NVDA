@@ -25,23 +25,39 @@ class Scheduler:
 			self.timer.Stop()
 		logHandler.log.info("JadwalKu: Scheduler berhenti.")
 
-	def add_quick_timer(self, duration, unit, audio_file):
+	def add_quick_timer(self, duration, unit, audio_file, prep_seconds=0):
 		now = datetime.datetime.now()
 		if unit == "Detik":
-			delta = datetime.timedelta(seconds=duration)
+			dur_sec = duration
 		elif unit == "Jam":
-			delta = datetime.timedelta(hours=duration)
+			dur_sec = duration * 3600
 		else:  # "Menit" (default)
-			delta = datetime.timedelta(minutes=duration)
-		trigger_time = now + delta
-		item = {
-			"trigger_time": trigger_time,
-			"duration": duration,
-			"unit": unit,
-			"audio_file": audio_file
-		}
-		self.quick_timers.append(item)
-		ui.message(f"Timer {duration} {unit} dimulai. Akan berbunyi pada {trigger_time.strftime('%H:%M:%S')}.")
+			dur_sec = duration * 60
+
+		if prep_seconds > 0:
+			prep_trigger_time = now + datetime.timedelta(seconds=prep_seconds)
+			item = {
+				"state": "prep",
+				"prep_trigger_time": prep_trigger_time,
+				"dur_sec": dur_sec,
+				"duration": duration,
+				"unit": unit,
+				"audio_file": audio_file,
+				"last_prep_announced": -1
+			}
+			self.quick_timers.append(item)
+			ui.message(f"Hitung mundur persiapan {prep_seconds} detik dimulai sebelum Timer {duration} {unit} berjalan.")
+		else:
+			trigger_time = now + datetime.timedelta(seconds=dur_sec)
+			item = {
+				"state": "running",
+				"trigger_time": trigger_time,
+				"duration": duration,
+				"unit": unit,
+				"audio_file": audio_file
+			}
+			self.quick_timers.append(item)
+			ui.message(f"Timer {duration} {unit} dimulai. Akan berbunyi pada {trigger_time.strftime('%H:%M:%S')}.")
 		return item
 
 	def check_quick_timers(self, now):
@@ -49,17 +65,41 @@ class Scheduler:
 			return
 		remaining = []
 		for item in self.quick_timers:
-			diff_sec = (item["trigger_time"] - now).total_seconds()
-			if diff_sec <= 0:
-				title = "Timer JadwalKu Habis!"
-				msg = f"Timer {item['duration']} {item['unit']} telah selesai."
-				self.audio.notify(title, msg, speech_enabled=True, audio_enabled=True, audio_file=item["audio_file"], is_alarm=True)
+			if item.get("state", "running") == "prep":
+				diff_prep = (item["prep_trigger_time"] - now).total_seconds()
+				if diff_prep <= 0:
+					try:
+						if hasattr(self.audio, "play_sound"):
+							self.audio.play_sound("chime.wav", allow_overlap=True)
+					except Exception:
+						pass
+					item["state"] = "running"
+					item["trigger_time"] = now + datetime.timedelta(seconds=item["dur_sec"])
+					ui.message(f"Ding! Timer {item['duration']} {item['unit']} sesungguhnya dimulai!")
+					remaining.append(item)
+				else:
+					sec_left = int(diff_prep) + 1
+					if sec_left != item.get("last_prep_announced", -1):
+						item["last_prep_announced"] = sec_left
+						if 1 <= sec_left <= 10:
+							self.play_random_clock_tick()
+							if sec_left <= 5:
+								ui.message(str(sec_left))
+						elif sec_left % 10 == 0:
+							ui.message(f"{sec_left} detik lagi sebelum mulai")
+					remaining.append(item)
 			else:
-				sec_left = int(diff_sec) + 1
-				if 1 <= sec_left <= 10 and sec_left != item.get("last_ticked_sec", -1):
-					item["last_ticked_sec"] = sec_left
-					self.play_random_clock_tick()
-				remaining.append(item)
+				diff_sec = (item["trigger_time"] - now).total_seconds()
+				if diff_sec <= 0:
+					title = "Timer JadwalKu Habis!"
+					msg = f"Timer {item['duration']} {item['unit']} telah selesai."
+					self.audio.notify(title, msg, speech_enabled=True, audio_enabled=True, audio_file=item["audio_file"], is_alarm=True)
+				else:
+					sec_left = int(diff_sec) + 1
+					if 1 <= sec_left <= 10 and sec_left != item.get("last_ticked_sec", -1):
+						item["last_ticked_sec"] = sec_left
+						self.play_random_clock_tick()
+					remaining.append(item)
 		self.quick_timers = remaining
 
 	def play_random_clock_tick(self):
@@ -195,8 +235,18 @@ class Scheduler:
 				if not agenda.get("active", False):
 					continue
 
-				if int(agenda.get("hour", -1)) != now.hour or int(agenda.get("minute", -1)) != now.minute:
+				if int(agenda.get("minute", -1)) != now.minute:
 					continue
+
+				start_hour = int(agenda.get("hour", -1))
+				interval_hour = int(agenda.get("interval_hour", 0))
+
+				if interval_hour > 0:
+					if now.hour < start_hour or (now.hour - start_hour) % interval_hour != 0:
+						continue
+				else:
+					if start_hour != now.hour:
+						continue
 
 				freq = agenda.get("frequency", "Setiap Hari")
 				match = False
@@ -218,8 +268,9 @@ class Scheduler:
 					if target_date == today_date_str:
 						match = True
 
-				if match and agenda.get("last_triggered_date") != today_date_str:
-					agenda["last_triggered_date"] = today_date_str
+				trigger_key = f"{today_date_str}_{now.hour:02d}:{now.minute:02d}" if interval_hour > 0 else today_date_str
+				if match and agenda.get("last_triggered_date") != trigger_key:
+					agenda["last_triggered_date"] = trigger_key
 					self.config.update_schedule(agenda["id"], agenda)
 
 					title = "Pengingat JadwalKu"

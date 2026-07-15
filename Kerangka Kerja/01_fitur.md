@@ -20,7 +20,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
   - **`L` / `Enter`**: Buka Dialog Layout Utama.
-  - **`1`**: Buka Dialog Pasang Timer Mundur Cepat (Quick Timer) dengan satuan Detik, Menit (default), atau Jam. Dilengkapi fitur hitung mundur detak jam acak (*WaitingClock random ticking sounds*) pada 10 detik terakhir sebelum timer habis.
+  - **`1`**: Buka Dialog Pasang Timer Mundur Cepat (Quick Timer) dengan satuan Detik, Menit (default), atau Jam. Dilengkapi input **Detik Persiapan Sebelum Mulai** yang menghitung mundur terlebih dahulu (dengan detak jam dan ucapan angka di 5 detik terakhir), memicu bunyi **Ding (`chime.wav`)** saat mencapai angka nol sebagai tanda dimulainya hitung mundur utama, serta memicu detak acak (*WaitingClock random ticking sounds*) pada 10 detik terakhir sebelum timer sesungguhnya habis dan membunyikan alarm.
   - **`2`**: Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm) dengan presisi Jam, Menit, dan Detik.
   - **`W` / `T`**: Bacakan informasi jam sekarang dan status pengingat waktu berkala (*Current Time & Status*).
   - **`J`**: Bacakan jadwal agenda terdekat berikutnya beserta sisa waktu menuju agenda tersebut.
@@ -36,8 +36,9 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - Pengguna dapat membaca panduan secara nyaman per baris menggunakan panah atas/bawah, atau mengeja huruf dengan panah kiri/kanan tepat seperti *read-only mode* standar NVDA.
 
 ## 5. Sistem Audio Manager & Pengaturan Perangkat Speaker Khusus (`audioManager.py` & `AudioManagerDialog`)
-- **Pemutaran Mandiri di Speaker Berbeda**: Pengguna dapat memilih perangkat output audio khusus (kartu suara terpisah, *headphone USB*, atau *speaker eksternal* seperti pada IslamicPedia) tanpa mengikuti aturan default system soundcard.
-- **Dukungan Alarm Jam Weker MP3 & WAV (`mciSendStringW` & `nvwave`)**: Memungkinkan pemutaran file `.wav` berkualitas tinggi serta file `.mp3` seperti `wind-up-clock-alarm-bell.mp3` secara native.
+- **Pemutaran Mandiri di Speaker Berbeda (`Dynamic Device Routing`)**: Menggunakan mesin **Single-Open WinMM Relooping Engine** berbasis API kernel Windows yang menjamin suara 100% dipancarkan melalui perangkat output audio pilihan pengguna (*kartu suara terpisah, headphone USB, atau speaker eksternal*) tanpa pernah mandek di speaker default NVDA.
+- **Perulangan Alarm Tanpa Batas & Anti-Potong (`Infinite Looping & Full Completion`)**: *Handle* audio dibuka 1 kali saja di awal perulangan sehingga alarm mampu berdering ribuan kali tanpa mengalami *error 4 (driver mengunci)* setelah putaran kedua. Suara berbunyi padat 100% dari dentaman pertama hingga akhir tanpa potongan dengan jeda konsisten 2 detik sekali.
+- **Dukungan Alarm Jam Weker MP3 & WAV (`mciSendStringW` & `winmm`)**: Memungkinkan pemutaran file `.wav` berkualitas tinggi serta file `.mp3` seperti `wind-up-clock-alarm-bell.mp3` secara native.
 - **Daftar Suara Dinamis**: Memuat otomatis seluruh file suara (`.wav` dan `.mp3`) yang ada di dalam folder `sounds/` add-on.
 
 ## 6. Penjadwalan Gabungan Hari Kustom (`Sesuaikan Hari`)

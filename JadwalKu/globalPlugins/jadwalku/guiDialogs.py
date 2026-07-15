@@ -28,18 +28,78 @@ class HelpDialog(wx.Dialog):
 			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
 			"- S : Buka Pengaturan Audio Manager (Speaker & Suara).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
+			"- V : Bacakan versi terkini JadwalKu dan buka dialog catatan riwayat pembaruan (Changelog Read-Only).\n"
 			"- Z : Tunda (Snooze) alarm yang sedang berbunyi selama 10 menit ke depan.\n"
 			"- Spasi : Hentikan suara notifikasi/chime atau matikan alarm weker yang sedang berdering.\n"
 			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
 			"- Escape : Keluar dari mode perintah JadwalKu.\n\n"
 			"3. TIPS FITUR ALARM WEKER & NAVIGASI DI DIALOG UTAMA:\n"
 			"- Saat menambah atau mengedit agenda, Anda dapat memilih Mode Pemberitahuan: 'Pemberitahuan Singkat (Chime)' atau 'Alarm Jam Weker'. Jika Anda memilih Alarm Jam Weker, suara akan berdering terus-menerus tanpa henti sampai Anda mematikannya (Spasi) atau menundanya (Z / Alt+T).\n"
+			"- Anda juga dapat mengatur pengingat berulang pada agenda (misalnya: tiap 1 jam sekali atau tiap 2 jam sekali untuk pengingat minum/istirahat).\n"
 			"- Di dalam daftar agenda (ListBox), Anda dapat menekan tombol Spasi untuk dengan cepat mengaktifkan (Check) atau menonaktifkan (Uncheck) agenda yang dipilih.\n"
 			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah atau mengedit agenda untuk mendengarkan sampel suara chime/alarm yang Anda pilih.\n"
 			"- Gunakan tombol 'Cek Pembaruan...' untuk memeriksa versi terbaru add-on dari server GitHub secara langsung tanpa perlu membuka browser.\n"
 		)
 		
 		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
+		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnClose = wx.Button(self, wx.ID_CLOSE, label="&Tutup")
+		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CLOSE))
+		btnSizer.AddButton(self.btnClose)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.textCtrl.SetFocus()
+
+
+class ChangelogDialog(wx.Dialog):
+	def __init__(self, parent):
+		super().__init__(parent, title="Catatan Riwayat Pembaruan JadwalKu (Changelog)", size=(620, 500), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Gunakan Panah Atas/Bawah untuk membaca riwayat pembaruan dari versi terbaru hingga terlama:")
+		sizer.Add(info_label, 0, wx.ALL, 8)
+		
+		changelog_text = (
+			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.4.2 (Terbaru) ---\n"
+			"* Fitur Hitung Mundur Persiapan Quick Timer (NVDA + / lalu 1): Dilengkapi kolom input 'Detik Persiapan Sebelum Mulai' yang menghitung mundur terlebih dahulu, memainkan efek detak jam di 10 detik terakhir dan membacakan angka hitung mundur di 5 detik terakhir (5... 4... 3... 2... 1...).\n"
+			"* Pemicu Mulai Timer Utama (Ding Indicator): Ketika waktu persiapan mencapai titik nol, suara Ding (chime.wav) dipicu otomatis sebagai tanda hitung mundur sesungguhnya resmi dimulai.\n"
+			"* Revolusi Arsitektur Audio (Single-Open WinMM Relooping Engine): Perpindahan perangkat audio (speaker/headphone pilihan) 100% akurat tanpa macet di default, berulang tanpa batas setiap 2 detik dengan suara utuh tanpa potongan, serta dapat dimatikan seketika via tombol Spasi.\n"
+			"* Fitur Pengingat Berulang dalam Form Jadwal: Kini saat membuat atau mengedit agenda, tersedia opsi 'Ulangi Setiap (Interval Jam Sekali)' untuk mengatur pengingat otomatis berulang (misal: setiap 1 jam sekali, 2 jam sekali, dst. untuk pengingat minum atau istirahat mata).\n"
+			"* Shortcut Catatan Pembaruan (NVDA + / lalu V): Membacakan versi terkini sekaligus membuka dialog riwayat pembaruan (Changelog) yang dapat dibaca dengan nyaman menggunakan panah.\n\n"
+			"--- Versi 1.4.1 ---\n"
+			"* Perbaikan sistem Auto Updater agar mendeteksi versi aktif secara dinamis dari manifest dan menghindari permintaan update berulang saat versi terbaru sudah terinstal.\n"
+			"* Perbaikan unduhan add-on agar dapat diakses dari repositori publik GitHub tanpa kendala token otentikasi (401 Unauthorized / 404 Not Found).\n"
+			"* Perbaikan pemutaran suara hitung mundur timer dan bunyi alarm pada detik ke-0 (overlapping audio/tumpang tindih), memastikan alarm langsung berbunyi dengan lantang tepat saat timer selesai.\n"
+			"* Mempertahankan sistem penguat volume audio super (1%-600%) tanpa ketergantungan eksternal.\n\n"
+			"--- Versi 1.4.0 ---\n"
+			"* Fitur Penguat Volume Audio Super (Up to 600%): Penambahan penguat volume audio internal pada Audio Manager, memungkinkan pengguna memperkeras suara chime/alarm hingga 6 kali lipat dari volume sistem.\n"
+			"* Pratinjau Suara Slider Volume: Menggeser slider volume kini langsung memutarkan sampel suara sesuai persentase yang dipilih.\n\n"
+			"--- Versi 1.3.3 ---\n"
+			"* Fitur Timer Mundur Cepat (Quick Timer - NVDA + / lalu 1): Memungkinkan pemasangan timer berdasarkan detik, menit, atau jam dengan mudah via dropdown.\n"
+			"* Efek Suara Detik Hitung Mundur: Pada 10 detik terakhir timer mundur, sistem memutar suara detak jam weker acak dari folder WaitingClock.\n"
+			"* Fitur Alarm Sekali Pakai (One-Time Alarm - NVDA + / lalu 2): Pemasangan alarm cepat dengan penentuan jam, menit, detik, pemilihan suara, tes suara, dan fitur tunda (snooze).\n"
+			"* Peningkatan stabilitas pemutaran audio dan antarmuka dialog.\n\n"
+			"--- Versi 1.3.0 - 1.3.2 ---\n"
+			"* Integrasi Sistem Pembaruan Otomatis (Auto-Updater): Pemeriksaan versi terbaru dari server GitHub dan pengunduhan langsung paket add-on.\n"
+			"* Penambahan tombol 'Cek Pembaruan...' pada dialog utama dan shortcut cepat NVDA + / lalu U.\n\n"
+			"--- Versi 1.2.0 ---\n"
+			"* Desain ulang arsitektur Audio Manager menggunakan WinMM (Windows Multimedia API) untuk pemutaran WAV dan MP3 yang sangat ringan dan tidak memblokir suara NVDA.\n"
+			"* Fitur Pemilihan Perangkat Audio Output (Speaker/Headphone) pada Audio Manager.\n"
+			"* Fitur Pengingat Waktu Berkala (Time Reminder) tiap 15, 30, atau 60 menit dengan lonceng lembut.\n"
+			"* Shortcut cepat NVDA + / lalu W/T untuk mengecek jam dan status pengingat.\n\n"
+			"--- Versi 1.0.0 (Rilis Awal) ---\n"
+			"* Kerangka dasar add-on JadwalKu untuk NVDA dengan manajemen jadwal agenda rutin harian, mingguan, maupun tanggal spesifik.\n"
+			"* Pilihan mode pemberitahuan Chime singkat dan Alarm Jam Weker.\n"
+			"* Navigasi ramah tuna netra dengan tombol cepat Check/Uncheck status agenda via Spasi di dalam daftar agenda.\n"
+		)
+		
+		self.textCtrl = wx.TextCtrl(self, value=changelog_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
 		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
 		
 		btnSizer = wx.StdDialogButtonSizer()
@@ -340,7 +400,28 @@ class AgendaDialog(wx.Dialog):
 		time_sizer.Add(self.cb_minute, 0, wx.ALL, 5)
 		sizer.Add(time_sizer, 0, wx.ALL, 5)
 		
-		# 5. Mode Pemberitahuan (Chime vs Alarm Weker)
+		# 5. Pengingat Berulang (Interval Jam Sekali)
+		sizer.Add(wx.StaticText(self, label="&Ulangi Setiap (Interval Jam Sekali):"), 0, wx.ALL, 5)
+		self.interval_values = [0, 1, 2, 3, 4, 6, 8, 12]
+		interval_choices = [
+			"Sekali Saja pada Jam & Menit Tersebut (Tidak Diulang)",
+			"Setiap 1 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 2 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 3 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 4 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 6 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 8 Jam Sekali (Berulang dalam Hari Itu)",
+			"Setiap 12 Jam Sekali (Berulang dalam Hari Itu)"
+		]
+		self.cb_interval = wx.ComboBox(self, choices=interval_choices, style=wx.CB_READONLY)
+		cur_int = int(self.schedule_data.get("interval_hour", 0))
+		if cur_int in self.interval_values:
+			self.cb_interval.SetSelection(self.interval_values.index(cur_int))
+		else:
+			self.cb_interval.SetSelection(0)
+		sizer.Add(self.cb_interval, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# 6. Mode Pemberitahuan (Chime vs Alarm Weker)
 		sizer.Add(wx.StaticText(self, label="&Mode Pemberitahuan:"), 0, wx.ALL, 5)
 		alarm_modes = [
 			"Pemberitahuan Singkat (Sekali Bunyi / Chime)",
@@ -441,6 +522,8 @@ class AgendaDialog(wx.Dialog):
 		audio_enabled = bool(audio_file)
 		
 		is_alarm_sel = (self.cb_alarm_mode.GetSelection() == 1)
+		interval_idx = self.cb_interval.GetSelection()
+		interval_val = self.interval_values[interval_idx] if 0 <= interval_idx < len(self.interval_values) else 0
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
@@ -449,6 +532,7 @@ class AgendaDialog(wx.Dialog):
 			"date": self.txt_date.GetValue().strip(),
 			"hour": int(self.cb_hour.GetValue()),
 			"minute": int(self.cb_minute.GetValue()),
+			"interval_hour": interval_val,
 			"audio_file": audio_file,
 			"audio_enabled": audio_enabled,
 			"is_alarm": is_alarm_sel,
@@ -510,7 +594,12 @@ class QuickTimerDialog(wx.Dialog):
 		self.cb_unit.SetSelection(0)  # Default ke Menit
 		sizer.Add(self.cb_unit, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
-		# 3. Suara Audio
+		# 3. Detik Persiapan Sebelum Mulai (Hitung Mundur Awal)
+		sizer.Add(wx.StaticText(self, label="&Detik Persiapan Sebelum Mulai (0 jika langsung):"), 0, wx.ALL, 5)
+		self.txt_prep_seconds = wx.TextCtrl(self, value="0")
+		sizer.Add(self.txt_prep_seconds, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# 4. Suara Audio
 		sizer.Add(wx.StaticText(self, label="&Suara Timer:"), 0, wx.ALL, 5)
 		audio_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.audio_files_map = []
@@ -597,12 +686,20 @@ class QuickTimerDialog(wx.Dialog):
 				dur = 1
 		except Exception:
 			dur = 10
+		prep_str = self.txt_prep_seconds.GetValue().strip()
+		try:
+			prep = int(prep_str)
+			if prep < 0:
+				prep = 0
+		except Exception:
+			prep = 0
 		sel = self.cb_audio.GetSelection()
 		audio_file = self.audio_files_map[sel] if 0 <= sel < len(self.audio_files_map) else "alarm.wav"
 		return {
 			"duration": dur,
 			"unit": self.cb_unit.GetValue() or "Menit",
-			"audio_file": audio_file
+			"audio_file": audio_file,
+			"prep_seconds": prep
 		}
 
 
@@ -895,7 +992,9 @@ class JadwalKuDialog(wx.Dialog):
 		self.schedules = self.config.get_schedules()
 		for item in self.schedules:
 			status_mark = "[V]" if item.get("active", False) else "[ ]"
-			time_str = f"{int(item.get('hour', 0)):02d}:{int(item.get('minute', 0)):02d}"
+			int_h = int(item.get("interval_hour", 0))
+			repeat_str = f", Tiap {int_h} Jam" if int_h > 0 else ""
+			time_str = f"{int(item.get('hour', 0)):02d}:{int(item.get('minute', 0)):02d}{repeat_str}"
 			freq_str = item.get("frequency", "Setiap Hari")
 			name_str = item.get("name", "Tanpa Nama")
 			display_text = f"{status_mark} {time_str} - {name_str} ({freq_str})"

@@ -59,3 +59,18 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 - Menyediakan tombol **`[ &Pilih Hari (Checklist)... ]`** yang membuka dialog khusus berisi 7 Checkbox (`Senin` sampai `Minggu`).
 - Penjadwalan latar belakang (`scheduler.py`) kini memverifikasi kombinasi hari yang dicentang secara presisi di setiap pergantian menit.
 
+### 12. Fitur Quick Timer dengan Hitung Mundur Persiapan & Alarm Sekali Pakai (`v1.3.0`, `v1.4.0`, `v1.4.2`)
+- **Quick Timer (`NVDA + /` lalu `1`)**: Memungkinkan pengguna memasang hitung mundur cepat dari 1 detik hingga jam.
+  - **Hitung Mundur Persiapan (`Preparation Countdown`)**: Dilengkapi kolom input **Detik Persiapan Sebelum Mulai** (default 0). Jika diisi (misalnya 5 detik), sistem menghitung mundur waktu persiapan terlebih dahulu, memainkan efek detak jam di 10 detik terakhir dan membacakan angka hitung mundur di 5 detik terakhir (`5... 4... 3... 2... 1...`).
+  - **Pemicu Mulai (`Ding Indicator`)**: Ketika waktu persiapan mencapai titik nol, suara **Ding (`chime.wav`)** dipicu otomatis sebagai tanda hitung mundur sesungguhnya resmi dimulai.
+  - **Hitung Mundur Utama**: Selama timer berjalan, suara detak jam acak (*WaitingClock random ticking sounds*) diputar pada 10 detik terakhir sebelum habis, dan suara alarm/weker pilihan berdering saat mencapai titik nol.
+- **Alarm Sekali Pakai (`NVDA + /` lalu `2`)**: Memungkinkan penetapan alarm presisi hingga Jam, Menit, dan Detik dengan pilihan suara lengkap serta fitur Tunda (*Snooze*).
+
+### 13. Revolusi Arsitektur Audio: `Single-Open WinMM Relooping Engine` (`v1.4.2`)
+- **Perpindahan Speaker Kustom (`Dynamic Device Routing`)**: Mengatasi keterbatasan mesin WASAPI/`nvwave` yang selalu memutar suara ke perangkat default NVDA dengan beralih kembali ke API kernel `ctypes.windll.winmm.waveOutOpen(..., device_id, ...)`. Suara 100% akurat keluar di speaker/headphone pilihan pengguna.
+- **Relooping Tanpa Tutup-Buka (`Zero Handle Churn`)**: Membuka *handle* hardware tepat **1 kali di awal thread `worker()`**. Selama alarm berulang, sistem hanya menyuapkan ulang data audio (`Prepare -> Write -> Unprepare`). Hal ini memecahkan dua kendala kritis:
+  1. **Anti-Potong**: Menunggu buffer selesai sempurna sehingga tidak ada lagi suara alarm yang terpotong di tengah.
+  2. **Anti-Macet setelah 2 Putaran**: Menghilangkan *race condition / error 4 (`MMSYSERR_ALLOCATED`)* yang sebelumnya terjadi karena *close-open handle* berulang di setiap putaran. Alarm kini mampu berulang ribuan kali dengan konsisten setiap 2 detik sekali.
+- **Keutuhan Struktur C (`WAVEFORMATEX` & `WAVEHDR`)**: Memastikan struktur API WinMM selalu terdefinisi di bagian atas `audioManager.py` untuk mencegah *NameError*.
+
+

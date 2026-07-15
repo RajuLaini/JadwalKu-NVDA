@@ -11,6 +11,29 @@ import ui
 
 SOUNDS_DIR = os.path.join(os.path.dirname(__file__), "sounds")
 
+class WAVEFORMATEX(ctypes.Structure):
+	_fields_ = [
+		("wFormatTag", ctypes.c_ushort),
+		("nChannels", ctypes.c_ushort),
+		("nSamplesPerSec", ctypes.c_ulong),
+		("nAvgBytesPerSec", ctypes.c_ulong),
+		("nBlockAlign", ctypes.c_ushort),
+		("wBitsPerSample", ctypes.c_ushort),
+		("cbSize", ctypes.c_ushort)
+	]
+
+class WAVEHDR(ctypes.Structure):
+	_fields_ = [
+		("lpData", ctypes.c_char_p),
+		("dwBufferLength", ctypes.c_ulong),
+		("dwBytesRecorded", ctypes.c_ulong),
+		("dwUser", ctypes.c_ulong),
+		("dwFlags", ctypes.c_ulong),
+		("dwLoops", ctypes.c_ulong),
+		("lpNext", ctypes.c_void_p),
+		("reserved", ctypes.c_ulong)
+	]
+
 class AlarmNotificationDialog(wx.Dialog):
 	def __init__(self, parent, title, message, audio_manager):
 		super().__init__(parent, title=title, size=(460, 250), style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP)
@@ -73,11 +96,11 @@ class AudioManager:
 
 	def has_active_playback(self):
 		with self._lock:
-			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0
+			return self._is_playing or len(self._active_mp3_aliases) > 0
 
 	def has_active_sounds(self):
 		with self._lock:
-			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
+			return self._is_playing or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
 
 	def get_sound_path(self, filename):
 		if not filename:
@@ -175,117 +198,166 @@ class AudioManager:
 			logHandler.log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
 			return frames
 
-	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False):
+	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False, loop=False):
 		if not allow_overlap:
 			self.stop_sound(stop_alarm=stop_alarm)
+		
 		try:
 			wf = wave.open(filepath, 'rb')
-			nchannels = wf.getnchannels()
+			duration_sec = float(wf.getnframes()) / float(wf.getframerate())
+			channels = wf.getnchannels()
 			framerate = wf.getframerate()
-			sampwidth = wf.getsampwidth()
+			bitsPerSample = wf.getsampwidth() * 8
 			frames = wf.readframes(wf.getnframes())
 			wf.close()
-			
-			volume = getattr(self, "_override_volume", None)
-			if volume is None:
-				volume = self.config.get_audio_volume() if self.config else 100
-			if sampwidth == 2 and volume != 100:
-				factor = float(volume) / 100.0
-				frames = self._boost_pcm_16bit(frames, factor)
-			elif sampwidth == 1 and volume != 100:
-				factor = float(volume) / 100.0
-				try:
-					import array
-					arr = array.array('B')
-					arr.frombytes(frames)
-					for i in range(len(arr)):
-						val = int((arr[i] - 128) * factor) + 128
-						arr[i] = 255 if val > 255 else (0 if val < 0 else val)
-					frames = arr.tobytes()
-				except Exception:
-					pass
-		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal membaca file wave '{filepath}': {e}")
+		except Exception:
+			duration_sec = 2.5
+			channels = 2
+			framerate = 44100
+			bitsPerSample = 16
+			frames = b""
+
+		if not frames:
 			return False
-
-		winmm = ctypes.windll.winmm
-		class WAVEFORMATEX(ctypes.Structure):
-			_fields_ = [
-				('wFormatTag', ctypes.c_ushort),
-				('nChannels', ctypes.c_ushort),
-				('nSamplesPerSec', ctypes.c_ulong),
-				('nAvgBytesPerSec', ctypes.c_ulong),
-				('nBlockAlign', ctypes.c_ushort),
-				('wBitsPerSample', ctypes.c_ushort),
-				('cbSize', ctypes.c_ushort)
-			]
-
-		class WAVEHDR(ctypes.Structure):
-			_fields_ = [
-				('lpData', ctypes.c_char_p),
-				('dwBufferLength', ctypes.c_ulong),
-				('dwBytesRecorded', ctypes.c_ulong),
-				('dwUser', ctypes.c_ulong),
-				('dwFlags', ctypes.c_ulong),
-				('dwLoops', ctypes.c_ulong),
-				('lpNext', ctypes.c_void_p),
-				('reserved', ctypes.c_ulong)
-			]
 
 		wfx = WAVEFORMATEX()
-		wfx.wFormatTag = 1 # PCM
-		wfx.nChannels = nchannels
+		wfx.wFormatTag = 1 # WAVE_FORMAT_PCM
+		wfx.nChannels = channels
 		wfx.nSamplesPerSec = framerate
-		wfx.wBitsPerSample = sampwidth * 8
-		wfx.nBlockAlign = wfx.nChannels * sampwidth
-		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign
+		wfx.wBitsPerSample = bitsPerSample
+		wfx.nBlockAlign = (channels * bitsPerSample) // 8
+		wfx.nAvgBytesPerSec = framerate * wfx.nBlockAlign
 		wfx.cbSize = 0
 
-		hWaveOut = ctypes.c_void_p()
-		res = winmm.waveOutOpen(ctypes.byref(hWaveOut), device_id, ctypes.byref(wfx), 0, 0, 0)
-		if res != 0:
-			logHandler.log.warning(f"JadwalKu: waveOutOpen gagal (kode {res}) untuk device {device_id}")
-			return False
+		# Apply override volume / PCM boost if needed
+		try:
+			vol = getattr(self, "_override_volume", None)
+			if vol is None:
+				vol = self.config.get_audio_volume() if self.config else 100
+			if bitsPerSample == 16 and vol != 100:
+				factor = float(vol) / 100.0
+				frames = self._boost_pcm_16bit(frames, factor)
+		except Exception:
+			pass
 
-		with self._lock:
-			self._active_wave_outs.add(hWaveOut.value or ctypes.addressof(hWaveOut))
 		self._is_playing = True
+		self.last_played_file = filepath
 
-		def worker(hw=hWaveOut):
+		def worker():
+			hWaveOut = ctypes.c_void_p()
+			handle_val = None
 			try:
-				hdr = WAVEHDR()
-				hdr.lpData = frames
-				hdr.dwBufferLength = len(frames)
-				hdr.dwFlags = 0
+				open_attempts = 0
+				res = -1
+				while open_attempts < 20:
+					res = ctypes.windll.winmm.waveOutOpen(ctypes.byref(hWaveOut), device_id, ctypes.byref(wfx), 0, 0, 0)
+					if res == 0:
+						break
+					if res == 4: # MMSYSERR_ALLOCATED
+						time.sleep(0.05)
+						open_attempts += 1
+					else:
+						break
 
-				winmm.waveOutPrepareHeader(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
-				winmm.waveOutWrite(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
+				if res != 0:
+					logHandler.log.error(f"JadwalKu: waveOutOpen gagal (kode {res}) pada device ID {device_id}")
+					return
 
-				handle_val = hw.value or ctypes.addressof(hw)
+				handle_val = hWaveOut.value or ctypes.addressof(hWaveOut)
+				with self._lock:
+					self._active_wave_outs.add(handle_val)
+
 				while True:
 					with self._lock:
-						if handle_val not in self._active_wave_outs:
+						if not self._is_playing:
 							break
-					if (hdr.dwFlags & 1): # WHDR_DONE
-						break
-					time.sleep(0.05)
 
-				winmm.waveOutReset(hw)
-				winmm.waveOutUnprepareHeader(hw, ctypes.byref(hdr), ctypes.sizeof(hdr))
-				winmm.waveOutClose(hw)
+					buf = ctypes.create_string_buffer(frames)
+					hdr = WAVEHDR()
+					hdr.lpData = ctypes.cast(buf, ctypes.c_char_p)
+					hdr.dwBufferLength = len(frames)
+					hdr.dwFlags = 0
+					hdr.dwLoops = 0
+
+					res_prep = ctypes.windll.winmm.waveOutPrepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+					if res_prep != 0:
+						logHandler.log.error(f"JadwalKu: waveOutPrepareHeader gagal (kode {res_prep})")
+						break
+
+					res_write = ctypes.windll.winmm.waveOutWrite(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+					if res_write != 0:
+						logHandler.log.error(f"JadwalKu: waveOutWrite gagal (kode {res_write})")
+						try:
+							ctypes.windll.winmm.waveOutUnprepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+						except Exception:
+							pass
+						break
+
+					start_t = time.time()
+					while time.time() - start_t < duration_sec:
+						with self._lock:
+							if not self._is_playing:
+								break
+						time.sleep(0.05)
+
+					# Tunggu sampai buffer selesai (WHDR_DONE / WAVERR_STILLPLAYING bersih) sebelum unprepare agar suara utuh 100%
+					unprep_attempts = 0
+					while True:
+						with self._lock:
+							if not self._is_playing:
+								try:
+									ctypes.windll.winmm.waveOutReset(hWaveOut)
+								except Exception:
+									pass
+						res_unprep = ctypes.windll.winmm.waveOutUnprepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
+						if res_unprep == 0:
+							break
+						if res_unprep == 33: # WAVERR_STILLPLAYING
+							time.sleep(0.02)
+							unprep_attempts += 1
+							if unprep_attempts > 100:
+								try:
+									ctypes.windll.winmm.waveOutReset(hWaveOut)
+								except Exception:
+									pass
+						else:
+							break
+
+					with self._lock:
+						if not self._is_playing:
+							break
+
+					if not loop:
+						break
+
+					# Jeda 2 detik antar putaran agar suara tidak tumpang tindih / terpotong (sesuai permintaan user)
+					for _ in range(20):
+						with self._lock:
+							if not self._is_playing:
+								break
+						time.sleep(0.1)
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Error saat pemutaran audio di thread: {e}")
 			finally:
-				handle_val = hw.value or ctypes.addressof(hw)
+				if handle_val is not None:
+					try:
+						ctypes.windll.winmm.waveOutReset(hWaveOut)
+					except Exception:
+						pass
+					try:
+						ctypes.windll.winmm.waveOutClose(hWaveOut)
+					except Exception:
+						pass
+					with self._lock:
+						self._active_wave_outs.discard(handle_val)
 				with self._lock:
-					self._active_wave_outs.discard(handle_val)
-					if len(self._active_wave_outs) == 0 and len(self._active_mp3_aliases) == 0:
+					if len(self._active_mp3_aliases) == 0 and len(self._active_wave_outs) == 0:
 						self._is_playing = False
 
 		threading.Thread(target=worker, daemon=True).start()
 		return True
 
-	def play_sound(self, filename, allow_overlap=True, stop_alarm=False):
+	def play_sound(self, filename, allow_overlap=True, stop_alarm=False, loop=False):
 		if not filename or filename == "Tanpa Suara Audio":
 			return False
 		path = self.get_sound_path(filename)
@@ -314,7 +386,7 @@ class AudioManager:
 					if os.path.exists(wav_equiv):
 						path = wav_equiv
 						self.last_played_file = path
-						return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm)
+						return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm, loop=loop)
 					else:
 						if not allow_overlap:
 							self.stop_sound(stop_alarm=stop_alarm)
@@ -327,7 +399,8 @@ class AudioManager:
 							if vol is None:
 								vol = self.config.get_audio_volume() if self.config else 100
 							ctypes.windll.winmm.mciSendStringW(f"setaudio {alias} volume to {min(1000, int(vol * 10))}", None, 0, None)
-							ctypes.windll.winmm.mciSendStringW(f"play {alias}", None, 0, None)
+							play_cmd = f"play {alias} repeat" if loop else f"play {alias}"
+							ctypes.windll.winmm.mciSendStringW(play_cmd, None, 0, None)
 							with self._lock:
 								self._active_mp3_aliases.add(alias)
 							self._is_playing = True
@@ -343,7 +416,14 @@ class AudioManager:
 										ctypes.windll.winmm.mciSendStringW(f"status {al} mode", buf, 128, None)
 										mode = buf.value.lower()
 										if mode in ["stopped", "not ready", ""]:
-											break
+											if not loop:
+												break
+											else:
+												with self._lock:
+													if al not in self._active_mp3_aliases:
+														break
+												ctypes.windll.winmm.mciSendStringW(f"seek {al} to start", None, 0, None)
+												ctypes.windll.winmm.mciSendStringW(f"play {al}", None, 0, None)
 										time.sleep(0.1)
 								finally:
 									ctypes.windll.winmm.mciSendStringW(f"close {al}", None, 0, None)
@@ -356,7 +436,7 @@ class AudioManager:
 							return True
 				elif path.lower().endswith(".wav"):
 					self.last_played_file = path
-					return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm)
+					return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm, loop=loop)
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
 		return False
@@ -369,8 +449,21 @@ class AudioManager:
 			with self._lock:
 				wave_handles = list(self._active_wave_outs)
 				mp3_aliases = list(self._active_mp3_aliases)
+				nv_players = list(getattr(self, "_active_nvwave_players", []))
 				self._active_wave_outs.clear()
 				self._active_mp3_aliases.clear()
+				if hasattr(self, "_active_nvwave_players"):
+					self._active_nvwave_players.clear()
+
+			for p in nv_players:
+				try:
+					p.stop()
+				except Exception:
+					pass
+				try:
+					p.close()
+				except Exception:
+					pass
 
 			for hw in wave_handles:
 				try:
@@ -397,18 +490,10 @@ class AudioManager:
 			return False
 
 	def start_alarm_loop(self, audio_file, title, message):
-		self.stop_alarm()
+		self.stop_sound(stop_alarm=False)
 		self.is_alarm_ringing = True
 		self.active_alarm_info = (audio_file, title, message)
-		self.play_sound(audio_file, allow_overlap=False, stop_alarm=False)
-		
-		def _looper():
-			while self.is_alarm_ringing:
-				if not self.has_active_playback():
-					self.play_sound(audio_file, allow_overlap=False, stop_alarm=False)
-				time.sleep(0.3)
-		
-		threading.Thread(target=_looper, daemon=True).start()
+		self.play_sound(audio_file, allow_overlap=True, stop_alarm=False, loop=True)
 		
 		def _show_dlg():
 			try:

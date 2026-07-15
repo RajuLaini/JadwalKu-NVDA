@@ -10,7 +10,7 @@ import scriptHandler
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -91,6 +91,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
 			"kb:u": "checkUpdate",
+			"kb:v": "showChangelog",
 			"kb:z": "snoozeAlarm",
 			"kb:space": "stopAudio",
 			"kb:b": "help",
@@ -209,6 +210,19 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
+	def show_changelog_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = ChangelogDialog(gui.mainFrame)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
 	def show_quick_timer_dialog(self):
 		if not self.check_dialog_open():
 			return
@@ -219,7 +233,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if dlg.ShowModal() == wx.ID_OK:
 				res = dlg.get_result()
 				if self.scheduler:
-					self.scheduler.add_quick_timer(res["duration"], res["unit"], res["audio_file"])
+					self.scheduler.add_quick_timer(res["duration"], res["unit"], res["audio_file"], prep_seconds=res.get("prep_seconds", 0))
 			dlg.Destroy()
 		finally:
 			self.is_dialog_open = False
@@ -272,14 +286,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm Sekali Pakai, W Waktu, J Agenda, Z Snooze, Spasi Stop)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm Sekali Pakai, W Waktu, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout utama, 1 untuk Quick Timer, 2 untuk Alarm Sekali Pakai, W info waktu, atau B untuk bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 untuk Quick Timer, 2 untuk Alarm Sekali Pakai, V untuk Riwayat Pembaruan, W info waktu, atau B untuk bantuan.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
@@ -316,9 +330,18 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		for item in active_schedules:
 			h = int(item.get("hour", 0))
 			m = int(item.get("minute", 0))
-			item_time = now.replace(hour=h, minute=m, second=0, microsecond=0)
-			if item_time > now:
-				upcoming.append((item_time, item))
+			int_h = int(item.get("interval_hour", 0))
+			if int_h > 0:
+				curr_h = h
+				while curr_h <= 23:
+					item_time = now.replace(hour=curr_h, minute=m, second=0, microsecond=0)
+					if item_time > now:
+						upcoming.append((item_time, item))
+					curr_h += int_h
+			else:
+				item_time = now.replace(hour=h, minute=m, second=0, microsecond=0)
+				if item_time > now:
+					upcoming.append((item_time, item))
 		
 		if upcoming:
 			upcoming.sort(key=lambda x: x[0])
@@ -331,7 +354,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			else:
 				time_left_str = f"{diff_mins} menit lagi"
 			
-			ui.message(f"Jadwal terdekat berikutnya: {next_item.get('name')} pada jam {h:02d}:{m:02d} ({time_left_str}).")
+			int_h = int(next_item.get("interval_hour", 0))
+			repeat_str = f" (Tiap {int_h} Jam Sekali)" if int_h > 0 else ""
+			ui.message(f"Jadwal terdekat berikutnya: {next_item.get('name')}{repeat_str} pada jam {next_time.hour:02d}:{next_time.minute:02d} ({time_left_str}).")
 		else:
 			ui.message("Seluruh jadwal agenda hari ini sudah lewat.")
 
@@ -347,7 +372,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		for item in active_schedules:
 			h = int(item.get("hour", 0))
 			m = int(item.get("minute", 0))
-			msg_lines.append(f"Jam {h:02d}:{m:02d} - {item.get('name')}")
+			int_h = int(item.get("interval_hour", 0))
+			repeat_str = f" (Tiap {int_h} jam sekali)" if int_h > 0 else ""
+			msg_lines.append(f"Jam {h:02d}:{m:02d}{repeat_str} - {item.get('name')}")
 		
 		ui.message(". ".join(msg_lines))
 
@@ -379,6 +406,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.updater.check_update_manual()
 		else:
 			ui.message("Fitur pemeriksa pembaruan tidak aktif.")
+
+	def script_showChangelog(self, gesture):
+		ui.message("JadwalKu Versi 1.4.2. Membuka riwayat pembaruan (Changelog)...")
+		wx.CallAfter(self.show_changelog_dialog)
 
 	def script_exitLayer(self, gesture):
 		pass

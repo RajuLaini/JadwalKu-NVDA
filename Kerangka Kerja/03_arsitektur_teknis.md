@@ -6,8 +6,14 @@ Secara struktural, add-on `JadwalKu` mengikuti standar pengembangan add-on NVDA 
 Project_Jadwalku/
 ├── build_and_install.py        # Script otomatis pembuat paket .nvda-addon dan pemasang langsung
 ├── version.json                # Template spesifikasi info pembaruan untuk server/cloud
-├── JadwalKu-1.0.nvda-addon     # Binary/zip siap pakai dan siap dibagikan
+├── JadwalKu-v1.4.2.nvda-addon  # Binary/zip siap pakai dan siap dibagikan
 ├── Kerangka Kerja/             # Dokumentasi arsitektur, fitur, dan catatan pengerjaan
+│   ├── 01_fitur.md
+│   ├── 02_konsep.md
+│   ├── 03_arsitektur_teknis.md
+│   ├── 04_catatan_pengerjaan_dini_hari.md
+│   ├── 05_rencana_pengembangan_selanjutnya.md
+│   └── 06_catatan_revolusi_audio_winmm.md # Catatan revolusi Single-Open WinMM Relooping Engine & Device Routing
 └── JadwalKu/
     ├── manifest.ini            # Metadata utama add-on NVDA (nama, versi, author, deskripsi)
     ├── doc/                    # Dokumentasi pengguna (readme.html dalam bahasa id & en)
@@ -15,11 +21,11 @@ Project_Jadwalku/
         └── jadwalku/
             ├── __init__.py     # Entry point (GlobalPlugin, Command Layer, NVDA Menu/Settings integration)
             ├── configManager.py# Manajer persistensi JSON (%appdata%\nvda\jadwalku_data.json)
-            ├── audioManager.py # Manajer pemutaran suara non-blocking berbasis nvwave
+            ├── audioManager.py # Manajer pemutaran suara non-blocking berbasis Single-Open WinMM Relooping Engine
             ├── scheduler.py    # Worker latar belakang (wx.Timer) pengecek waktu tiap detik
             ├── guiDialogs.py   # Antarmuka wxPython (JadwalKuDialog, AgendaDialog, TimeReminderDialog, HelpDialog)
             ├── updateChecker.py# Pemeriksa pembaruan dan Direct Background Downloader
-            └── sounds/         # Koleksi aset audio (.wav) bawaan
+            └── sounds/         # Koleksi aset audio (.wav & .mp3) bawaan
 ```
 
 ## Penjelasan Modul Utama
@@ -29,16 +35,18 @@ Project_Jadwalku/
 - Bertanggung jawab menginisialisasi `ConfigManager`, `AudioManager`, `Scheduler`, dan `UpdateChecker`.
 - Mendaftarkan panel pengaturan `JadwalKuSettingsPanel` ke dalam preferensi NVDA (*NVDA Menu -> Preferences -> Settings -> JadwalKu*).
 - Menambahkan item menu `&JadwalKu - Manajemen Agenda & Pengingat...` ke dalam *NVDA Menu -> Tools*.
-- Mengelola *Layer / Mode Perintah* melalui pemicu `NVDA + /` dan pemetaan `commandLayerGestures` (termasuk memanggil `HelpDialog` saat menekan `B` / `F1`).
+- Mengelola *Layer / Mode Perintah* melalui pemicu `NVDA + /` dan pemetaan `commandLayerGestures` (termasuk memanggil `HelpDialog` saat menekan `B` / `F1`, dan Audio Manager saat menekan `S`).
 
 ### 2. `configManager.py` (`ConfigManager`)
 - Membaca dan menulis ke `jadwalku_data.json`.
 - Menyediakan metode abstrak `get_schedules()`, `add_schedule()`, `update_schedule()`, `delete_schedule()`, serta `get_time_reminder_config()` dan `update_time_reminder_config()`.
 - Memastikan struktur data selalu valid menggunakan struktur `DEFAULT_DATA` sebagai *fallback*.
 
-### 3. `audioManager.py` (`AudioManager`)
-- Membungkus panggilan ke `nvwave.playWaveFile()` dalam blok *try-except* yang aman.
-- Menyimpan *handle* pemutaran audio (`self._current_wave`) dan menyediakan metode `stop_sound()` untuk menghentikan suara seketika saat tombol Spasi ditekan di Mode Perintah.
+### 3. `audioManager.py` (`AudioManager` & `Single-Open WinMM Relooping Engine`)
+- Mengolah pemutaran file `.wav` dan `.mp3` di latar belakang (`worker` thread) tanpa memblokir pembaca layar NVDA.
+- **Single-Open WinMM Relooping Engine**: Membuka *handle* hardware kartu suara (`ctypes.windll.winmm.waveOutOpen`) **tepat 1 kali** di awal thread dengan parameter numeric `uDeviceID` pilihan pengguna (`Dynamic Device Routing`).
+- **Penyuapan Ulang Tanpa Tutup-Buka (`Seamless Re-Feeding`)**: Selama alarm berulang (`loop=True`), data audio disuapkan ke *handle* tunggal tersebut tanpa pernah melakukan `waveOutClose` di tengah jalan. Hal ini menjamin suara berdering utuh tanpa potongan, tidak mengunci driver (*error 4*), dan mengulang tanpa batas dengan jeda 2 detik.
+- **Penghentian Seketika (`Instant Reset`)**: Menyediakan metode `stop_sound()` dan `stop_alarm()` yang mengirim `ctypes.windll.winmm.waveOutReset(hWaveOut)` saat pengguna menekan tombol Spasi di Mode Perintah atau tombol dialog, mematikan alarm dalam waktu < 50 milidetik.
 
 ### 4. `scheduler.py` (`Scheduler`)
 - Menggunakan `wx.Timer` dengan interval 1000ms.
