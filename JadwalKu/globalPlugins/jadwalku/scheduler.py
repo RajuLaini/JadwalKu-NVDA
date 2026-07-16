@@ -210,11 +210,59 @@ class Scheduler:
 				self.audio.play_sound("chime.wav")
 
 			if mode in ("both", "speech"):
-				# Siapkan kalimat waktu
-				if now.minute == 0:
-					time_str = f"Sekarang jam {now.strftime('%H:00')} tepat"
+				# Siapkan kalimat waktu berdasarkan gaya pengucapan yang dipilih
+				speech_style = time_cfg.get("speech_style", "default")
+				if speech_style == "follow_f12":
+					# Ikuti persis format dari NVDA+F12 (time_settings)
+					t_set = self.config.get_time_settings() if self.config else {}
+					is_24 = t_set.get("time_format", "24") == "24"
+					f12_style = t_set.get("time_speech_style", "default")
+					inc_sec = t_set.get("include_seconds", False) or f12_style in ("full_seconds", "with_seconds")
+					
+					if is_24:
+						h_str = f"{now.hour:02d}"
+						ampm = ""
+					else:
+						h_12 = now.hour % 12 or 12
+						ampm = " AM" if now.hour < 12 else " PM"
+						h_str = f"{h_12:02d}"
+					m_str = f"{now.minute:02d}"
+					s_str = f"{now.second:02d}"
+					
+					if f12_style == "only_time":
+						time_str = f"{h_str}:{m_str}:{s_str}{ampm}" if inc_sec else f"{h_str}:{m_str}{ampm}"
+					elif f12_style == "prefix_pukul":
+						time_str = f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}" if inc_sec else f"Waktu sekarang pukul {h_str}:{m_str}{ampm}"
+					elif f12_style == "with_seconds":
+						time_str = f"Pukul {h_str}:{m_str}{ampm} lewat {now.second} detik"
+					elif f12_style == "full_seconds":
+						time_str = f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}"
+					else:
+						time_str = f"{h_str}:{m_str}:{s_str}{ampm} waktu sekarang" if inc_sec else f"{h_str}:{m_str}{ampm} waktu sekarang"
+				elif speech_style == "only_time":
+					t_set = self.config.get_time_settings() if self.config else {}
+					is_24 = t_set.get("time_format", "24") == "24"
+					if is_24:
+						time_str = f"{now.hour:02d}:{now.minute:02d}"
+					else:
+						h_12 = now.hour % 12 or 12
+						ampm = " AM" if now.hour < 12 else " PM"
+						time_str = f"{h_12:02d}:{now.minute:02d}{ampm}"
+				elif speech_style == "waktu_sekarang":
+					time_str = f"{now.hour:02d}:{now.minute:02d} waktu sekarang"
+				elif speech_style == "prefix_pukul":
+					time_str = f"Waktu sekarang pukul {now.hour:02d}:{now.minute:02d}"
+				elif speech_style == "pukul_tepat":
+					if now.minute == 0:
+						time_str = f"Pukul {now.hour:02d}:00 tepat"
+					else:
+						time_str = f"Pukul {now.hour:02d}:{now.minute:02d}"
 				else:
-					time_str = f"Sekarang jam {now.strftime('%H:%M')}"
+					# default
+					if now.minute == 0:
+						time_str = f"Sekarang jam {now.strftime('%H:00')} tepat"
+					else:
+						time_str = f"Sekarang jam {now.strftime('%H:%M')}"
 				
 				def speak_reminder():
 					if hasattr(self, "tts_manager") and self.tts_manager and self.tts_manager.is_enabled():

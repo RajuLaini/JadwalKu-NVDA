@@ -21,6 +21,7 @@ DEFAULT_DATA = {
 		"enabled": False,
 		"interval": 60,         # Pilihan: 5, 10, 15, 30, 60 (menit)
 		"mode": "both",         # Pilihan: "both" (Bicara + Chime), "speech" (Hanya Bicara), "audio" (Hanya Chime)
+		"speech_style": "default", # Pilihan: "default", "follow_f12", "waktu_sekarang", "only_time", "prefix_pukul", "pukul_tepat"
 		"start_hour": 0,        # 00:00
 		"end_hour": 23,         # 23:59
 		"last_triggered_minute": "" # Caching agar tidak bunyi 2x di menit yang sama

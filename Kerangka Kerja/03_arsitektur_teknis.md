@@ -63,7 +63,7 @@ Project_Jadwalku/
 ### 5. `scheduler.py` (`Scheduler`)
 - Menggunakan `wx.Timer` dengan interval 1000ms.
 - **Logika Agenda Rutin & Quick Timer/Alarm**: Memeriksa agenda harian/mingguan, hitung mundur persiapan timer, dan satu kali alarm. Jika pemicu tercapai, sistem akan mengecek apakah `tts_manager` aktif untuk membacakan pesan suara mandiri, atau menggunakan `ui.message()` jika TTS mandiri dimatikan.
-- **Logika Pengingat Waktu Berkala (*Time Reminder*)**: Memeriksa apakah `time_reminder["enabled"]` bernilai `True`. Jika menit saat ini habis dibagi `interval`, berada dalam rentang `start_hour` s/d `end_hour`, dan belum dipicu pada menit tersebut, sistem memanggil `tts_manager.speak(msg)` untuk pengucapan mandiri, atau `ui.message()` sebagai fallback.
+- **Logika Pengingat Waktu Berkala (*Time Reminder*)**: Memeriksa apakah `time_reminder["enabled"]` bernilai `True`. Jika menit saat ini habis dibagi `interval`, berada dalam rentang `start_hour` s/d `end_hour`, dan belum dipicu pada menit tersebut, sistem memformat kalimat berdasarkan `speech_style` yang dipilih (termasuk opsi `follow_f12` yang sinkron dengan `time_settings`) lalu memanggil `tts_manager.speak(msg)` untuk pengucapan mandiri, atau `ui.message()` sebagai fallback.
 
 ### 6. `guiDialogs.py` (`wxPython UI` & `wx.Notebook`)
 - `JadwalKuDialog`: Dialog utama berbasis multi-tab (`wx.Notebook`). Tab 1 (`Manajemen Agenda & Jadwal`) memuat `ListBox` agenda dan tombol aksi (`Tambah`, `Edit`, `Hapus`, `Check/Uncheck`, `Pengingat Waktu Berkala`, `Bantuan`, dan `Cek Pembaruan`). Tab 2 (`Pengaturan Waktu & Kalender JadwalKu`) memuat kontrol opsi pelaporan waktu `NVDA + F12`, format 12/24 jam, opsi detik, serta tombol untuk membuka Kalender (`NVDA + /, K`), Jam Dunia (`NVDA + /, D`), dan Pengaturan TTS Mandiri (`NVDA + /, M`).
@@ -71,7 +71,7 @@ Project_Jadwalku/
 - `CalendarDialog`: Dialog interaktif penghitung hari bulan aktif dan pemetakan hari libur nasional Indonesia (`get_indonesian_holidays`).
 - `WorldClockDialog`: Dialog interaktif yang memuat tabel offset zona waktu 20+ kota dunia (`WORLD_CLOCKS_DATA`) dan kalkulator perbedaan waktu modular dengan perhitungan pergeseran hari (*Day Shift Calculation*).
 - `AgendaDialog`: Form input agenda menggunakan `wx.Choice`/`ComboBox` untuk Jam, Menit, Frekuensi, dan Suara. Dilengkapi tombol `[ &Tes Suara ]` yang memanggil `audio_manager.play_sound()`.
-- `TimeReminderDialog`: Form pengaturan pengingat waktu berkala dengan Checkbox Aktifkan, Combo Box untuk Interval, Mode Notifikasi, Jam Mulai, dan Jam Selesai, serta tombol pintas `[ &Pengaturan Suara TTS Mandiri... ]`.
+- `TimeReminderDialog`: Form pengaturan pengingat waktu berkala dengan Checkbox Aktifkan, Combo Box untuk Interval, Mode Notifikasi, Gaya Pengucapan Waktu (`speech_style`), Jam Mulai, dan Jam Selesai, serta tombol pintas `[ &Pengaturan Suara TTS Mandiri... ]`.
 - `HelpDialog`: Dialog bantuan aksesibel dengan kontrol `wx.TextCtrl(style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)` sehingga ramah navigasi panah atas/bawah dan eja karakter NVDA.
 
 ### 7. `updateChecker.py` (`UpdateChecker`)
