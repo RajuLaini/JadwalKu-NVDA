@@ -5,6 +5,7 @@ import logHandler
 import ui
 import gui
 import os
+import api
 
 class HelpDialog(wx.Dialog):
 	def __init__(self, parent):
@@ -23,10 +24,15 @@ class HelpDialog(wx.Dialog):
 			"- 1 : Buka Dialog Pasang Timer Mundur Cepat (Quick Timer dengan detak jam acak di 10 detik terakhir).\n"
 			"- 2 : Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm).\n"
 			"- W atau T : Bacakan jam saat ini dan status pengingat waktu berkala (Time Reminder).\n"
+			"- K : Buka Kalender Bulanan & Daftar Tanggal Merah Indonesia.\n"
+			"- R : Buka Dialog Kirim Laporan, Kritik, Saran & Bug Fix (Terhubung ke Telegram Bot Aileen).\n"
+			"- D : Buka Jam Dunia & Kalkulator Konversi Waktu.\n"
 			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
 			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
 			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
 			"- S : Buka Pengaturan Audio Manager (Speaker & Suara).\n"
+			"- M atau P : Buka Pengaturan Mesin TTS Mandiri SAPI 5 untuk notifikasi latar belakang.\n"
+			"- G : Bagikan Add-on (Salin tautan unduhan langsung / direct download ke clipboard).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
 			"- V : Bacakan versi terkini JadwalKu dan buka dialog catatan riwayat pembaruan (Changelog Read-Only).\n"
 			"- Z : Tunda (Snooze) alarm yang sedang berbunyi selama 10 menit ke depan.\n"
@@ -39,6 +45,8 @@ class HelpDialog(wx.Dialog):
 			"- Di dalam daftar agenda (ListBox), Anda dapat menekan tombol Spasi untuk dengan cepat mengaktifkan (Check) atau menonaktifkan (Uncheck) agenda yang dipilih.\n"
 			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah atau mengedit agenda untuk mendengarkan sampel suara chime/alarm yang Anda pilih.\n"
 			"- Gunakan tombol 'Cek Pembaruan...' untuk memeriksa versi terbaru add-on dari server GitHub secara langsung tanpa perlu membuka browser.\n"
+			"- Gunakan tombol 'Bagikan Add-on (Copy Link)...' atau shortcut NVDA + / lalu G untuk menyalin tautan unduhan langsung agar teman Anda dapat mengunduh JadwalKu dengan mudah tanpa browser.\n"
+			"- Gunakan tombol 'Kirim Laporan & Saran...' atau shortcut NVDA + / lalu K (atau R) untuk mengirimkan ide baru atau melaporkan bug langsung ke Telegram pengembang.\n"
 		)
 		
 		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
@@ -66,7 +74,14 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.0 (Terbaru - Mesin Suara TTS Mandiri untuk Notifikasi Latar Belakang) ---\n"
+			"--- Versi 1.6.2 (Terbaru - Fitur Kirim Laporan, Kritik & Saran Terintegrasi Bot Telegram via Proxy) ---\n"
+			"* Fitur Laporan & Saran Aksesibel (NVDA + / lalu R): Memungkinkan pengguna mengirimkan permintaan fitur baru, kritik saran, atau melaporkan kesalahan/bug langsung dari dalam add-on JadwalKu ke Bot Telegram pengembang (Aileen Bot) melalui Web API Proxy yang aman tanpa mengekspos token bot.\n"
+			"* Kategori & Sub-Kategori Bug Transparan: Saat melaporkan bug, pengguna dapat memilih sub-fitur spesifik dan memeriksa/mengedit log diagnostik NVDA yang dilampirkan secara transparan.\n"
+			"* Pembatasan Pintar & Salin Otomatis: Batas 1 laporan per pengguna per hari (maksimal 10 laporan/hari dari seluruh pengguna). Jika offline atau kuota penuh, laporan otomatis disalin ke clipboard agar tidak ada pesan yang hilang.\n"
+			"* Shortcut Kalender Tetap pada Tombol K: Tombol K tetap dipertahankan sebagai shortcut Kalender & Tanggal Merah Indonesia, sementara Kirim Laporan dapat dibuka menggunakan shortcut R (Report) atau dari tombol di Panel Pengaturan NVDA.\n\n"
+			"--- Versi 1.6.1 (Terbaru - Fitur Bagikan Add-on Direct Link) ---\n"
+			"* Fitur Bagikan Add-on Cepat (Aksesibel via NVDA + / lalu G, atau tombol di Panel Pengaturan NVDA): Menyalin tautan unduhan langsung (direct download link) versi terbaru JadwalKu langsung ke clipboard. Teman yang mengeklik tautan tersebut akan langsung mengunduh file .nvda-addon tanpa perlu menavigasi halaman browser GitHub yang rumit!\n\n"
+			"--- Versi 1.6.0 (Mesin Suara TTS Mandiri untuk Notifikasi Latar Belakang) ---\n"
 			"* Fitur Mesin TTS Mandiri (Aksesibel via NVDA + / lalu M atau tombol di Tab 2 & Pengingat Waktu): Memungkinkan seluruh pemberitahuan latar belakang (pengingat waktu berkala setiap jam/menit, alarm agenda, quick timer, dan satu kali alarm) dibacakan menggunakan mesin suara SAPI 5 terpisah yang mandiri dan tidak menumpuk dengan suara pembacaan layar NVDA yang sedang aktif!\n"
 			"* Pengaturan Suara, Kecepatan & Volume TTS SAPI 5: Pilih suara SAPI 5 yang diinginkan (misal suara Indonesia atau Inggris di sistem), sesuaikan kecepatan (Rate -10 s/d +10) dan volume (0% - 100%) dengan pratinjau tes suara langsung.\n"
 			"* Routing Audio Penuh (Audio Device Independent): Suara TTS Mandiri sepenuhnya mengikuti rute perangkat audio (Speaker/Headphone/Virtual Audio Cable) yang dipilih pada Audio Manager JadwalKu, sehingga suara notifikasi tidak bocor ke speaker utama jika diatur ke perangkat lain.\n"
@@ -125,6 +140,152 @@ class ChangelogDialog(wx.Dialog):
 		self.SetSizer(sizer)
 		self.Centre()
 		self.textCtrl.SetFocus()
+
+
+class FeedbackDialog(wx.Dialog):
+	def __init__(self, parent, config_manager):
+		super().__init__(parent, title="Kirim Laporan, Kritik, Saran & Bug Fix JadwalKu (Bot Telegram Aileen)", size=(680, 640), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.config = config_manager
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Anda dapat mengirimkan ide fitur baru, kritik saran, atau melaporkan kesalahan (bug) langsung ke Bot Telegram pengembang.\nBatas pengiriman: 1 laporan per pengguna per hari (maksimal 10 laporan/hari dari seluruh pengguna).")
+		sizer.Add(info_label, 0, wx.ALL, 8)
+		
+		# Kategori
+		cat_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		cat_sizer.Add(wx.StaticText(self, label="&Kategori Laporan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		choices = ["Minta Fitur Baru / Ide Pengembangan", "Laporkan Kesalahan / Bug (Error)", "Kritik, Saran & Masukan Umum"]
+		self.cb_category = wx.ComboBox(self, choices=choices, style=wx.CB_READONLY)
+		self.cb_category.SetSelection(0)
+		self.cb_category.Bind(wx.EVT_COMBOBOX, self.onCategoryChange)
+		cat_sizer.Add(self.cb_category, 1, wx.EXPAND | wx.ALL, 4)
+		sizer.Add(cat_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
+		
+		# Sub-Kategori Fitur (Untuk Bug Report)
+		self.sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.lbl_sub_feature = wx.StaticText(self, label="&Pilih Fitur yang Mengalami Kesalahan:")
+		self.sub_sizer.Add(self.lbl_sub_feature, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		sub_choices = [
+			"Manajemen Agenda Rutin (Tambah/Edit/Hapus)",
+			"Pengingat Waktu Berkala (Time Reminder)",
+			"Mesin Suara TTS Mandiri SAPI 5",
+			"Audio Manager & Single-Open WinMM Relooping Engine",
+			"Timer Mundur Cepat (Quick Timer)",
+			"Alarm Sekali Pakai (One-Time Alarm & Snooze)",
+			"Kalender Bulanan & Tanggal Merah",
+			"Jam Dunia & Konversi Waktu",
+			"Pemeriksa Pembaruan & Unduh Langsung (Update Checker)",
+			"Lainnya / Kesalahan Umum Sistem NVDA"
+		]
+		self.cb_sub_feature = wx.ComboBox(self, choices=sub_choices, style=wx.CB_READONLY)
+		self.cb_sub_feature.SetSelection(0)
+		self.cb_sub_feature.Bind(wx.EVT_COMBOBOX, self.onSubFeatureChange)
+		self.sub_sizer.Add(self.cb_sub_feature, 1, wx.EXPAND | wx.ALL, 4)
+		sizer.Add(self.sub_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
+		
+		# Judul
+		title_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		title_sizer.Add(wx.StaticText(self, label="&Judul Laporan / Permintaan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.txt_title = wx.TextCtrl(self, value="Permintaan Fitur Baru JadwalKu")
+		title_sizer.Add(self.txt_title, 1, wx.EXPAND | wx.ALL, 4)
+		sizer.Add(title_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
+		
+		# Deskripsi
+		sizer.Add(wx.StaticText(self, label="&Deskripsi Lengkap (Tuliskan detail ide permintaan atau kronologi error di sini):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		self.txt_desc = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_RICH2)
+		sizer.Add(self.txt_desc, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		# Log Diagnostik (Transparan dan Bisa Diedit)
+		self.lbl_logs = wx.StaticText(self, label="&Log Deteksi Otomatis NVDA & JadwalKu (Akan dilampirkan transparan, dapat Anda periksa/edit):")
+		sizer.Add(self.lbl_logs, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		self.txt_logs = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_RICH2 | wx.HSCROLL)
+		sizer.Add(self.txt_logs, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		# Sembunyikan Sub-Kategori & Log secara default (karena defaultnya adalah Permintaan Fitur Baru)
+		self.lbl_sub_feature.Hide()
+		self.cb_sub_feature.Hide()
+		self.lbl_logs.Hide()
+		self.txt_logs.Hide()
+		
+		# Tombol
+		btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_send = wx.Button(self, label="&Kirim Laporan Sekarang")
+		self.btn_send.Bind(wx.EVT_BUTTON, self.onSend)
+		btn_sizer.Add(self.btn_send, 0, wx.ALL, 6)
+		
+		self.btn_cancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btn_cancel.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CANCEL))
+		btn_sizer.Add(self.btn_cancel, 0, wx.ALL, 6)
+		
+		sizer.Add(btn_sizer, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+
+	def onCategoryChange(self, event):
+		sel = self.cb_category.GetSelection()
+		if sel == 1: # Bug Report
+			self.lbl_sub_feature.Show()
+			self.cb_sub_feature.Show()
+			self.lbl_logs.Show()
+			self.txt_logs.Show()
+			if not self.txt_logs.GetValue():
+				from .reportSender import extract_recent_logs
+				self.txt_logs.SetValue(extract_recent_logs())
+			sub_text = self.cb_sub_feature.GetStringSelection()
+			self.txt_title.SetValue(f"Laporan Bug: {sub_text}")
+		elif sel == 0: # Fitur Baru
+			self.lbl_sub_feature.Hide()
+			self.cb_sub_feature.Hide()
+			self.lbl_logs.Hide()
+			self.txt_logs.Hide()
+			self.txt_title.SetValue("Permintaan Fitur Baru JadwalKu")
+		else: # Kritik / Saran Masukan
+			self.lbl_sub_feature.Hide()
+			self.cb_sub_feature.Hide()
+			self.lbl_logs.Hide()
+			self.txt_logs.Hide()
+			self.txt_title.SetValue("Kritik & Saran Masukan Umum JadwalKu")
+		self.Layout()
+
+	def onSubFeatureChange(self, event):
+		if self.cb_category.GetSelection() == 1:
+			sub_text = self.cb_sub_feature.GetStringSelection()
+			self.txt_title.SetValue(f"Laporan Bug: {sub_text}")
+
+	def onSend(self, event):
+		desc = self.txt_desc.GetValue().strip()
+		if not desc:
+			ui.message("Mohon isi deskripsi lengkap laporan atau saran Anda sebelum mengirim.")
+			self.txt_desc.SetFocus()
+			return
+		
+		sel = self.cb_category.GetSelection()
+		cat_map = {0: "Saran", 1: "Bug", 2: "Lainnya"}
+		report_data = {
+			"category": cat_map.get(sel, "Lainnya"),
+			"sub_feature": self.cb_sub_feature.GetStringSelection() if sel == 1 else "-",
+			"title": self.txt_title.GetValue().strip() or "Laporan JadwalKu",
+			"description": desc,
+			"logs": self.txt_logs.GetValue().strip() if sel == 1 else ""
+		}
+		
+		self.btn_send.Disable()
+		self.btn_cancel.Disable()
+		ui.message("Mengirim laporan ke server JadwalKu...")
+		
+		from .reportSender import send_report_async
+		def on_done(success, msg):
+			ui.message(msg)
+			if self and self.IsShown():
+				if success:
+					self.EndModal(wx.ID_OK)
+				else:
+					self.btn_send.Enable()
+					self.btn_cancel.Enable()
+					gui.messageBox(msg, "Pemberitahuan Laporan JadwalKu", wx.OK | wx.ICON_INFORMATION if "clipboard" in msg.lower() else wx.OK | wx.ICON_WARNING, self)
+		
+		send_report_async(self.config, report_data, on_done)
 
 
 class CustomDaysDialog(wx.Dialog):

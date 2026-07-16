@@ -6,28 +6,33 @@ Secara struktural, add-on `JadwalKu` mengikuti standar pengembangan add-on NVDA 
 Project_Jadwalku/
 ├── build_and_install.py        # Script otomatis pembuat paket .nvda-addon dan pemasang langsung
 ├── version.json                # Template spesifikasi info pembaruan untuk server/cloud
-├── JadwalKu-v1.6.0.nvda-addon  # Binary/zip siap pakai dan siap dibagikan
+├── JadwalKu-v1.6.2.nvda-addon  # Binary/zip siap pakai dan siap dibagikan
 ├── Kerangka Kerja/             # Dokumentasi arsitektur, fitur, dan catatan pengerjaan
 │   ├── 01_fitur.md
 │   ├── 02_konsep.md
 │   ├── 03_arsitektur_teknis.md
 │   ├── 04_catatan_pengerjaan_dini_hari.md
 │   ├── 05_rencana_pengembangan_selanjutnya.md
-│   ├── 06_catatan_revolusi_audio_winmm.md # Catatan revolusi Single-Open WinMM Relooping Engine & Device Routing
-│   └── 07_catatan_mesin_tts_mandiri.md    # Catatan revolusi Mesin TTS Mandiri SAPI 5 untuk latar belakang
-└── JadwalKu/
-    ├── manifest.ini            # Metadata utama add-on NVDA (nama, versi, author, deskripsi)
-    ├── doc/                    # Dokumentasi pengguna (readme.html dalam bahasa id & en)
-    └── globalPlugins/
-        └── jadwalku/
-            ├── __init__.py     # Entry point (GlobalPlugin, Command Layer, NVDA Menu/Settings integration)
-            ├── configManager.py# Manajer persistensi JSON (%appdata%\nvda\jadwalku_data.json)
-            ├── audioManager.py # Manajer pemutaran suara non-blocking berbasis Single-Open WinMM Relooping Engine
-            ├── ttsManager.py   # Mesin sintesis suara mandiri SAPI 5 untuk notifikasi latar belakang
-            ├── scheduler.py    # Worker latar belakang (wx.Timer) pengecek waktu tiap detik
-            ├── guiDialogs.py   # Antarmuka wxPython (JadwalKuDialog, AgendaDialog, TimeReminderDialog, TTSManagerDialog, HelpDialog)
-            ├── updateChecker.py# Pemeriksa pembaruan dan Direct Background Downloader
-            └── sounds/         # Koleksi aset audio (.wav & .mp3) bawaan
+│   ├── 06_catatan_audio_device_routing.md
+│   ├── 07_catatan_mesin_tts_mandiri.md
+│   ├── 08_catatan_fitur_bagikan_direct_link.md
+│   ├── 09_catatan_fitur_laporan_telegram_proxy.md
+│   └── resources/
+│       └── jadwalku_telegram_proxy.php # Script Web API Proxy PHP untuk pengiriman Telegram aman
+├── JadwalKu/
+│   ├── manifest.ini            # Metadata utama add-on NVDA (nama, versi, author, deskripsi)
+│   ├── doc/                    # Dokumentasi pengguna (readme.html dalam bahasa id & en)
+│   └── globalPlugins/
+│       └── jadwalku/
+│           ├── __init__.py     # Entry point (GlobalPlugin, Command Layer, NVDA Menu/Settings integration)
+│           ├── configManager.py# Manajer persistensi JSON (%appdata%\nvda\jadwalku_data.json)
+│           ├── audioManager.py # Manajer pemutaran suara non-blocking berbasis Single-Open WinMM Relooping Engine
+│           ├── ttsManager.py   # Mesin sintesis suara mandiri SAPI 5 untuk notifikasi latar belakang
+│           ├── scheduler.py    # Worker latar belakang (wx.Timer) pengecek waktu tiap detik
+│           ├── guiDialogs.py   # Antarmuka wxPython (JadwalKuDialog, AgendaDialog, TimeReminderDialog, TTSManagerDialog, HelpDialog, FeedbackDialog)
+│           ├── reportSender.py # Modul pengirim laporan asinkron via Web API Proxy & ekstraktor log NVDA
+│           ├── updateChecker.py# Pemeriksa pembaruan dan Direct Background Downloader
+│           └── sounds/         # Koleksi aset audio (.wav & .mp3) bawaan
 ```
 
 ## Penjelasan Modul Utama
@@ -35,13 +40,13 @@ Project_Jadwalku/
 ### 1. `__init__.py` (`GlobalPlugin`)
 - Mewarisi kelas `globalPluginHandler.GlobalPlugin`.
 - Bertanggung jawab menginisialisasi `ConfigManager`, `AudioManager`, `TTSManager`, `Scheduler`, dan `UpdateChecker`.
-- Mendaftarkan panel pengaturan `JadwalKuSettingsPanel` ke dalam preferensi NVDA (*NVDA Menu -> Preferences -> Settings -> JadwalKu*).
+- Mendaftarkan panel pengaturan `JadwalKuSettingsPanel` ke dalam preferensi NVDA (*NVDA Menu -> Preferences -> Settings -> JadwalKu*), dilengkapi tombol instan `Bagikan Add-on (Copy Link)` dan `Kirim Laporan & Saran`.
 - Menambahkan item menu `&JadwalKu - Manajemen Agenda & Pengingat...` ke dalam *NVDA Menu -> Tools*.
-- Mengelola *Layer / Mode Perintah* melalui pemicu `NVDA + /` dan pemetaan `commandLayerGestures` (termasuk memanggil `HelpDialog` saat menekan `B` / `F1`, Audio Manager saat menekan `S`, dan Mesin TTS saat menekan `M` / `P`).
+- Mengelola *Layer / Mode Perintah* melalui pemicu `NVDA + /` dan pemetaan `commandLayerGestures` (termasuk memanggil `HelpDialog` saat menekan `B` / `F1`, Audio Manager saat menekan `S`, Mesin TTS saat menekan `M` / `P`, Bagikan Add-on saat menekan `G`, Laporan & Saran saat menekan `R`, serta Kalender saat menekan `K`).
 
 ### 2. `configManager.py` (`ConfigManager`)
 - Membaca dan menulis ke `jadwalku_data.json`.
-- Menyediakan metode abstrak `get_schedules()`, `add_schedule()`, `update_schedule()`, `delete_schedule()`, `get_time_reminder_config()`, `update_time_reminder_config()`, `get_time_settings()`, `update_time_settings()`, serta `get_tts_config()` dan `update_tts_config()` (v1.6.0).
+- Menyediakan metode abstrak `get_schedules()`, `add_schedule()`, `update_schedule()`, `delete_schedule()`, `get_time_reminder_config()`, `update_time_reminder_config()`, `get_time_settings()`, `update_time_settings()`, `get_tts_config()`, serta `get_feedback_config()` dan `get_last_report_date()` (v1.6.2).
 - Memastikan struktur data selalu valid menggunakan struktur `DEFAULT_DATA` sebagai *fallback*.
 
 ### 3. `audioManager.py` (`AudioManager` & `Single-Open WinMM Relooping Engine`)

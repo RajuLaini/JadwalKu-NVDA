@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.6.0
+# Daftar Fitur Lengkap Add-on JadwalKu v1.6.2
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -68,5 +68,15 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Pengaturan Suara, Kecepatan & Volume TTS SAPI 5**: Pilih suara SAPI 5 yang diinginkan (misal suara Indonesia atau Inggris di sistem), sesuaikan kecepatan (Rate -10 s/d +10) dan volume (0% - 100%) dengan pratinjau tes suara langsung (`[ &Tes Suara ]`).
 - **Routing Audio Penuh (`Audio Device Independent`)**: Suara TTS Mandiri sepenuhnya mengikuti rute perangkat audio (Speaker/Headphone/Virtual Audio Cable) yang dipilih pada Audio Manager JadwalKu, sehingga suara notifikasi tidak bocor ke speaker utama jika diatur ke perangkat lain.
 - **Pengecualian Pintar NVDA + F12**: Pengucapan waktu/tanggal manual via `NVDA + F12` tetap dibacakan oleh pembaca layar NVDA utama sesuai preferensi pengguna, menjaga pemisahan fungsi yang sempurna.
+
+## 10. Fitur Bagikan Add-on Instan (`NVDA + / lalu G`) (v1.6.1)
+- **Salin Tautan Unduhan Langsung (*Direct Download Link*)**: Memungkinkan pengguna dengan 1x tekan tombol (`NVDA + /` lalu `G`) atau melalui tombol `Bagikan Add-on` di Panel Pengaturan NVDA menyalin tautan unduhan `.nvda-addon` terbaru secara otomatis ke clipboard (`api.copyToClip`).
+- **Berbagi Tanpa Browser**: Teman pengguna dapat langsung menempel (*paste*) tautan ke browser atau download manager dan mengunduh file `.nvda-addon` terbaru tanpa perlu membuka dan menavigasi halaman repositori GitHub yang kompleks.
+
+## 11. Fitur Kirim Laporan, Kritik, Saran & Bug Fix (`NVDA + / lalu R`) (v1.6.2)
+- **Terhubung ke Bot Telegram Aileen via Web API Proxy Aman**: Memungkinkan pengguna dengan 1x tekan tombol (`NVDA + /` lalu `R`) atau melalui tombol `Kirim Laporan & Saran` di Panel Pengaturan NVDA mengirimkan permintaan fitur baru, kritik saran, atau melaporkan bug langsung ke Telegram pengembang (`Aileen Bot`). Seluruh komunikasi melewati Web API Proxy (`jadwalku_telegram_proxy.php`) untuk menjaga keamanan mutlak dan mencegah kebocoran token Bot Telegram.
+- **Kategori & Sub-Kategori Bug Spesifik**: Pengguna dapat memilih kategori (`Minta Fitur Baru`, `Laporkan Kesalahan`, atau `Kritik Saran`). Saat memilih `Laporkan Kesalahan`, dropdown sub-fitur (10 modul utama JadwalKu) ditampilkan untuk memudahkan diagnosis cepat.
+- **Pratinjau Log Transparan & Bisa Diedit**: Sistem mengekstrak baris log diagnostik NVDA/JadwalKu terkini dan menampilkannya pada kotak edit transparan yang dapat dibaca dan diedit pengguna sebelum dikirimkan.
+- **Pembatasan Pintar & Salin Clipboard Otomatis**: Dilengkapi pembatasan 1 laporan per pengguna per hari (maksimal 10 laporan/hari dari seluruh pengguna). Jika koneksi internet offline atau server proxy gagal, seluruh laporan beserta log diagnostik otomatis disalin ke clipboard (`api.copyToClip`) agar tidak ada pesan atau kontribusi pengguna yang hilang!
 
 

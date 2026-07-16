@@ -6,12 +6,13 @@ import wx
 import logHandler
 import datetime
 import scriptHandler
+import api
 
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .ttsManager import TTSManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog, TTSManagerDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog, TTSManagerDialog, FeedbackDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -27,24 +28,35 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		infoLabel = wx.StaticText(self, label="JadwalKu - Pengingat Agenda & Waktu Berkala Aksesibel.\n\nAnda dapat mengelola seluruh jadwal agenda dan pengingat waktu berkala secara detail melalui Dialog Layout Utama JadwalKu, atau menggunakan tombol di bawah ini:")
 		settingsSizer.Add(infoLabel, 0, wx.ALL, 8)
 		
-		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+		btnSizer1 = wx.BoxSizer(wx.HORIZONTAL)
 		self.btnOpenLayout = wx.Button(self, label="&Buka Dialog Utama JadwalKu...")
 		self.btnOpenLayout.Bind(wx.EVT_BUTTON, self.onOpenLayout)
-		btnSizer.Add(self.btnOpenLayout, 0, wx.ALL, 5)
+		btnSizer1.Add(self.btnOpenLayout, 0, wx.ALL, 5)
 		
-		self.btnOpenTime = wx.Button(self, label="&Pengaturan Pengingat Waktu Berkala...")
+		self.btnOpenTime = wx.Button(self, label="&Pengingat Waktu Berkala...")
 		self.btnOpenTime.Bind(wx.EVT_BUTTON, self.onOpenTime)
-		btnSizer.Add(self.btnOpenTime, 0, wx.ALL, 5)
+		btnSizer1.Add(self.btnOpenTime, 0, wx.ALL, 5)
+		settingsSizer.Add(btnSizer1, 0, wx.ALL, 2)
 		
+		btnSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 		self.btnOpenAudio = wx.Button(self, label="Pengaturan &Audio Manager (Speaker)...")
 		self.btnOpenAudio.Bind(wx.EVT_BUTTON, self.onOpenAudio)
-		btnSizer.Add(self.btnOpenAudio, 0, wx.ALL, 5)
+		btnSizer2.Add(self.btnOpenAudio, 0, wx.ALL, 5)
 		
 		self.btnOpenTTS = wx.Button(self, label="Pengaturan &Mesin TTS Mandiri...")
 		self.btnOpenTTS.Bind(wx.EVT_BUTTON, self.onOpenTTS)
-		btnSizer.Add(self.btnOpenTTS, 0, wx.ALL, 5)
+		btnSizer2.Add(self.btnOpenTTS, 0, wx.ALL, 5)
+		settingsSizer.Add(btnSizer2, 0, wx.ALL, 2)
 		
-		settingsSizer.Add(btnSizer, 0, wx.ALL, 5)
+		btnSizer3 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnShare = wx.Button(self, label="&Bagikan Add-on (Copy Link ke Clipboard)...")
+		self.btnShare.Bind(wx.EVT_BUTTON, self.onShareAddon)
+		btnSizer3.Add(self.btnShare, 0, wx.ALL, 5)
+		
+		self.btnFeedback = wx.Button(self, label="&Kirim Laporan, Kritik & Saran...")
+		self.btnFeedback.Bind(wx.EVT_BUTTON, self.onOpenFeedback)
+		btnSizer3.Add(self.btnFeedback, 0, wx.ALL, 5)
+		settingsSizer.Add(btnSizer3, 0, wx.ALL, 2)
 
 	def onOpenLayout(self, event):
 		global _plugin_instance
@@ -65,6 +77,16 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		global _plugin_instance
 		if _plugin_instance:
 			wx.CallAfter(_plugin_instance.show_tts_manager_dialog)
+
+	def onShareAddon(self, event):
+		global _plugin_instance
+		if _plugin_instance:
+			wx.CallAfter(_plugin_instance.share_addon_link)
+
+	def onOpenFeedback(self, event):
+		global _plugin_instance
+		if _plugin_instance:
+			wx.CallAfter(_plugin_instance.show_feedback_dialog)
 
 	def onSave(self):
 		pass
@@ -100,8 +122,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:enter": "openLayout",
 			"kb:1": "openQuickTimer",
 			"kb:2": "openOneTimeAlarm",
-			"kb:w": "announceTime",
-			"kb:t": "announceTime",
+			"kb:r": "openFeedback",
 			"kb:k": "openCalendar",
 			"kb:d": "openWorldClock",
 			"kb:j": "nextAgenda",
@@ -110,6 +131,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:s": "openAudioManager",
 			"kb:m": "openTTSManager",
 			"kb:p": "openTTSManager",
+			"kb:g": "shareAddon",
 			"kb:u": "checkUpdate",
 			"kb:v": "showChangelog",
 			"kb:z": "snoozeAlarm",
@@ -261,6 +283,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
+	def share_addon_link(self):
+		url = "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.1.nvda-addon"
+		try:
+			if api.copyToClip(url):
+				ui.message("Tautan unduhan langsung JadwalKu v1.6.1 berhasil disalin ke clipboard!")
+			else:
+				ui.message("Gagal menyalin tautan ke clipboard.")
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Error saat salin tautan bagikan: {e}")
+			ui.message("Gagal menyalin tautan ke clipboard.")
+
 	def show_quick_timer_dialog(self):
 		if not self.check_dialog_open():
 			return
@@ -313,6 +346,24 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		gui.mainFrame.prePopup()
 		try:
 			dlg = WorldClockDialog(gui.mainFrame)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+	def show_feedback_dialog(self):
+		if not self.check_dialog_open():
+			return
+		from .reportSender import check_can_send_report
+		allowed, reason = check_can_send_report(self.config)
+		if not allowed:
+			ui.message(reason)
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = FeedbackDialog(gui.mainFrame, self.config)
 			dlg.ShowModal()
 			dlg.Destroy()
 		finally:
@@ -598,8 +649,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			ui.message("Fitur pemeriksa pembaruan tidak aktif.")
 
 	def script_showChangelog(self, gesture):
-		ui.message("JadwalKu Versi 1.5.0. Membuka riwayat pembaruan (Changelog)...")
+		ui.message("JadwalKu Versi 1.6.2. Membuka riwayat pembaruan (Changelog)...")
 		wx.CallAfter(self.show_changelog_dialog)
+
+	def script_shareAddon(self, gesture):
+		wx.CallAfter(self.share_addon_link)
+
+	def script_openFeedback(self, gesture):
+		wx.CallAfter(self.show_feedback_dialog)
 
 	def script_exitLayer(self, gesture):
 		pass

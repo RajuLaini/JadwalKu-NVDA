@@ -65,6 +65,10 @@ DEFAULT_DATA = {
 		"voice_name": "",
 		"rate": 0,
 		"volume": 100
+	},
+	"feedback_config": {
+		"last_report_date": "",
+		"proxy_url": "https://butterflywings.my.id/api/jadwalku/proxy"
 	}
 }
 
@@ -199,4 +203,22 @@ class ConfigManager:
 			self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
 		self.data["tts_config"].update(updated_dict)
 		self.save_data()
+
+	def get_feedback_config(self):
+		return self.data.get("feedback_config", DEFAULT_DATA["feedback_config"].copy())
+
+	def update_feedback_config(self, updated_dict):
+		if "feedback_config" not in self.data:
+			self.data["feedback_config"] = DEFAULT_DATA["feedback_config"].copy()
+		self.data["feedback_config"].update(updated_dict)
+		self.save_data()
+
+	def get_last_report_date(self):
+		cfg = self.get_feedback_config()
+		return cfg.get("last_report_date", "")
+
+	def set_last_report_date(self, date_str):
+		cfg = self.get_feedback_config()
+		cfg["last_report_date"] = date_str
+		self.update_feedback_config(cfg)
 

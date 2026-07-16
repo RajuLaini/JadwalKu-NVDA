@@ -29,3 +29,11 @@ Dokumen ini berisi daftar ide dan konsep fitur yang dapat kita kembangkan di ses
 
 ## 8. [SELESAI di v1.6.0] Mesin Suara TTS Mandiri SAPI 5 untuk Latar Belakang (*Background Standalone TTS Engine*)
 - **Status**: Telah berhasil diterapkan di versi 1.6.0! Pengguna dapat mengaktifkan mesin TTS terpisah berbasis `comtypes` SAPI 5 melalui `NVDA + /` lalu `M` atau dari Tab 2 & Pengingat Waktu. Mesin ini membacakan seluruh pemberitahuan latar belakang (pengingat waktu, timer, dan alarm) di thread terpisah dan meremajakannya melalui `audioManager` sehingga 100% mengikuti routing perangkat audio pilihan (Speaker/Headphone) tanpa pernah bertumpuk dengan suara pembacaan layar NVDA utama! Pengecualian pada `NVDA + F12` yang tetap dibacakan oleh NVDA utama sesuai keinginan pengguna.
+
+## 9. [SELESAI di v1.6.1] Fitur Bagikan Add-on Instan Direct Link (*Clipboard Downloader URL Copy*)
+- **Status**: Telah berhasil diterapkan di versi 1.6.1! Pengguna dapat menekan shortcut cepat `NVDA + /` lalu `G`, atau menekan tombol `Bagikan Add-on` di panel pengaturan NVDA (*Settings -> JadwalKu*). Fitur ini secara instan menyalin tautan unduhan `.nvda-addon` terbaru (`raw.githubusercontent.com/.../JadwalKu-v1.6.1.nvda-addon`) ke clipboard, memungkinkan distribusi mudah tanpa perlu membuka browser.
+
+## 10. [SELESAI di v1.6.2] Fitur Laporan, Kritik & Saran Terintegrasi Bot Telegram via Web API Proxy (*Feedback & Bug Diagnosis*)
+- **Status**: Telah berhasil diterapkan di versi 1.6.2! Pengguna dapat menekan shortcut `NVDA + /` lalu `R` (maupun dari tombol `Kirim Laporan & Saran` di panel pengaturan NVDA) untuk memilih kategori (`Minta Fitur Baru`, `Laporkan Kesalahan`, `Kritik Saran`). Sistem secara otomatis mengekstrak log diagnostik terbaru dari NVDA dan menampilkannya secara transparan yang bisa diedit. Pengiriman dilakukan secara aman melalui Web API Proxy PHP (`jadwalku_telegram_proxy.php`) ke Bot Telegram Aileen, dilengkapi pembatasan kuota 1 laporan/hari per user dan fitur fallback salin otomatis ke clipboard jika offline/gagal.
+
+
