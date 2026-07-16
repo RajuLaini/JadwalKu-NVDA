@@ -74,8 +74,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.2 (Terbaru - Kustomisasi Gaya Ucapan Pengingat & Kirim Laporan via Cloudflare Workers) ---\n"
-			"* Penyesuaian Gaya Pengucapan Waktu Pengingat (Time Reminder Speech Style): Pada Pengaturan Pengingat Waktu Berkala, kini tersedia pilihan gaya pengucapan suara (Mulai dari 'Sekarang jam [Jam]:[Menit]', mengikuti persis format & gaya pengucapan NVDA+F12, '[Jam]:[Menit] waktu sekarang', hingga 'Waktu sekarang pukul [Jam]:[Menit]').\n"
+			"--- Versi 1.6.2 (Terbaru - Kustomisasi Format & Gaya Ucapan Pengingat serta Kirim Laporan via Cloudflare Workers) ---\n"
+			"* Penyesuaian Format & Gaya Pengucapan Waktu Pengingat (Time Reminder Speech Style & 12/24 Jam): Pada Pengaturan Pengingat Waktu Berkala, kini tersedia pilihan format jam (24 Jam, 12 Jam AM/PM, atau Mengikuti Format NVDA+F12) serta pilihan gaya pengucapan suara (Mulai dari 'Sekarang jam [Jam]:[Menit]', mengikuti persis format & gaya pengucapan NVDA+F12, '[Jam]:[Menit] waktu sekarang', hingga 'Waktu sekarang pukul [Jam]:[Menit]').\n"
 			"* Fitur Laporan & Saran Aksesibel via Cloudflare Workers (NVDA + / lalu R): Memungkinkan pengguna mengirimkan permintaan fitur baru, kritik saran, atau melaporkan kesalahan/bug langsung dari dalam add-on JadwalKu ke Bot Telegram pengembang (Aileen Bot) melalui Web API Proxy berkecepatan tinggi yang aman tanpa mengekspos token bot.\n"
 			"* Kategori & Sub-Kategori Bug Transparan: Saat melaporkan bug, pengguna dapat memilih sub-fitur spesifik dan memeriksa/mengedit log diagnostik NVDA yang dilampirkan secara transparan.\n"
 			"* Pembatasan Pintar & Salin Otomatis: Batas 1 laporan per pengguna per hari (maksimal 10 laporan/hari dari seluruh pengguna). Jika offline atau kuota penuh, laporan otomatis disalin ke clipboard agar tidak ada pesan yang hilang.\n"
@@ -1174,6 +1174,22 @@ class TimeReminderDialog(wx.Dialog):
 			self.cb_speech_style.SetSelection(0)
 		sizer.Add(self.cb_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
+		# Format Jam Pengingat (12 / 24 Jam)
+		sizer.Add(wx.StaticText(self, label="&Format Jam Pengingat (12/24 Jam):"), 0, wx.ALL, 5)
+		format_choices = [
+			("24 Jam (Contoh: 14:00 atau 16:30)", "24"),
+			("12 Jam AM/PM (Contoh: 02:00 PM atau 04:30 PM)", "12"),
+			("Mengikuti Format Jam NVDA+F12", "follow_f12")
+		]
+		self.format_values = [v for k, v in format_choices]
+		self.cb_time_format = wx.ComboBox(self, choices=[k for k, v in format_choices], style=wx.CB_READONLY)
+		cur_fmt = self.cfg.get("time_format", "24")
+		if cur_fmt in self.format_values:
+			self.cb_time_format.SetSelection(self.format_values.index(cur_fmt))
+		else:
+			self.cb_time_format.SetSelection(0)
+		sizer.Add(self.cb_time_format, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
 		# Jam Mulai & Jam Selesai
 		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		hours = [f"{i:02d}:00" for i in range(24)]
@@ -1222,11 +1238,13 @@ class TimeReminderDialog(wx.Dialog):
 		idx_int = self.cb_interval.GetSelection()
 		idx_mod = self.cb_mode.GetSelection()
 		idx_stl = self.cb_speech_style.GetSelection()
+		idx_fmt = self.cb_time_format.GetSelection()
 		return {
 			"enabled": self.chk_enabled.GetValue(),
 			"interval": self.interval_values[idx_int if idx_int >= 0 else 4],
 			"mode": self.mode_values[idx_mod if idx_mod >= 0 else 0],
 			"speech_style": self.speech_style_values[idx_stl if idx_stl >= 0 else 0],
+			"time_format": self.format_values[idx_fmt if idx_fmt >= 0 else 0],
 			"start_hour": self.cb_start.GetSelection(),
 			"end_hour": self.cb_end.GetSelection(),
 			"last_triggered_minute": self.cfg.get("last_triggered_minute", "")
