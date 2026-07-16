@@ -66,11 +66,16 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.5.0 (Terbaru - Puncak Spektakuler Waktu, Kalender & Jam Dunia) ---\n"
+			"--- Versi 1.6.0 (Terbaru - Mesin Suara TTS Mandiri untuk Notifikasi Latar Belakang) ---\n"
+			"* Fitur Mesin TTS Mandiri (Aksesibel via NVDA + / lalu M atau tombol di Tab 2 & Pengingat Waktu): Memungkinkan seluruh pemberitahuan latar belakang (pengingat waktu berkala setiap jam/menit, alarm agenda, quick timer, dan satu kali alarm) dibacakan menggunakan mesin suara SAPI 5 terpisah yang mandiri dan tidak menumpuk dengan suara pembacaan layar NVDA yang sedang aktif!\n"
+			"* Pengaturan Suara, Kecepatan & Volume TTS SAPI 5: Pilih suara SAPI 5 yang diinginkan (misal suara Indonesia atau Inggris di sistem), sesuaikan kecepatan (Rate -10 s/d +10) dan volume (0% - 100%) dengan pratinjau tes suara langsung.\n"
+			"* Routing Audio Penuh (Audio Device Independent): Suara TTS Mandiri sepenuhnya mengikuti rute perangkat audio (Speaker/Headphone/Virtual Audio Cable) yang dipilih pada Audio Manager JadwalKu, sehingga suara notifikasi tidak bocor ke speaker utama jika diatur ke perangkat lain.\n"
+			"* Pengecualian Pintar NVDA + F12: Pengucapan waktu/tanggal manual via NVDA + F12 tetap dibacakan oleh pembaca layar NVDA utama sesuai preferensi pengguna, menjaga pemisahan fungsi yang sempurna.\n\n"
+			"--- Versi 1.5.0 (Puncak Spektakuler Waktu, Kalender & Jam Dunia) ---\n"
 			"* Fitur Tab 2 Pengaturan Waktu & Kalender (Aksesibel via Shift+Tab dari daftar agenda & Panah Kanan atau Ctrl+Tab): Memungkinkan kostumisasi menyeluruh bagaimana NVDA melaporkan jam dan tanggal.\n"
 			"* Penggantian Pintar NVDA + F12: Tekan 1x untuk informasi jam sesuai format (24/12 Jam, pilihan gaya pengucapan, opsi detik). Tekan 2x untuk tanggal lengkap/ringkas. Tekan 3x untuk informasi lengkap beserta hitung mundur sisa hari & jam menuju akhir tahun!\n"
 			"* Fitur Kalender & Tanggal Merah (NVDA + / lalu K): Melihat kalender bulanan lengkap dengan deteksi otomatis hari libur nasional Indonesia, serta filter khusus untuk menampilkan seluruh daftar tanggal merah tahun ini.\n"
-			"* Fitur Jam Dunia & Konversi Waktu (NVDA + / lalu D): Menampilkan selisih waktu Indonesia (WIB/WITA/WIT) dengan berbagai negara di benua Asia, Eropa, Amerika, Australia, dan Afrika, dilengkapi Kalkulator Konversi Waktu instan (contoh: jika jam 20:00 di Jerman, berapa di Indonesia?).\n\n"
+			"* Fitur Jam Dunia & Konversi Waktu (NVDA + / lalu D): Menampilkan selisih waktu Indonesia (WIB/WITA/WIT) dengan berbagai negara di benua Asia, Eropa, Amerika, Australia, dan Afrika, dilengkapi Kalkulator Konversi Waktu instan.\n\n"
 			"--- Versi 1.4.3 ---\n"
 			"* Fitur Waktu Selesai Interval (Jam Selesai Perulangan): Pada form tambah/edit jadwal, kini tersedia input 'Waktu Selesai Interval (Jam Selesai Perulangan)' sehingga pengingat berulang (misal minum air atau jam kerja) dapat dibatasi secara otomatis agar berhenti berbunyi setelah jam selesai yang ditentukan.\n"
 			"* Dukungan Interval Lintas Malam (Overnight Interval): Sistem mendukung penuh perulangan interval di hari yang sama maupun lintas malam (misal dari jam 20:00 sampai 04:00 pagi).\n\n"
@@ -858,10 +863,94 @@ class OneTimeAlarmDialog(wx.Dialog):
 		}
 
 
+class TTSManagerDialog(wx.Dialog):
+	def __init__(self, parent, tts_manager, config_manager):
+		super().__init__(parent, title="Pengaturan Suara TTS Mandiri (Notifikasi Latar Belakang)", size=(540, 460), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.tts_manager = tts_manager
+		self.config = config_manager
+		self.cfg = self.config.get_tts_config() if self.config else {}
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# Checkbox Aktif
+		self.chk_enabled = wx.CheckBox(self, label="&Aktifkan Suara TTS Mandiri Terpisah untuk Notifikasi Latar Belakang")
+		self.chk_enabled.SetValue(self.cfg.get("enabled", False))
+		sizer.Add(self.chk_enabled, 0, wx.ALL, 10)
+		
+		# Daftar Suara
+		sizer.Add(wx.StaticText(self, label="&Pilih Suara / Mesin SAPI 5:"), 0, wx.ALL, 5)
+		self.voices_list = self.tts_manager.get_available_voices() if self.tts_manager else []
+		choices = [v["name"] for v in self.voices_list]
+		if not choices:
+			choices = ["(Suara SAPI 5 tidak ditemukan / tidak tersedia)"]
+			self.voices_list = [{"id": 0, "name": choices[0]}]
+		
+		self.cb_voices = wx.ComboBox(self, choices=choices, style=wx.CB_READONLY)
+		cur_id = int(self.cfg.get("voice_id", 0))
+		found_idx = 0
+		for idx, v in enumerate(self.voices_list):
+			if v["id"] == cur_id:
+				found_idx = idx
+				break
+		self.cb_voices.SetSelection(found_idx)
+		sizer.Add(self.cb_voices, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# Slider Rate (Kecepatan)
+		sizer.Add(wx.StaticText(self, label="&Kecepatan Pengucapan (Rate: -10 lambat s/d +10 cepat):"), 0, wx.ALL, 5)
+		self.slider_rate = wx.Slider(self, value=int(self.cfg.get("rate", 0)), minValue=-10, maxValue=10, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		sizer.Add(self.slider_rate, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# Slider Volume
+		sizer.Add(wx.StaticText(self, label="&Volume Suara TTS (0% s/d 100%):"), 0, wx.ALL, 5)
+		self.slider_volume = wx.Slider(self, value=int(self.cfg.get("volume", 100)), minValue=0, maxValue=100, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		sizer.Add(self.slider_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# Tombol Tes Suara
+		self.btnTest = wx.Button(self, label="&Tes Suara TTS Mandiri")
+		self.btnTest.Bind(wx.EVT_BUTTON, self.onTest)
+		sizer.Add(self.btnTest, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 10)
+		
+		# Buttons Simpan & Batal
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
+		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		btnSizer.AddButton(self.btnOk)
+		btnSizer.AddButton(self.btnCancel)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.chk_enabled.SetFocus()
+
+	def onTest(self, event):
+		if not self.tts_manager:
+			return
+		sel = self.cb_voices.GetSelection()
+		v_id = self.voices_list[sel]["id"] if sel >= 0 and sel < len(self.voices_list) else 0
+		rate = self.slider_rate.GetValue()
+		vol = self.slider_volume.GetValue()
+		self.tts_manager.test_voice(v_id, rate, vol)
+
+	def get_result(self):
+		sel = self.cb_voices.GetSelection()
+		v_id = self.voices_list[sel]["id"] if sel >= 0 and sel < len(self.voices_list) else 0
+		v_name = self.voices_list[sel]["name"] if sel >= 0 and sel < len(self.voices_list) else ""
+		return {
+			"enabled": self.chk_enabled.GetValue(),
+			"voice_id": v_id,
+			"voice_name": v_name,
+			"rate": self.slider_rate.GetValue(),
+			"volume": self.slider_volume.GetValue()
+		}
+
+
 class TimeReminderDialog(wx.Dialog):
-	def __init__(self, parent, time_config=None):
-		super().__init__(parent, title="Pengaturan Pengingat Waktu Berkala (Time Reminder)", size=(500, 420), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+	def __init__(self, parent, time_config=None, tts_manager=None, config_manager=None):
+		super().__init__(parent, title="Pengaturan Pengingat Waktu Berkala (Time Reminder)", size=(520, 460), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 		self.cfg = time_config or {}
+		self.tts_manager = tts_manager
+		self.config = config_manager
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -919,6 +1008,11 @@ class TimeReminderDialog(wx.Dialog):
 		time_sizer.Add(self.cb_end, 0, wx.ALL, 5)
 		sizer.Add(time_sizer, 0, wx.ALL, 5)
 		
+		# Tombol Pengaturan Suara TTS Mandiri
+		self.btnOpenTTS = wx.Button(self, label="&Pengaturan Suara TTS Mandiri (Notifikasi Latar)...")
+		self.btnOpenTTS.Bind(wx.EVT_BUTTON, self.onOpenTTS)
+		sizer.Add(self.btnOpenTTS, 0, wx.ALL | wx.ALIGN_LEFT, 10)
+		
 		# Buttons
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
@@ -931,6 +1025,17 @@ class TimeReminderDialog(wx.Dialog):
 		self.SetSizer(sizer)
 		self.Centre()
 		self.chk_enabled.SetFocus()
+
+	def onOpenTTS(self, event):
+		if self.tts_manager and self.config:
+			dlg = TTSManagerDialog(self, self.tts_manager, self.config)
+			if dlg.ShowModal() == wx.ID_OK:
+				self.config.update_tts_config(dlg.get_result())
+				status = "Aktif" if dlg.get_result()["enabled"] else "Nonaktif"
+				ui.message(f"Pengaturan TTS Mandiri berhasil disimpan ({status}).")
+			dlg.Destroy()
+		else:
+			ui.message("Fitur TTS Mandiri tidak tersedia.")
 
 	def get_result(self):
 		idx_int = self.cb_interval.GetSelection()
@@ -946,11 +1051,12 @@ class TimeReminderDialog(wx.Dialog):
 
 
 class JadwalKuDialog(wx.Dialog):
-	def __init__(self, parent, config_manager, audio_manager, updater=None):
+	def __init__(self, parent, config_manager, audio_manager, updater=None, tts_manager=None):
 		super().__init__(parent, title="JadwalKu - Manajemen Agenda & Pengingat", size=(680, 520), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 		self.config = config_manager
 		self.audio = audio_manager
 		self.updater = updater
+		self.tts_manager = tts_manager
 		
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -1081,6 +1187,10 @@ class JadwalKuDialog(wx.Dialog):
 		self.btnOpenWorld.Bind(wx.EVT_BUTTON, self.onOpenWorldClock)
 		btnSizerTab2.Add(self.btnOpenWorld, 0, wx.ALL, 4)
 		
+		self.btnOpenTTS = wx.Button(self.panel_tab2, label="&Pengaturan Suara TTS Mandiri (NVDA+/, M)...")
+		self.btnOpenTTS.Bind(wx.EVT_BUTTON, self.onOpenTTSManager)
+		btnSizerTab2.Add(self.btnOpenTTS, 0, wx.ALL, 4)
+		
 		self.btnSaveTimeCfg = wx.Button(self.panel_tab2, label="&Simpan Pengaturan Waktu")
 		self.btnSaveTimeCfg.Bind(wx.EVT_BUTTON, self.onSaveTimeSettings)
 		btnSizerTab2.Add(self.btnSaveTimeCfg, 0, wx.ALL, 4)
@@ -1201,13 +1311,25 @@ class JadwalKuDialog(wx.Dialog):
 		gui.mainFrame.prePopup()
 		try:
 			cfg = self.config.get_time_reminder_config()
-			dlg = TimeReminderDialog(self, cfg.copy())
+			dlg = TimeReminderDialog(self, cfg.copy(), getattr(self, "tts_manager", None), self.config)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
 				self.config.update_time_reminder_config(updated)
 				status = "Aktif" if updated["enabled"] else "Nonaktif"
 				ui.message(f"Pengaturan pengingat waktu berkala berhasil disimpan ({status}, tiap {updated['interval']} menit).")
+			dlg.Destroy()
+		finally:
+			gui.mainFrame.postPopup()
+
+	def onOpenTTSManager(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			dlg = TTSManagerDialog(self, getattr(self, "tts_manager", None), self.config)
+			if dlg.ShowModal() == wx.ID_OK:
+				self.config.update_tts_config(dlg.get_result())
+				status = "Aktif" if dlg.get_result()["enabled"] else "Nonaktif"
+				ui.message(f"Pengaturan TTS Mandiri berhasil disimpan ({status}).")
 			dlg.Destroy()
 		finally:
 			gui.mainFrame.postPopup()

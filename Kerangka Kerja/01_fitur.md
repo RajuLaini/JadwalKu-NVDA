@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.4.3
+# Daftar Fitur Lengkap Add-on JadwalKu v1.6.0
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -26,6 +26,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
   - **`W` / `T`**: Bacakan informasi jam sekarang dan status pengingat waktu berkala (*Current Time & Status*).
   - **`K`**: Buka Dialog **Kalender Bulanan & Daftar Tanggal Merah Indonesia**.
   - **`D`**: Buka Dialog **Jam Dunia & Kalkulator Konversi Waktu Antar Negara**.
+  - **`M` / `P`**: Buka Dialog **Pengaturan Suara & Mesin TTS Mandiri SAPI 5**.
   - **`J`**: Bacakan jadwal agenda terdekat berikutnya beserta sisa waktu menuju agenda tersebut.
   - **`H`**: Bacakan seluruh daftar agenda aktif hari ini.
   - **`A`**: Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.
@@ -61,4 +62,11 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
   - **Tekan 3x**: Membacakan ringkasan lengkap tanggal & waktu serta hitung mundur akurat menuju akhir tahun (sisa hari & jam menuju 1 Januari tahun berikutnya).
 - **Kalender Bulanan & Daftar Tanggal Merah (`NVDA + / lalu K`)**: Dialog khusus untuk memilih bulan dan tahun, melihat daftar hari dengan penandaan akhir pekan (Sabtu/Minggu) serta libur nasional Indonesia yang akurat.
 - **Jam Dunia & Kalkulator Konversi Waktu (`NVDA + / lalu D`)**: Menampilkan daftar jam waktu aktual di berbagai kota/negara dunia dan selisih waktunya dengan WIB, serta kalkulator konversi waktu interaktif untuk menghitung waktu antar negara.
+
+## 9. Mesin Suara TTS Mandiri untuk Notifikasi Latar Belakang (v1.6.0)
+- **Sintesis Suara Mandiri Latar Belakang (`comtypes` SAPI 5 + `WinMM`)**: Seluruh pemberitahuan latar belakang (pengingat waktu berkala setiap jam/menit, alarm agenda, quick timer, dan satu kali alarm) dibacakan menggunakan mesin suara SAPI 5 terpisah yang mandiri dan tidak menumpuk dengan suara pembacaan layar NVDA yang sedang aktif!
+- **Pengaturan Suara, Kecepatan & Volume TTS SAPI 5**: Pilih suara SAPI 5 yang diinginkan (misal suara Indonesia atau Inggris di sistem), sesuaikan kecepatan (Rate -10 s/d +10) dan volume (0% - 100%) dengan pratinjau tes suara langsung (`[ &Tes Suara ]`).
+- **Routing Audio Penuh (`Audio Device Independent`)**: Suara TTS Mandiri sepenuhnya mengikuti rute perangkat audio (Speaker/Headphone/Virtual Audio Cable) yang dipilih pada Audio Manager JadwalKu, sehingga suara notifikasi tidak bocor ke speaker utama jika diatur ke perangkat lain.
+- **Pengecualian Pintar NVDA + F12**: Pengucapan waktu/tanggal manual via `NVDA + F12` tetap dibacakan oleh pembaca layar NVDA utama sesuai preferensi pengguna, menjaga pemisahan fungsi yang sempurna.
+
 

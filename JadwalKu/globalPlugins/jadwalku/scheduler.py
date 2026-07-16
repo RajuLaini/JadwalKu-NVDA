@@ -7,9 +7,10 @@ import os
 import random
 
 class Scheduler:
-	def __init__(self, config_manager, audio_manager):
+	def __init__(self, config_manager, audio_manager, tts_manager=None):
 		self.config = config_manager
 		self.audio = audio_manager
+		self.tts_manager = tts_manager
 		self.timer = wx.Timer()
 		self.timer.Bind(wx.EVT_TIMER, self.on_tick)
 		self.last_check_minute = -1
@@ -215,11 +216,17 @@ class Scheduler:
 				else:
 					time_str = f"Sekarang jam {now.strftime('%H:%M')}"
 				
+				def speak_reminder():
+					if hasattr(self, "tts_manager") and self.tts_manager and self.tts_manager.is_enabled():
+						self.tts_manager.speak(time_str)
+					else:
+						ui.message(time_str)
+
 				# Jika audio dan bicara menyala, beri sedikit jeda agar tidak bertabrakan dengan chime
 				if mode == "both":
-					wx.CallLater(350, ui.message, time_str)
+					wx.CallLater(350, speak_reminder)
 				else:
-					ui.message(time_str)
+					speak_reminder()
 
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Error saat cek time reminder: {e}")

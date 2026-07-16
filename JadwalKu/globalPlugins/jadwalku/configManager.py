@@ -58,6 +58,13 @@ DEFAULT_DATA = {
 		"include_seconds": False,
 		"date_speech_style": "default",
 		"full_speech_style": "default"
+	},
+	"tts_config": {
+		"enabled": False,
+		"voice_id": 0,
+		"voice_name": "",
+		"rate": 0,
+		"volume": 100
 	}
 }
 
@@ -88,6 +95,8 @@ class ConfigManager:
 					self.data["audio_volume"] = DEFAULT_DATA["audio_volume"]
 				if "time_settings" not in self.data:
 					self.data["time_settings"] = DEFAULT_DATA["time_settings"].copy()
+				if "tts_config" not in self.data:
+					self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
 				self.save_data()
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
@@ -180,5 +189,14 @@ class ConfigManager:
 		if "time_settings" not in self.data:
 			self.data["time_settings"] = DEFAULT_DATA["time_settings"].copy()
 		self.data["time_settings"].update(updated_dict)
+		self.save_data()
+
+	def get_tts_config(self):
+		return self.data.get("tts_config", DEFAULT_DATA["tts_config"].copy())
+
+	def update_tts_config(self, updated_dict):
+		if "tts_config" not in self.data:
+			self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
+		self.data["tts_config"].update(updated_dict)
 		self.save_data()
 

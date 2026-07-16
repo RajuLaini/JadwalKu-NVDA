@@ -82,8 +82,9 @@ class AlarmNotificationDialog(wx.Dialog):
 		self.Destroy()
 
 class AudioManager:
-	def __init__(self, config_manager=None):
+	def __init__(self, config_manager=None, tts_manager=None):
 		self.config = config_manager
+		self.tts_manager = tts_manager
 		self.last_played_file = None
 		self._mp3_alias = "jadwalku_alarm_mp3"
 		self._active_wave_outs = set()
@@ -357,7 +358,7 @@ class AudioManager:
 		threading.Thread(target=worker, daemon=True).start()
 		return True
 
-	def play_sound(self, filename, allow_overlap=True, stop_alarm=False, loop=False):
+	def play_sound(self, filename, allow_overlap=True, stop_alarm=False, loop=False, is_tts=False):
 		if not filename or filename == "Tanpa Suara Audio":
 			return False
 		path = self.get_sound_path(filename)
@@ -550,12 +551,14 @@ class AudioManager:
 	def notify(self, title, message, speech_enabled=True, audio_enabled=True, audio_file="chime.wav", is_alarm=False):
 		if speech_enabled:
 			full_msg = f"{title}: {message}" if title else message
-			ui.message(full_msg)
+			if hasattr(self, "tts_manager") and self.tts_manager and self.tts_manager.is_enabled():
+				self.tts_manager.speak(full_msg)
+			else:
+				ui.message(full_msg)
 
 		if audio_enabled and audio_file and audio_file != "Tanpa Suara Audio":
 			if is_alarm:
 				self.start_alarm_loop(audio_file, title, message)
 			else:
 				self.play_sound(audio_file)
-
 

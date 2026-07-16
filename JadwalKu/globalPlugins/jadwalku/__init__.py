@@ -9,8 +9,9 @@ import scriptHandler
 
 from .configManager import ConfigManager
 from .audioManager import AudioManager
+from .ttsManager import TTSManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog, TTSManagerDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -39,6 +40,10 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		self.btnOpenAudio.Bind(wx.EVT_BUTTON, self.onOpenAudio)
 		btnSizer.Add(self.btnOpenAudio, 0, wx.ALL, 5)
 		
+		self.btnOpenTTS = wx.Button(self, label="Pengaturan &Mesin TTS Mandiri...")
+		self.btnOpenTTS.Bind(wx.EVT_BUTTON, self.onOpenTTS)
+		btnSizer.Add(self.btnOpenTTS, 0, wx.ALL, 5)
+		
 		settingsSizer.Add(btnSizer, 0, wx.ALL, 5)
 
 	def onOpenLayout(self, event):
@@ -55,6 +60,11 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		global _plugin_instance
 		if _plugin_instance:
 			wx.CallAfter(_plugin_instance.show_audio_manager_dialog)
+
+	def onOpenTTS(self, event):
+		global _plugin_instance
+		if _plugin_instance:
+			wx.CallAfter(_plugin_instance.show_tts_manager_dialog)
 
 	def onSave(self):
 		pass
@@ -74,7 +84,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		
 		self.config = ConfigManager()
 		self.audio = AudioManager(self.config)
-		self.scheduler = Scheduler(self.config, self.audio)
+		self.tts = TTSManager(self.config, self.audio)
+		self.audio.tts_manager = self.tts
+		self.scheduler = Scheduler(self.config, self.audio, self.tts)
 		self.scheduler.start()
 		
 		self.updater = UpdateChecker(self.config, self)
@@ -96,6 +108,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
+			"kb:m": "openTTSManager",
+			"kb:p": "openTTSManager",
 			"kb:u": "checkUpdate",
 			"kb:v": "showChangelog",
 			"kb:z": "snoozeAlarm",
@@ -128,6 +142,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.scheduler.stop()
 		if self.audio:
 			self.audio.stop_sound()
+		if getattr(self, 'tts', None):
+			self.tts.stop()
 			
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(JadwalKuSettingsPanel)
@@ -157,7 +173,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.is_dialog_open = True
 		gui.mainFrame.prePopup()
 		try:
-			dlg = JadwalKuDialog(gui.mainFrame, self.config, self.audio, updater=getattr(self, 'updater', None))
+			dlg = JadwalKuDialog(gui.mainFrame, self.config, self.audio, updater=getattr(self, 'updater', None), tts_manager=getattr(self, 'tts', None))
 			dlg.ShowModal()
 			dlg.Destroy()
 		finally:
@@ -171,13 +187,29 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		gui.mainFrame.prePopup()
 		try:
 			cfg = self.config.get_time_reminder_config()
-			dlg = TimeReminderDialog(gui.mainFrame, cfg.copy())
+			dlg = TimeReminderDialog(gui.mainFrame, cfg.copy(), tts_manager=getattr(self, 'tts', None), config_manager=self.config)
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
 				self.config.update_time_reminder_config(updated)
 				status = "Aktif" if updated["enabled"] else "Nonaktif"
 				ui.message(f"Pengaturan pengingat waktu berkala berhasil disimpan ({status}, tiap {updated['interval']} menit).")
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+	def show_tts_manager_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = TTSManagerDialog(gui.mainFrame, getattr(self, 'tts', None), self.config)
+			if dlg.ShowModal() == wx.ID_OK:
+				self.config.update_tts_config(dlg.get_result())
+				status = "Aktif" if dlg.get_result()["enabled"] else "Nonaktif"
+				ui.message(f"Pengaturan TTS Mandiri berhasil disimpan ({status}).")
 			dlg.Destroy()
 		finally:
 			self.is_dialog_open = False
@@ -318,14 +350,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, M/P Mesin TTS Mandiri, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, V Riwayat, atau B Bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, M Mesin TTS Mandiri, V Riwayat, atau B Bantuan.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
@@ -345,6 +377,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def script_openAudioManager(self, gesture):
 		wx.CallAfter(self.show_audio_manager_dialog)
+
+	def script_openTTSManager(self, gesture):
+		wx.CallAfter(self.show_tts_manager_dialog)
 
 	def format_time_str(self, now, time_settings):
 		is_24 = time_settings.get("time_format", "24") == "24"

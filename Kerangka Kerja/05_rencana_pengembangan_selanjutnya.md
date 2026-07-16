@@ -26,3 +26,6 @@ Dokumen ini berisi daftar ide dan konsep fitur yang dapat kita kembangkan di ses
 
 ## 7. [SELESAI di v1.5.0] Waktu, Kalender, Tanggal Merah & Jam Dunia (*Time & Calendar Expansion*)
 - **Status**: Telah berhasil diterapkan di versi 1.5.0! Pengguna dapat mengakses pengaturan lengkap melalui Tab 2 di Dialog Utama (`Ctrl+Tab`), mengatur penggantian/override `NVDA + F12` (1x jam, 2x tanggal, 3x sisa akhir tahun), membuka Kalender & Tanggal Merah (`NVDA + /, K`), serta membuka Jam Dunia & Kalkulator Konversi Waktu (`NVDA + /, D`).
+
+## 8. [SELESAI di v1.6.0] Mesin Suara TTS Mandiri SAPI 5 untuk Latar Belakang (*Background Standalone TTS Engine*)
+- **Status**: Telah berhasil diterapkan di versi 1.6.0! Pengguna dapat mengaktifkan mesin TTS terpisah berbasis `comtypes` SAPI 5 melalui `NVDA + /` lalu `M` atau dari Tab 2 & Pengingat Waktu. Mesin ini membacakan seluruh pemberitahuan latar belakang (pengingat waktu, timer, dan alarm) di thread terpisah dan meremajakannya melalui `audioManager` sehingga 100% mengikuti routing perangkat audio pilihan (Speaker/Headphone) tanpa pernah bertumpuk dengan suara pembacaan layar NVDA utama! Pengecualian pada `NVDA + F12` yang tetap dibacakan oleh NVDA utama sesuai keinginan pengguna.
