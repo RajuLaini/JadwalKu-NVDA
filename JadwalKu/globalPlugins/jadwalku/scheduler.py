@@ -240,10 +240,21 @@ class Scheduler:
 
 				start_hour = int(agenda.get("hour", -1))
 				interval_hour = int(agenda.get("interval_hour", 0))
+				interval_end_hour = int(agenda.get("interval_end_hour", 23))
 
 				if interval_hour > 0:
-					if now.hour < start_hour or (now.hour - start_hour) % interval_hour != 0:
-						continue
+					if start_hour <= interval_end_hour:
+						if now.hour < start_hour or now.hour > interval_end_hour or (now.hour - start_hour) % interval_hour != 0:
+							continue
+					else:  # Lintas malam / overnight (misal start_hour=20, interval_end_hour=04)
+						if now.hour >= start_hour:
+							if (now.hour - start_hour) % interval_hour != 0:
+								continue
+						elif now.hour <= interval_end_hour:
+							if ((now.hour + 24) - start_hour) % interval_hour != 0:
+								continue
+						else:
+							continue
 				else:
 					if start_hour != now.hour:
 						continue

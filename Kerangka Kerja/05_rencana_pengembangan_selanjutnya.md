@@ -23,3 +23,6 @@ Dokumen ini berisi daftar ide dan konsep fitur yang dapat kita kembangkan di ses
 
 ## 6. [SELESAI di v1.3.0] Timer Mundur Cepat & Alarm Sekali Pakai Presisi Detik
 - **Status**: Telah berhasil diterapkan di versi 1.3.0! Pengguna dapat menekan `NVDA + /` lalu `1` untuk memasang Quick Timer (satuan Detik, Menit, Jam), atau `2` untuk memasang Alarm Sekali Pakai (dengan presisi Jam, Menit, Detik, serta opsi suara & snooze lengkap).
+
+## 7. [SELESAI di v1.5.0] Waktu, Kalender, Tanggal Merah & Jam Dunia (*Time & Calendar Expansion*)
+- **Status**: Telah berhasil diterapkan di versi 1.5.0! Pengguna dapat mengakses pengaturan lengkap melalui Tab 2 di Dialog Utama (`Ctrl+Tab`), mengatur penggantian/override `NVDA + F12` (1x jam, 2x tanggal, 3x sisa akhir tahun), membuka Kalender & Tanggal Merah (`NVDA + /, K`), serta membuka Jam Dunia & Kalkulator Konversi Waktu (`NVDA + /, D`).

@@ -1,10 +1,11 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.2.0
+# Daftar Fitur Lengkap Add-on JadwalKu v1.4.3
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
 ## 1. Manajemen Agenda Rutin (Harian / Mingguan)
 - **Daftar Agenda Aktif**: Menampilkan semua jadwal dalam `ListBox` yang mudah dinavigasi menggunakan panah atas/bawah.
 - **Input Berbasis Combo Box**: Saat menambah atau mengedit jadwal, pengguna tidak perlu mengetik format waktu manual. Cukup pilih **Jam (00 - 23)**, **Menit (00 - 59)**, dan **Frekuensi (Setiap Hari / Hari tertentu)** melalui dropdown/combo box.
+- **Pengingat Berulang dengan Pembatas Jam Selesai (*Interval & End Hour*)**: Opsi 'Ulangi Setiap (Interval Jam Sekali)' untuk mengatur pengingat berkala dalam hari tersebut (misal setiap 1, 2, 3 jam sekali untuk minum atau istirahat kerja), dilengkapi kolom **Waktu Selesai Interval (Jam Selesai Perulangan)** sehingga pengingat berhenti otomatis setelah jam yang ditentukan baik di hari yang sama maupun lintas malam (*overnight shift*).
 - **Mode Pemberitahuan (Chime vs Alarm Weker)**: Memungkinkan agenda diputar sekali bunyi (*chime*) atau berdering terus-menerus tanpa henti (*Alarm Jam Weker*) dengan fitur Tunda/Snooze 10 menit (`Z` / `Alt+T`).
 - **Tombol Tes Suara (`Alt + T`)**: Di dalam formulir tambah/edit agenda (`AgendaDialog`), pengguna dapat menekan tombol `[ &Tes Suara ]` untuk langsung mendengarkan sampel suara dari opsi yang dipilih di Combo Box sebelum menyimpan.
 - **Status Check/Uncheck Cepat**: Pengguna dapat mengaktifkan atau menonaktifkan suatu agenda dengan cepat melalui tombol `[ Check / Uncheck Status ]` atau langsung menekan Spasi di daftar agenda.
@@ -19,14 +20,17 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
-  - **`L` / `Enter`**: Buka Dialog Layout Utama.
+  - **`L` / `Enter`**: Buka Dialog Layout Utama (Multi-Tab: Manajemen Agenda & Pengaturan Waktu/Kalender).
   - **`1`**: Buka Dialog Pasang Timer Mundur Cepat (Quick Timer) dengan satuan Detik, Menit (default), atau Jam. Dilengkapi input **Detik Persiapan Sebelum Mulai** yang menghitung mundur terlebih dahulu (dengan detak jam dan ucapan angka di 5 detik terakhir), memicu bunyi **Ding (`chime.wav`)** saat mencapai angka nol sebagai tanda dimulainya hitung mundur utama, serta memicu detak acak (*WaitingClock random ticking sounds*) pada 10 detik terakhir sebelum timer sesungguhnya habis dan membunyikan alarm.
   - **`2`**: Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm) dengan presisi Jam, Menit, dan Detik.
   - **`W` / `T`**: Bacakan informasi jam sekarang dan status pengingat waktu berkala (*Current Time & Status*).
+  - **`K`**: Buka Dialog **Kalender Bulanan & Daftar Tanggal Merah Indonesia**.
+  - **`D`**: Buka Dialog **Jam Dunia & Kalkulator Konversi Waktu Antar Negara**.
   - **`J`**: Bacakan jadwal agenda terdekat berikutnya beserta sisa waktu menuju agenda tersebut.
   - **`H`**: Bacakan seluruh daftar agenda aktif hari ini.
   - **`A`**: Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.
   - **`S`**: Buka **JadwalKu Audio Manager** (Pengaturan Speaker & Suara).
+  - **`V`**: Buka Dialog **Riwayat Pembaruan JadwalKu (Changelog Read-Only)**.
   - **`Spasi`**: Hentikan suara audio/chime/alarm yang sedang berbunyi.
   - **`B` / `F1`**: Buka **Dialog Panduan Bantuan Read-Only (`HelpDialog`)**.
   - **`Escape`**: Keluar dari mode JadwalKu.
@@ -47,4 +51,14 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 ## 7. Pemeriksa Pembaruan Otomatis dengan Unduh Langsung (*Direct Background Downloader*)
 - **Pemeriksaan Latar Belakang**: Secara otomatis mengecek file `version.json` dari repositori GitHub Private tanpa mengganggu performa NVDA.
 - **Pemasangan Langsung Tanpa Browser**: Jika pengguna menekan `Yes / Ya` saat ada pembaruan baru, add-on akan mengunduh file `.nvda-addon` di latar belakang (*background thread*) lalu memicu dialog resmi pemasangan add-on NVDA secara langsung (`os.startfile`).
+
+## 8. Pengaturan Waktu & Kalender Aksesibel (v1.5.0)
+- **Antarmuka Dialog Multi-Tab (`wx.Notebook`)**: Dialog Utama JadwalKu dibagi menjadi Tab 1 (`Manajemen Agenda & Jadwal`) dan Tab 2 (`Pengaturan Waktu & Kalender JadwalKu`) yang mudah dinavigasikan dengan `Ctrl+Tab` atau `Shift+Tab`.
+- **Penggantian Pelaporan Waktu NVDA (`NVDA + F12 Override`)**: Memungkinkan penggantian fungsi pelaporan standar `NVDA + F12` secara kustom dengan format jam (24 Jam / 12 Jam AM/PM) serta berbagai pilihan gaya pengucapan (misal: `09:00 waktu sekarang`, `Waktu sekarang pukul 09:00`, `Pukul 09:00 lewat 30 detik`, dsb.).
+- **Pelaporan Bertingkat `NVDA + F12`**:
+  - **Tekan 1x**: Membacakan jam dan menit sekarang sesuai format yang dipilih.
+  - **Tekan 2x**: Membacakan tanggal hari ini dengan gaya pengucapan yang dapat dipilih (misal: `Kamis, 16 Juli 2026` atau `Hari Kamis, tanggal 16 bulan Juli tahun 2026`).
+  - **Tekan 3x**: Membacakan ringkasan lengkap tanggal & waktu serta hitung mundur akurat menuju akhir tahun (sisa hari & jam menuju 1 Januari tahun berikutnya).
+- **Kalender Bulanan & Daftar Tanggal Merah (`NVDA + / lalu K`)**: Dialog khusus untuk memilih bulan dan tahun, melihat daftar hari dengan penandaan akhir pekan (Sabtu/Minggu) serta libur nasional Indonesia yang akurat.
+- **Jam Dunia & Kalkulator Konversi Waktu (`NVDA + / lalu D`)**: Menampilkan daftar jam waktu aktual di berbagai kota/negara dunia dan selisih waktunya dengan WIB, serta kalkulator konversi waktu interaktif untuk menghitung waktu antar negara.
 

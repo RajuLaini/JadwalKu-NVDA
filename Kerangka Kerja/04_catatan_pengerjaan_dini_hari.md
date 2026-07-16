@@ -73,4 +73,8 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
   2. **Anti-Macet setelah 2 Putaran**: Menghilangkan *race condition / error 4 (`MMSYSERR_ALLOCATED`)* yang sebelumnya terjadi karena *close-open handle* berulang di setiap putaran. Alarm kini mampu berulang ribuan kali dengan konsisten setiap 2 detik sekali.
 - **Keutuhan Struktur C (`WAVEFORMATEX` & `WAVEHDR`)**: Memastikan struktur API WinMM selalu terdefinisi di bagian atas `audioManager.py` untuk mencegah *NameError*.
 
+### 14. Fitur Pembatas Waktu Selesai Interval Perulangan & Lintas Malam (`v1.4.3`)
+- **Kolom Input Waktu Selesai Interval (`cb_interval_end`)**: Pada formulir tambah/edit jadwal (`AddEditScheduleDialog`), kini disediakan Combo Box untuk memilih Jam Selesai Perulangan (`Jam 00:00` sampai `Jam 23:00`).
+- **Dukungan Interval Lintas Malam (*Overnight Shift*)**: Mesin penjadwal (`scheduler.py` & `__init__.py`) secara pintar mendeteksi apakah perulangan berada dalam hari yang sama (`start_hour <= interval_end_hour`) atau melintasi tengah malam (`start_hour > interval_end_hour`, misal dari jam `20:00` sampai jam `04:00` pagi), sehingga pengingat berkala minum air atau jam kerja dapat beroperasi secara persis sesuai jam shift pengguna tanpa berdering saat shift sudah berakhir.
+
 

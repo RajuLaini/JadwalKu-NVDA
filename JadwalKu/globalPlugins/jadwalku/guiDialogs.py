@@ -66,7 +66,15 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.4.2 (Terbaru) ---\n"
+			"--- Versi 1.5.0 (Terbaru - Puncak Spektakuler Waktu, Kalender & Jam Dunia) ---\n"
+			"* Fitur Tab 2 Pengaturan Waktu & Kalender (Aksesibel via Shift+Tab dari daftar agenda & Panah Kanan atau Ctrl+Tab): Memungkinkan kostumisasi menyeluruh bagaimana NVDA melaporkan jam dan tanggal.\n"
+			"* Penggantian Pintar NVDA + F12: Tekan 1x untuk informasi jam sesuai format (24/12 Jam, pilihan gaya pengucapan, opsi detik). Tekan 2x untuk tanggal lengkap/ringkas. Tekan 3x untuk informasi lengkap beserta hitung mundur sisa hari & jam menuju akhir tahun!\n"
+			"* Fitur Kalender & Tanggal Merah (NVDA + / lalu K): Melihat kalender bulanan lengkap dengan deteksi otomatis hari libur nasional Indonesia, serta filter khusus untuk menampilkan seluruh daftar tanggal merah tahun ini.\n"
+			"* Fitur Jam Dunia & Konversi Waktu (NVDA + / lalu D): Menampilkan selisih waktu Indonesia (WIB/WITA/WIT) dengan berbagai negara di benua Asia, Eropa, Amerika, Australia, dan Afrika, dilengkapi Kalkulator Konversi Waktu instan (contoh: jika jam 20:00 di Jerman, berapa di Indonesia?).\n\n"
+			"--- Versi 1.4.3 ---\n"
+			"* Fitur Waktu Selesai Interval (Jam Selesai Perulangan): Pada form tambah/edit jadwal, kini tersedia input 'Waktu Selesai Interval (Jam Selesai Perulangan)' sehingga pengingat berulang (misal minum air atau jam kerja) dapat dibatasi secara otomatis agar berhenti berbunyi setelah jam selesai yang ditentukan.\n"
+			"* Dukungan Interval Lintas Malam (Overnight Interval): Sistem mendukung penuh perulangan interval di hari yang sama maupun lintas malam (misal dari jam 20:00 sampai 04:00 pagi).\n\n"
+			"--- Versi 1.4.2 ---\n"
 			"* Fitur Hitung Mundur Persiapan Quick Timer (NVDA + / lalu 1): Dilengkapi kolom input 'Detik Persiapan Sebelum Mulai' yang menghitung mundur terlebih dahulu, memainkan efek detak jam di 10 detik terakhir dan membacakan angka hitung mundur di 5 detik terakhir (5... 4... 3... 2... 1...).\n"
 			"* Pemicu Mulai Timer Utama (Ding Indicator): Ketika waktu persiapan mencapai titik nol, suara Ding (chime.wav) dipicu otomatis sebagai tanda hitung mundur sesungguhnya resmi dimulai.\n"
 			"* Revolusi Arsitektur Audio (Single-Open WinMM Relooping Engine): Perpindahan perangkat audio (speaker/headphone pilihan) 100% akurat tanpa macet di default, berulang tanpa batas setiap 2 detik dengan suara utuh tanpa potongan, serta dapat dimatikan seketika via tombol Spasi.\n"
@@ -421,7 +429,18 @@ class AgendaDialog(wx.Dialog):
 			self.cb_interval.SetSelection(0)
 		sizer.Add(self.cb_interval, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
-		# 6. Mode Pemberitahuan (Chime vs Alarm Weker)
+		# 6. Waktu Selesai Interval (Jam Selesai Perulangan)
+		sizer.Add(wx.StaticText(self, label="&Waktu Selesai Interval (Jam Selesai Perulangan):"), 0, wx.ALL, 5)
+		end_hours = [f"{i:02d} (Jam {i:02d}:00)" for i in range(24)]
+		self.cb_interval_end = wx.ComboBox(self, choices=end_hours, style=wx.CB_READONLY)
+		cur_end = int(self.schedule_data.get("interval_end_hour", 23))
+		if 0 <= cur_end <= 23:
+			self.cb_interval_end.SetSelection(cur_end)
+		else:
+			self.cb_interval_end.SetSelection(23)
+		sizer.Add(self.cb_interval_end, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		# 7. Mode Pemberitahuan (Chime vs Alarm Weker)
 		sizer.Add(wx.StaticText(self, label="&Mode Pemberitahuan:"), 0, wx.ALL, 5)
 		alarm_modes = [
 			"Pemberitahuan Singkat (Sekali Bunyi / Chime)",
@@ -524,6 +543,8 @@ class AgendaDialog(wx.Dialog):
 		is_alarm_sel = (self.cb_alarm_mode.GetSelection() == 1)
 		interval_idx = self.cb_interval.GetSelection()
 		interval_val = self.interval_values[interval_idx] if 0 <= interval_idx < len(self.interval_values) else 0
+		end_idx = self.cb_interval_end.GetSelection()
+		interval_end_val = end_idx if 0 <= end_idx <= 23 else 23
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
@@ -533,6 +554,7 @@ class AgendaDialog(wx.Dialog):
 			"hour": int(self.cb_hour.GetValue()),
 			"minute": int(self.cb_minute.GetValue()),
 			"interval_hour": interval_val,
+			"interval_end_hour": interval_end_val,
 			"audio_file": audio_file,
 			"audio_enabled": audio_enabled,
 			"is_alarm": is_alarm_sel,
@@ -925,64 +947,158 @@ class TimeReminderDialog(wx.Dialog):
 
 class JadwalKuDialog(wx.Dialog):
 	def __init__(self, parent, config_manager, audio_manager, updater=None):
-		super().__init__(parent, title="JadwalKu - Manajemen Agenda & Pengingat", size=(650, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		super().__init__(parent, title="JadwalKu - Manajemen Agenda & Pengingat", size=(680, 520), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 		self.config = config_manager
 		self.audio = audio_manager
 		self.updater = updater
 		
-		sizer = wx.BoxSizer(wx.VERTICAL)
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
 		
-		# Judul & petunjuk
-		sizer.Add(wx.StaticText(self, label="Daftar Agenda JadwalKu (Tekan Spasi atau tombol Aktifkan untuk Check/Uncheck):"), 0, wx.ALL, 8)
+		self.notebook = wx.Notebook(self)
 		
-		# List box agenda
-		self.listBox = wx.ListBox(self, style=wx.LB_SINGLE)
+		# ==================== TAB 1: MANAJEMEN AGENDA & JADWAL ====================
+		self.panel_tab1 = wx.Panel(self.notebook)
+		sizer_tab1 = wx.BoxSizer(wx.VERTICAL)
+		
+		sizer_tab1.Add(wx.StaticText(self.panel_tab1, label="Daftar Agenda JadwalKu (Tekan Spasi untuk Check/Uncheck, Shift+Tab ke Tab):"), 0, wx.ALL, 8)
+		
+		self.listBox = wx.ListBox(self.panel_tab1, style=wx.LB_SINGLE)
 		self.listBox.Bind(wx.EVT_KEY_DOWN, self.onListKeyDown)
 		self.listBox.Bind(wx.EVT_LISTBOX_DCLICK, self.onEdit)
-		sizer.Add(self.listBox, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		sizer_tab1.Add(self.listBox, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
 		
-		# Tombol-tombol aksi
 		btnSizer1 = wx.BoxSizer(wx.HORIZONTAL)
-		self.btnAdd = wx.Button(self, label="&Tambah Jadwal Baru...")
+		self.btnAdd = wx.Button(self.panel_tab1, label="&Tambah Jadwal Baru...")
 		self.btnAdd.Bind(wx.EVT_BUTTON, self.onAdd)
 		btnSizer1.Add(self.btnAdd, 0, wx.ALL, 4)
 		
-		self.btnEdit = wx.Button(self, label="&Edit Jadwal...")
+		self.btnEdit = wx.Button(self.panel_tab1, label="&Edit Jadwal...")
 		self.btnEdit.Bind(wx.EVT_BUTTON, self.onEdit)
 		btnSizer1.Add(self.btnEdit, 0, wx.ALL, 4)
 		
-		self.btnDel = wx.Button(self, label="&Hapus Jadwal")
+		self.btnDel = wx.Button(self.panel_tab1, label="&Hapus Jadwal")
 		self.btnDel.Bind(wx.EVT_BUTTON, self.onDelete)
 		btnSizer1.Add(self.btnDel, 0, wx.ALL, 4)
 		
-		self.btnToggle = wx.Button(self, label="&Check / Uncheck Status")
+		self.btnToggle = wx.Button(self.panel_tab1, label="&Check / Uncheck Status")
 		self.btnToggle.Bind(wx.EVT_BUTTON, self.onToggleActive)
 		btnSizer1.Add(self.btnToggle, 0, wx.ALL, 4)
-		sizer.Add(btnSizer1, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 4)
+		sizer_tab1.Add(btnSizer1, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 4)
 		
 		btnSizer2 = wx.BoxSizer(wx.HORIZONTAL)
-		self.btnTimeRemind = wx.Button(self, label="&Pengaturan Pengingat Waktu Berkala...")
+		self.btnTimeRemind = wx.Button(self.panel_tab1, label="&Pengaturan Pengingat Waktu Berkala...")
 		self.btnTimeRemind.Bind(wx.EVT_BUTTON, self.onTimeReminder)
 		btnSizer2.Add(self.btnTimeRemind, 0, wx.ALL, 4)
 		
-		self.btnAudio = wx.Button(self, label="Pengaturan &Audio Manager (Speaker)...")
+		self.btnAudio = wx.Button(self.panel_tab1, label="Pengaturan &Audio Manager (Speaker)...")
 		self.btnAudio.Bind(wx.EVT_BUTTON, self.onAudioManager)
 		btnSizer2.Add(self.btnAudio, 0, wx.ALL, 4)
 		
-		self.btnHelp = wx.Button(self, label="&Bantuan...")
+		self.btnHelp = wx.Button(self.panel_tab1, label="&Bantuan...")
 		self.btnHelp.Bind(wx.EVT_BUTTON, self.onHelp)
 		btnSizer2.Add(self.btnHelp, 0, wx.ALL, 4)
 		
 		if self.updater:
-			self.btnCheckUp = wx.Button(self, label="&Cek Pembaruan...")
+			self.btnCheckUp = wx.Button(self.panel_tab1, label="&Cek Pembaruan...")
 			self.btnCheckUp.Bind(wx.EVT_BUTTON, self.onCheckUpdate)
 			btnSizer2.Add(self.btnCheckUp, 0, wx.ALL, 4)
 		
-		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
-		btnSizer2.Add(self.btnClose, 0, wx.ALL, 4)
-		sizer.Add(btnSizer2, 0, wx.ALIGN_RIGHT | wx.ALL, 8)
+		sizer_tab1.Add(btnSizer2, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		self.panel_tab1.SetSizer(sizer_tab1)
 		
-		self.SetSizer(sizer)
+		# ==================== TAB 2: PENGATURAN WAKTU & KALENDER JADWALKU ====================
+		self.panel_tab2 = wx.Panel(self.notebook)
+		sizer_tab2 = wx.BoxSizer(wx.VERTICAL)
+		
+		time_cfg = self.config.get_time_settings()
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="=== 1. Pengaturan Pelaporan Waktu (Tekan NVDA+F12 1x / NVDA+/, W) ==="), 0, wx.ALL, 6)
+		
+		self.chk_override_f12 = wx.CheckBox(self.panel_tab2, label="&Aktifkan Penggantian Pelaporan Waktu & Tanggal NVDA (NVDA + F12)")
+		self.chk_override_f12.SetValue(time_cfg.get("override_nvda_f12", True))
+		sizer_tab2.Add(self.chk_override_f12, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		fmt_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		fmt_sizer.Add(wx.StaticText(self.panel_tab2, label="&Format Jam:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		fmt_choices = ["24 Jam (00:00 - 23:59)", "12 Jam (01:00 AM - 12:59 PM)"]
+		self.cb_time_format = wx.ComboBox(self.panel_tab2, choices=fmt_choices, style=wx.CB_READONLY)
+		if time_cfg.get("time_format", "24") == "12":
+			self.cb_time_format.SetSelection(1)
+		else:
+			self.cb_time_format.SetSelection(0)
+		fmt_sizer.Add(self.cb_time_format, 0, wx.ALL, 4)
+		sizer_tab2.Add(fmt_sizer, 0, wx.LEFT | wx.RIGHT, 6)
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="&Gaya Pengucapan Waktu (Tekan NVDA+F12 1x atau NVDA+/, W):"), 0, wx.LEFT | wx.TOP, 6)
+		time_style_choices = [
+			"[Jam]:[Menit] waktu sekarang (Contoh: 09:15 waktu sekarang)",
+			"Hanya [Jam]:[Menit] (Contoh: 09:15 atau 09:15 AM)",
+			"Waktu sekarang pukul [Jam]:[Menit] (Contoh: Waktu sekarang pukul 09:15)",
+			"Pukul [Jam]:[Menit] lewat [Detik] detik (Contoh: Pukul 09:15 lewat 30 detik)",
+			"Waktu sekarang pukul [Jam]:[Menit]:[Detik] (Contoh: Waktu sekarang pukul 09:15:30)"
+		]
+		self.cb_time_speech_style = wx.ComboBox(self.panel_tab2, choices=time_style_choices, style=wx.CB_READONLY)
+		style_map = {"default": 0, "only_time": 1, "prefix_pukul": 2, "with_seconds": 3, "full_seconds": 4}
+		self.cb_time_speech_style.SetSelection(style_map.get(time_cfg.get("time_speech_style", "default"), 0))
+		sizer_tab2.Add(self.cb_time_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		self.chk_time_seconds = wx.CheckBox(self.panel_tab2, label="Sertakan bacaan &Detik pada pelaporan waktu standar")
+		self.chk_time_seconds.SetValue(time_cfg.get("include_seconds", False))
+		sizer_tab2.Add(self.chk_time_seconds, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="=== 2. Pengaturan Pelaporan Tanggal & Kalender (Tekan NVDA+F12 2x & 3x) ==="), 0, wx.LEFT | wx.TOP, 6)
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="&Gaya Pengucapan Tanggal (Tekan NVDA+F12 2x):"), 0, wx.LEFT | wx.TOP, 6)
+		date_style_choices = [
+			"[Hari], [Tanggal] [Bulan] [Tahun] (Contoh: Kamis, 16 Juli 2026)",
+			"Hari [Hari], tanggal [Tanggal] bulan [Bulan] tahun [Tahun]",
+			"[Tanggal]/[Bulan Angka]/[Tahun] (Contoh: 16/07/2026)",
+			"Tanggal [Tanggal] [Bulan] [Tahun] hari [Hari]"
+		]
+		self.cb_date_speech_style = wx.ComboBox(self.panel_tab2, choices=date_style_choices, style=wx.CB_READONLY)
+		date_style_map = {"default": 0, "prefix_hari": 1, "numeric": 2, "suffix_hari": 3}
+		self.cb_date_speech_style.SetSelection(date_style_map.get(time_cfg.get("date_speech_style", "default"), 0))
+		sizer_tab2.Add(self.cb_date_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="&Gaya Pengucapan Lengkap & Akhir Tahun (Tekan NVDA+F12 3x):"), 0, wx.LEFT | wx.TOP, 6)
+		full_style_choices = [
+			"Lengkap dengan sisa hari & jam menuju akhir tahun (Contoh: Kamis, 16 Juli 2026, pukul 09:15. Sisa waktu menuju akhir tahun: 168 hari 14 jam lagi)",
+			"Ringkas: Tanggal, waktu, dan sisa hari akhir tahun (Contoh: 16 Juli 2026 09:15. Akhir tahun kurang 168 hari)"
+		]
+		self.cb_full_speech_style = wx.ComboBox(self.panel_tab2, choices=full_style_choices, style=wx.CB_READONLY)
+		full_style_map = {"default": 0, "short": 1}
+		self.cb_full_speech_style.SetSelection(full_style_map.get(time_cfg.get("full_speech_style", "default"), 0))
+		sizer_tab2.Add(self.cb_full_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+		
+		sizer_tab2.Add(wx.StaticText(self.panel_tab2, label="=== 3. Fitur Kalender & Jam Dunia ==="), 0, wx.LEFT | wx.TOP, 6)
+		btnSizerTab2 = wx.BoxSizer(wx.HORIZONTAL)
+		
+		self.btnOpenCal = wx.Button(self.panel_tab2, label="&Lihat Kalender & Tanggal Merah (NVDA+/, K)...")
+		self.btnOpenCal.Bind(wx.EVT_BUTTON, self.onOpenCalendar)
+		btnSizerTab2.Add(self.btnOpenCal, 0, wx.ALL, 4)
+		
+		self.btnOpenWorld = wx.Button(self.panel_tab2, label="&Buka Jam Dunia & Konversi (NVDA+/, D)...")
+		self.btnOpenWorld.Bind(wx.EVT_BUTTON, self.onOpenWorldClock)
+		btnSizerTab2.Add(self.btnOpenWorld, 0, wx.ALL, 4)
+		
+		self.btnSaveTimeCfg = wx.Button(self.panel_tab2, label="&Simpan Pengaturan Waktu")
+		self.btnSaveTimeCfg.Bind(wx.EVT_BUTTON, self.onSaveTimeSettings)
+		btnSizerTab2.Add(self.btnSaveTimeCfg, 0, wx.ALL, 4)
+		
+		sizer_tab2.Add(btnSizerTab2, 0, wx.ALIGN_LEFT | wx.ALL, 6)
+		self.panel_tab2.SetSizer(sizer_tab2)
+		
+		self.notebook.AddPage(self.panel_tab1, "1. Manajemen Agenda & Jadwal")
+		self.notebook.AddPage(self.panel_tab2, "2. Pengaturan Waktu & Kalender JadwalKu")
+		
+		main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 6)
+		
+		bottom_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup Dialog")
+		bottom_btn_sizer.Add(self.btnClose, 0, wx.ALL, 6)
+		main_sizer.Add(bottom_btn_sizer, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		self.SetSizer(main_sizer)
 		self.Centre()
 		self.refreshList()
 		self.listBox.SetFocus()
@@ -993,7 +1109,11 @@ class JadwalKuDialog(wx.Dialog):
 		for item in self.schedules:
 			status_mark = "[V]" if item.get("active", False) else "[ ]"
 			int_h = int(item.get("interval_hour", 0))
-			repeat_str = f", Tiap {int_h} Jam" if int_h > 0 else ""
+			if int_h > 0:
+				end_h = int(item.get("interval_end_hour", 23))
+				repeat_str = f", Tiap {int_h} Jam s.d. Jam {end_h:02d}:00"
+			else:
+				repeat_str = ""
 			time_str = f"{int(item.get('hour', 0)):02d}:{int(item.get('minute', 0)):02d}{repeat_str}"
 			freq_str = item.get("frequency", "Setiap Hari")
 			name_str = item.get("name", "Tanpa Nama")
@@ -1009,6 +1129,8 @@ class JadwalKuDialog(wx.Dialog):
 	def onListKeyDown(self, event):
 		if event.GetKeyCode() == wx.WXK_SPACE:
 			self.onToggleActive(None)
+		elif event.GetKeyCode() == wx.WXK_TAB and event.ShiftDown():
+			self.notebook.SetFocus()
 		else:
 			event.Skip()
 
@@ -1119,5 +1241,441 @@ class JadwalKuDialog(wx.Dialog):
 			dlg.Destroy()
 		finally:
 			gui.mainFrame.postPopup()
+
+	def onOpenCalendar(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			dlg = CalendarDialog(self)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			gui.mainFrame.postPopup()
+
+	def onOpenWorldClock(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			dlg = WorldClockDialog(self)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			gui.mainFrame.postPopup()
+
+	def onSaveTimeSettings(self, event):
+		t_style_inv = {0: "default", 1: "only_time", 2: "prefix_pukul", 3: "with_seconds", 4: "full_seconds"}
+		d_style_inv = {0: "default", 1: "prefix_hari", 2: "numeric", 3: "suffix_hari"}
+		f_style_inv = {0: "default", 1: "short"}
+		
+		updated = {
+			"override_nvda_f12": self.chk_override_f12.GetValue(),
+			"time_format": "12" if self.cb_time_format.GetSelection() == 1 else "24",
+			"time_speech_style": t_style_inv.get(self.cb_time_speech_style.GetSelection(), "default"),
+			"include_seconds": self.chk_time_seconds.GetValue(),
+			"date_speech_style": d_style_inv.get(self.cb_date_speech_style.GetSelection(), "default"),
+			"full_speech_style": f_style_inv.get(self.cb_full_speech_style.GetSelection(), "default")
+		}
+		self.config.update_time_settings(updated)
+		ui.message("Pengaturan pelaporan waktu dan kalender JadwalKu berhasil disimpan!")
+
+
+def get_indonesian_holidays(year):
+	holidays = {
+		datetime.date(year, 1, 1): "Tahun Baru Masehi",
+		datetime.date(year, 5, 1): "Hari Buruh Internasional",
+		datetime.date(year, 6, 1): "Hari Lahir Pancasila",
+		datetime.date(year, 8, 17): f"Hari Kemerdekaan Republik Indonesia ke-{year - 1945}",
+		datetime.date(year, 12, 25): "Hari Raya Natal"
+	}
+	if year == 2026:
+		holidays.update({
+			datetime.date(2026, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2026, 2, 10): "Tahun Baru Imlek 2577 Kongzili",
+			datetime.date(2026, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1948",
+			datetime.date(2026, 3, 20): "Hari Raya Idul Fitri 1447 Hijriah (Hari Pertama)",
+			datetime.date(2026, 3, 21): "Hari Raya Idul Fitri 1447 Hijriah (Hari Kedua)",
+			datetime.date(2026, 4, 3): "Wafat Yesus Kristus",
+			datetime.date(2026, 5, 14): "Kenaikan Yesus Kristus",
+			datetime.date(2026, 5, 27): "Hari Raya Idul Adha 1447 Hijriah",
+			datetime.date(2026, 5, 31): "Hari Raya Waisak 2570 BE",
+			datetime.date(2026, 6, 16): "Tahun Baru Islam 1448 Hijriah",
+			datetime.date(2026, 8, 25): "Maulid Nabi Muhammad SAW"
+		})
+	elif year == 2025:
+		holidays.update({
+			datetime.date(2025, 1, 27): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2025, 1, 29): "Tahun Baru Imlek 2576 Kongzili",
+			datetime.date(2025, 3, 29): "Hari Suci Nyepi Tahun Baru Saka 1947",
+			datetime.date(2025, 3, 31): "Hari Raya Idul Fitri 1446 Hijriah (Hari Pertama)",
+			datetime.date(2025, 4, 1): "Hari Raya Idul Fitri 1446 Hijriah (Hari Kedua)",
+			datetime.date(2025, 4, 18): "Wafat Yesus Kristus",
+			datetime.date(2025, 5, 12): "Hari Raya Waisak 2569 BE",
+			datetime.date(2025, 5, 29): "Kenaikan Yesus Kristus",
+			datetime.date(2025, 6, 6): "Hari Raya Idul Adha 1446 Hijriah",
+			datetime.date(2025, 6, 27): "Tahun Baru Islam 1447 Hijriah",
+			datetime.date(2025, 9, 5): "Maulid Nabi Muhammad SAW"
+		})
+	elif year == 2024:
+		holidays.update({
+			datetime.date(2024, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2024, 2, 10): "Tahun Baru Imlek 2575 Kongzili",
+			datetime.date(2024, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1946",
+			datetime.date(2024, 3, 29): "Wafat Yesus Kristus",
+			datetime.date(2024, 4, 10): "Hari Raya Idul Fitri 1445 Hijriah (Hari Pertama)",
+			datetime.date(2024, 4, 11): "Hari Raya Idul Fitri 1445 Hijriah (Hari Kedua)",
+			datetime.date(2024, 5, 9): "Kenaikan Yesus Kristus",
+			datetime.date(2024, 5, 23): "Hari Raya Waisak 2568 BE",
+			datetime.date(2024, 6, 17): "Hari Raya Idul Adha 1445 Hijriah",
+			datetime.date(2024, 7, 7): "Tahun Baru Islam 1446 Hijriah",
+			datetime.date(2024, 9, 16): "Maulid Nabi Muhammad SAW"
+		})
+	return holidays
+
+
+class CalendarDialog(wx.Dialog):
+	def __init__(self, parent):
+		super().__init__(parent, title="Kalender & Daftar Tanggal Merah Indonesia", size=(620, 500), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		
+		self.now = datetime.datetime.now()
+		self.current_year = self.now.year
+		self.current_month = self.now.month
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		sizer.Add(wx.StaticText(self, label="=== Kalender Bulanan & Tanggal Merah JadwalKu ==="), 0, wx.ALL, 8)
+		
+		# Pemilihan Bulan & Tahun
+		filter_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		filter_sizer.Add(wx.StaticText(self, label="&Bulan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.months_list = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+		self.cb_month = wx.ComboBox(self, choices=self.months_list, style=wx.CB_READONLY)
+		self.cb_month.SetSelection(self.current_month - 1)
+		self.cb_month.Bind(wx.EVT_COMBOBOX, self.onMonthYearChanged)
+		filter_sizer.Add(self.cb_month, 0, wx.ALL, 4)
+		
+		filter_sizer.Add(wx.StaticText(self, label="&Tahun:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.years_list = [str(y) for y in range(2024, 2036)]
+		self.cb_year = wx.ComboBox(self, choices=self.years_list, style=wx.CB_READONLY)
+		if str(self.current_year) in self.years_list:
+			self.cb_year.SetSelection(self.years_list.index(str(self.current_year)))
+		else:
+			self.cb_year.SetSelection(2)
+		self.cb_year.Bind(wx.EVT_COMBOBOX, self.onMonthYearChanged)
+		filter_sizer.Add(self.cb_year, 0, wx.ALL, 4)
+		sizer.Add(filter_sizer, 0, wx.LEFT | wx.RIGHT, 8)
+		
+		# Daftar Hari
+		self.lbl_list = wx.StaticText(self, label="Daftar Hari dalam Bulan Terpilih (Gunakan Panah Atas/Bawah):")
+		sizer.Add(self.lbl_list, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		
+		self.listBox = wx.ListBox(self, style=wx.LB_SINGLE)
+		self.listBox.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemDClick)
+		sizer.Add(self.listBox, 1, wx.EXPAND | wx.ALL, 8)
+		
+		# Tombol-tombol Aksi & Filter Tanggal Merah
+		btnSizer1 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnShowHolidays = wx.Button(self, label="&Tampilkan Seluruh Tanggal Merah Tahun Ini")
+		self.btnShowHolidays.Bind(wx.EVT_BUTTON, self.onShowAllHolidays)
+		btnSizer1.Add(self.btnShowHolidays, 0, wx.ALL, 4)
+		
+		self.btnMonthView = wx.Button(self, label="&Kembali ke Kalender Bulanan")
+		self.btnMonthView.Bind(wx.EVT_BUTTON, self.onMonthView)
+		btnSizer1.Add(self.btnMonthView, 0, wx.ALL, 4)
+		
+		self.btnCountdown = wx.Button(self, label="&Cek Akhir Tahun")
+		self.btnCountdown.Bind(wx.EVT_BUTTON, self.onCheckYearEnd)
+		btnSizer1.Add(self.btnCountdown, 0, wx.ALL, 4)
+		sizer.Add(btnSizer1, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT, 4)
+		
+		btnSizer2 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		btnSizer2.Add(self.btnClose, 0, wx.ALL, 6)
+		sizer.Add(btnSizer2, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.refreshMonthCalendar()
+		self.listBox.SetFocus()
+
+	def onMonthYearChanged(self, event):
+		self.refreshMonthCalendar()
+
+	def refreshMonthCalendar(self):
+		self.listBox.Clear()
+		year = int(self.cb_year.GetStringSelection())
+		month = self.cb_month.GetSelection() + 1
+		holidays = get_indonesian_holidays(year)
+		
+		# Hitung hari dalam bulan
+		if month == 12:
+			next_m = datetime.date(year + 1, 1, 1)
+		else:
+			next_m = datetime.date(year, month + 1, 1)
+		days_in_month = (next_m - datetime.date(year, month, 1)).days
+		
+		day_names = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+		month_name = self.months_list[month - 1]
+		self.lbl_list.SetLabel(f"Daftar Hari di Bulan {month_name} {year}:")
+		
+		today = datetime.date.today()
+		select_idx = 0
+		for d in range(1, days_in_month + 1):
+			curr_date = datetime.date(year, month, d)
+			d_name = day_names[curr_date.weekday()]
+			is_today = " (HARI INI)" if curr_date == today else ""
+			
+			if curr_date in holidays:
+				status = f"[TANGGAL MERAH / LIBUR] {holidays[curr_date]}"
+			elif curr_date.weekday() == 6:
+				status = "(Akhir Pekan - Hari Minggu)"
+			elif curr_date.weekday() == 5:
+				status = "(Akhir Pekan - Hari Sabtu)"
+			else:
+				status = "(Hari Kerja Normal)"
+			
+			self.listBox.Append(f"{d_name}, {d} {month_name} {year}{is_today} - {status}")
+			if curr_date == today:
+				select_idx = d - 1
+		
+		if self.listBox.GetCount() > 0:
+			self.listBox.SetSelection(min(select_idx, self.listBox.GetCount() - 1))
+
+	def onShowAllHolidays(self, event):
+		self.listBox.Clear()
+		year = int(self.cb_year.GetStringSelection())
+		holidays = get_indonesian_holidays(year)
+		day_names = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+		self.lbl_list.SetLabel(f"Seluruh Daftar Tanggal Merah & Libur Nasional Tahun {year}:")
+		
+		sorted_dates = sorted(holidays.keys())
+		for dt in sorted_dates:
+			d_name = day_names[dt.weekday()]
+			m_name = self.months_list[dt.month - 1]
+			self.listBox.Append(f"{dt.day} {m_name} {year} ({d_name}) - [TANGGAL MERAH] {holidays[dt]}")
+		
+		if self.listBox.GetCount() > 0:
+			self.listBox.SetSelection(0)
+		ui.message(f"Menampilkan {len(sorted_dates)} tanggal merah di tahun {year}.")
+		self.listBox.SetFocus()
+
+	def onMonthView(self, event):
+		self.refreshMonthCalendar()
+		ui.message("Kembali menampilkan kalender bulanan.")
+		self.listBox.SetFocus()
+
+	def onCheckYearEnd(self, event):
+		now = datetime.datetime.now()
+		end_y = datetime.datetime(now.year + 1, 1, 1, 0, 0, 0)
+		diff = end_y - now
+		days = diff.days
+		hours = diff.seconds // 3600
+		ui.message(f"Sisa waktu menuju akhir tahun {now.year}: {days} hari dan {hours} jam lagi.")
+
+	def onItemDClick(self, event):
+		sel = self.listBox.GetStringSelection()
+		if sel:
+			ui.message(sel)
+
+
+WORLD_CLOCKS_DATA = [
+	{"country": "Indonesia Barat (WIB - Jakarta / Surabaya)", "region": "Asia & Timur Tengah", "offset": 0},
+	{"country": "Indonesia Tengah (WITA - Bali / Makassar)", "region": "Asia & Timur Tengah", "offset": 1},
+	{"country": "Indonesia Timur (WIT - Papua / Maluku)", "region": "Asia & Timur Tengah", "offset": 2},
+	{"country": "Arab Saudi (Makkah / Madinah)", "region": "Asia & Timur Tengah", "offset": -4},
+	{"country": "Jepang (Tokyo / Osaka)", "region": "Asia & Timur Tengah", "offset": 2},
+	{"country": "Korea Selatan (Seoul)", "region": "Asia & Timur Tengah", "offset": 2},
+	{"country": "Singapura & Malaysia (Kuala Lumpur)", "region": "Asia & Timur Tengah", "offset": 1},
+	{"country": "Turki (Istanbul)", "region": "Asia & Timur Tengah", "offset": -4},
+	{"country": "Jerman (Berlin / Frankfurt)", "region": "Eropa", "offset": -5},
+	{"country": "Inggris (London)", "region": "Eropa", "offset": -6},
+	{"country": "Belanda (Amsterdam)", "region": "Eropa", "offset": -5},
+	{"country": "Prancis (Paris)", "region": "Eropa", "offset": -5},
+	{"country": "Rusia (Moskow)", "region": "Eropa", "offset": -4},
+	{"country": "Amerika Serikat (New York / Washington DC)", "region": "Amerika Utara & Selatan", "offset": -11},
+	{"country": "Amerika Serikat (Los Angeles / San Francisco)", "region": "Amerika Utara & Selatan", "offset": -14},
+	{"country": "Kanada (Toronto)", "region": "Amerika Utara & Selatan", "offset": -11},
+	{"country": "Brasil (Sao Paulo)", "region": "Amerika Utara & Selatan", "offset": -10},
+	{"country": "Australia (Sydney / Melbourne)", "region": "Australia & Pasifik", "offset": 3},
+	{"country": "Australia (Perth)", "region": "Australia & Pasifik", "offset": 1},
+	{"country": "Selandia Baru (Auckland)", "region": "Australia & Pasifik", "offset": 5},
+	{"country": "Mesir (Kairo)", "region": "Afrika", "offset": -4},
+	{"country": "Afrika Selatan (Cape Town)", "region": "Afrika", "offset": -5}
+]
+
+
+class WorldClockDialog(wx.Dialog):
+	def __init__(self, parent):
+		super().__init__(parent, title="Jam Dunia & Kalkulator Perbedaan Waktu JadwalKu", size=(680, 560), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		
+		self.notebook = wx.Notebook(self)
+		
+		# Tab 1: Daftar Jam Dunia
+		self.panel_clocks = wx.Panel(self.notebook)
+		sizer_c = wx.BoxSizer(wx.VERTICAL)
+		
+		filter_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		filter_sizer.Add(wx.StaticText(self.panel_clocks, label="&Filter Benua / Wilayah:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.regions = ["Semua Negara & Kota", "Asia & Timur Tengah", "Eropa", "Amerika Utara & Selatan", "Australia & Pasifik", "Afrika"]
+		self.cb_region = wx.ComboBox(self.panel_clocks, choices=self.regions, style=wx.CB_READONLY)
+		self.cb_region.SetSelection(0)
+		self.cb_region.Bind(wx.EVT_COMBOBOX, self.onFilterChanged)
+		filter_sizer.Add(self.cb_region, 0, wx.ALL, 4)
+		sizer_c.Add(filter_sizer, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		
+		sizer_c.Add(wx.StaticText(self.panel_clocks, label="Daftar Jam Dunia Langsung (Dibandingkan waktu Indonesia WIB saat ini):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		self.listBox_clocks = wx.ListBox(self.panel_clocks, style=wx.LB_SINGLE)
+		self.listBox_clocks.Bind(wx.EVT_LISTBOX_DCLICK, self.onClockDClick)
+		sizer_c.Add(self.listBox_clocks, 1, wx.EXPAND | wx.ALL, 8)
+		
+		btnSpeak = wx.Button(self.panel_clocks, label="&Bacakan Jam Terpilih")
+		btnSpeak.Bind(wx.EVT_BUTTON, self.onSpeakClock)
+		sizer_c.Add(btnSpeak, 0, wx.LEFT | wx.BOTTOM, 8)
+		self.panel_clocks.SetSizer(sizer_c)
+		
+		# Tab 2: Kalkulator Konversi Waktu
+		self.panel_conv = wx.Panel(self.notebook)
+		sizer_v = wx.BoxSizer(wx.VERTICAL)
+		sizer_v.Add(wx.StaticText(self.panel_conv, label="=== Kalkulator Konversi Waktu Antar Negara ==="), 0, wx.ALL, 8)
+		
+		# Negara Asal
+		sizer_v.Add(wx.StaticText(self.panel_conv, label="1. Pilih Negara/Kota &Asal:"), 0, wx.LEFT | wx.TOP, 8)
+		country_names = [item["country"] for item in WORLD_CLOCKS_DATA]
+		self.cb_src_country = wx.ComboBox(self.panel_conv, choices=country_names, style=wx.CB_READONLY)
+		# Default Jerman jika ada
+		jerman_idx = next((i for i, c in enumerate(country_names) if "Jerman" in c), 0)
+		self.cb_src_country.SetSelection(jerman_idx)
+		self.cb_src_country.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
+		sizer_v.Add(self.cb_src_country, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		# Jam & Menit Asal
+		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		time_sizer.Add(wx.StaticText(self.panel_conv, label="&Jam di Negara Asal (00-23):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.cb_src_hour = wx.ComboBox(self.panel_conv, choices=[f"{h:02d}" for h in range(24)], style=wx.CB_READONLY)
+		self.cb_src_hour.SetSelection(20) # Default Jam 20:00 seperti contoh user
+		self.cb_src_hour.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
+		time_sizer.Add(self.cb_src_hour, 0, wx.ALL, 4)
+		
+		time_sizer.Add(wx.StaticText(self.panel_conv, label="&Menit:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
+		self.cb_src_min = wx.ComboBox(self.panel_conv, choices=[f"{m:02d}" for m in range(60)], style=wx.CB_READONLY)
+		self.cb_src_min.SetSelection(0)
+		self.cb_src_min.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
+		time_sizer.Add(self.cb_src_min, 0, wx.ALL, 4)
+		sizer_v.Add(time_sizer, 0, wx.LEFT | wx.RIGHT, 8)
+		
+		# Negara Tujuan
+		sizer_v.Add(wx.StaticText(self.panel_conv, label="2. Pilih Negara/Kota &Tujuan Konversi:"), 0, wx.LEFT | wx.TOP, 8)
+		self.cb_tgt_country = wx.ComboBox(self.panel_conv, choices=country_names, style=wx.CB_READONLY)
+		# Default Indonesia WIB
+		wib_idx = next((i for i, c in enumerate(country_names) if "WIB" in c), 0)
+		self.cb_tgt_country.SetSelection(wib_idx)
+		self.cb_tgt_country.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
+		sizer_v.Add(self.cb_tgt_country, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
+		# Tombol Hitung & Hasil
+		self.btnCalc = wx.Button(self.panel_conv, label="&Hitung & Bacakan Hasil Konversi (Enter)")
+		self.btnCalc.Bind(wx.EVT_BUTTON, self.onCalculateConversion)
+		sizer_v.Add(self.btnCalc, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+		
+		self.txt_result = wx.TextCtrl(self.panel_conv, style=wx.TE_MULTILINE | wx.TE_READONLY)
+		sizer_v.Add(self.txt_result, 1, wx.EXPAND | wx.ALL, 8)
+		self.panel_conv.SetSizer(sizer_v)
+		
+		self.notebook.AddPage(self.panel_clocks, "1. Jam Dunia & Selisih Waktu")
+		self.notebook.AddPage(self.panel_conv, "2. Kalkulator Konversi Waktu Antar Negara")
+		
+		main_sizer = wx.BoxSizer(wx.VERTICAL)
+		main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 6)
+		
+		bottom_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup Dialog")
+		bottom_btn_sizer.Add(self.btnClose, 0, wx.ALL, 6)
+		main_sizer.Add(bottom_btn_sizer, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
+		
+		self.SetSizer(main_sizer)
+		self.Centre()
+		self.refreshClocksList()
+		self.onCalculateConversion(None, speak=False)
+		self.listBox_clocks.SetFocus()
+
+	def onFilterChanged(self, event):
+		self.refreshClocksList()
+
+	def refreshClocksList(self):
+		self.listBox_clocks.Clear()
+		sel_region = self.cb_region.GetStringSelection()
+		now = datetime.datetime.now()
+		
+		for item in WORLD_CLOCKS_DATA:
+			if sel_region != "Semua Negara & Kota" and item["region"] != sel_region:
+				continue
+			offset = item["offset"]
+			# Hitung waktu target
+			tgt_time = now + datetime.timedelta(hours=offset)
+			
+			if offset > 0:
+				selisih_str = f"+{offset} jam dari WIB"
+			elif offset < 0:
+				selisih_str = f"{offset} jam dari WIB"
+			else:
+				selisih_str = "Sama dengan WIB (0 jam)"
+			
+			day_str = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"][tgt_time.weekday()]
+			time_str = tgt_time.strftime("%H:%M")
+			date_str = f"{tgt_time.day}/{tgt_time.month}"
+			
+			self.listBox_clocks.Append(f"{item['country']} | Pukul {time_str} ({day_str}, {date_str}) | Selisih: {selisih_str}")
+		
+		if self.listBox_clocks.GetCount() > 0:
+			self.listBox_clocks.SetSelection(0)
+
+	def onClockDClick(self, event):
+		self.onSpeakClock(None)
+
+	def onSpeakClock(self, event):
+		sel = self.listBox_clocks.GetStringSelection()
+		if sel:
+			ui.message(sel)
+
+	def onCalculateConversion(self, event, speak=True):
+		src_idx = self.cb_src_country.GetSelection()
+		tgt_idx = self.cb_tgt_country.GetSelection()
+		if src_idx < 0 or tgt_idx < 0:
+			return
+		
+		src_data = next((c for c in WORLD_CLOCKS_DATA if c["country"] == self.cb_src_country.GetStringSelection()), WORLD_CLOCKS_DATA[0])
+		tgt_data = next((c for c in WORLD_CLOCKS_DATA if c["country"] == self.cb_tgt_country.GetStringSelection()), WORLD_CLOCKS_DATA[0])
+		
+		src_h = int(self.cb_src_hour.GetStringSelection())
+		src_m = int(self.cb_src_min.GetStringSelection())
+		
+		diff_hours = tgt_data["offset"] - src_data["offset"]
+		tgt_h_raw = src_h + diff_hours
+		tgt_h = tgt_h_raw % 24
+		day_shift = tgt_h_raw // 24
+		
+		if day_shift == 0:
+			day_desc = "di Hari yang Sama"
+		elif day_shift > 0:
+			day_desc = f"Keesokan Harinya (+{day_shift} Hari)"
+		else:
+			day_desc = f"Hari Sebelumnya ({day_shift} Hari)"
+		
+		if diff_hours > 0:
+			diff_str = f"+{diff_hours} jam"
+		elif diff_hours < 0:
+			diff_str = f"{diff_hours} jam"
+		else:
+			diff_str = "waktu yang sama"
+		
+		result_text = (
+			f"=== HASIL KONVERSI WAKTU JADWALKU ===\n\n"
+			f"Jika di {src_data['country']}:\n"
+			f"Pukul {src_h:02d}:{src_m:02d}\n\n"
+			f"Maka di {tgt_data['country']} adalah:\n"
+			f"Pukul {tgt_h:02d}:{src_m:02d} ({day_desc})\n\n"
+			f"Catatan: Selisih waktu adalah {diff_str}."
+		)
+		self.txt_result.SetValue(result_text)
+		if speak and event is not None:
+			speak_msg = f"Jika di {src_data['country']} pukul {src_h:02d}:{src_m:02d}, maka di {tgt_data['country']} adalah pukul {tgt_h:02d}:{src_m:02d} ({day_desc}, selisih {diff_str})."
+			ui.message(speak_msg)
+
 
 

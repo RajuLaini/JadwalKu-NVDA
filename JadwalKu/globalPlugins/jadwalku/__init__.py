@@ -10,7 +10,7 @@ import scriptHandler
 from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog
 from .updateChecker import UpdateChecker
 
 _plugin_instance = None
@@ -62,6 +62,10 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	scriptCategory = "JadwalKu"
+	__gestures = {
+		"kb:NVDA+/": "activateCommandLayer",
+		"kb:NVDA+F12": "reportTimeDate"
+	}
 
 	def __init__(self):
 		super().__init__()
@@ -86,6 +90,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:2": "openOneTimeAlarm",
 			"kb:w": "announceTime",
 			"kb:t": "announceTime",
+			"kb:k": "openCalendar",
+			"kb:d": "openWorldClock",
 			"kb:j": "nextAgenda",
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
@@ -255,6 +261,32 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
 
+	def show_calendar_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = CalendarDialog(gui.mainFrame)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+	def show_world_clock_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			dlg = WorldClockDialog(gui.mainFrame)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
 
 	def getScript(self, gesture):
 		if self.switch:
@@ -286,14 +318,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm Sekali Pakai, W Waktu, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 untuk Quick Timer, 2 untuk Alarm Sekali Pakai, V untuk Riwayat Pembaruan, W info waktu, atau B untuk bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, V Riwayat, atau B Bantuan.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
@@ -305,15 +337,116 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_openOneTimeAlarm(self, gesture):
 		wx.CallAfter(self.show_one_time_alarm_dialog)
 
+	def script_openCalendar(self, gesture):
+		wx.CallAfter(self.show_calendar_dialog)
+
+	def script_openWorldClock(self, gesture):
+		wx.CallAfter(self.show_world_clock_dialog)
+
 	def script_openAudioManager(self, gesture):
 		wx.CallAfter(self.show_audio_manager_dialog)
 
+	def format_time_str(self, now, time_settings):
+		is_24 = time_settings.get("time_format", "24") == "24"
+		style = time_settings.get("time_speech_style", "default")
+		inc_sec = time_settings.get("include_seconds", False) or style == "full_seconds" or style == "with_seconds"
+		
+		if is_24:
+			h_str = f"{now.hour:02d}"
+			ampm = ""
+		else:
+			h_12 = now.hour % 12
+			if h_12 == 0:
+				h_12 = 12
+			ampm = " AM" if now.hour < 12 else " PM"
+			h_str = f"{h_12:02d}"
+		
+		m_str = f"{now.minute:02d}"
+		s_str = f"{now.second:02d}"
+		
+		if style == "only_time":
+			return f"{h_str}:{m_str}:{s_str}{ampm}" if inc_sec else f"{h_str}:{m_str}{ampm}"
+		elif style == "prefix_pukul":
+			return f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}" if inc_sec else f"Waktu sekarang pukul {h_str}:{m_str}{ampm}"
+		elif style == "with_seconds":
+			return f"Pukul {h_str}:{m_str}{ampm} lewat {now.second} detik"
+		elif style == "full_seconds":
+			return f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}"
+		else:
+			# default
+			return f"{h_str}:{m_str}:{s_str}{ampm} waktu sekarang" if inc_sec else f"{h_str}:{m_str}{ampm} waktu sekarang"
+
+	def format_date_str(self, now, time_settings):
+		day_names = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+		month_names = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+		d_name = day_names[now.weekday()]
+		m_name = month_names[now.month]
+		
+		style = time_settings.get("date_speech_style", "default")
+		if style == "prefix_hari":
+			return f"Hari {d_name}, tanggal {now.day} bulan {m_name} tahun {now.year}"
+		elif style == "numeric":
+			return f"{now.day:02d}/{now.month:02d}/{now.year}"
+		elif style == "suffix_hari":
+			return f"Tanggal {now.day} {m_name} {now.year} hari {d_name}"
+		else:
+			# default
+			return f"{d_name}, {now.day} {m_name} {now.year}"
+
+	def format_full_year_countdown(self, now, time_settings):
+		end_y = datetime.datetime(now.year + 1, 1, 1, 0, 0, 0)
+		diff = end_y - now
+		days_left = diff.days
+		hours_left = diff.seconds // 3600
+		
+		date_s = self.format_date_str(now, time_settings)
+		time_s = self.format_time_str(now, time_settings)
+		
+		style = time_settings.get("full_speech_style", "default")
+		if style == "short":
+			month_names = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+			return f"{now.day} {month_names[now.month]} {now.year} {now.strftime('%H:%M')}. Akhir tahun kurang {days_left} hari {hours_left} jam."
+		else:
+			return f"{date_s}, {time_s}. Sisa waktu menuju akhir tahun {now.year}: {days_left} hari {hours_left} jam lagi."
+
+	@scriptHandler.script(
+		description="Membacakan waktu (1x), tanggal (2x), atau informasi lengkap akhir tahun (3x)",
+		gesture="kb:NVDA+F12"
+	)
+	def script_reportTimeDate(self, gesture):
+		time_settings = self.config.get_time_settings()
+		if not time_settings.get("override_nvda_f12", True):
+			try:
+				import globalCommands
+				if hasattr(globalCommands, 'commands') and hasattr(globalCommands.commands, 'script_dateTime'):
+					globalCommands.commands.script_dateTime(gesture)
+					return
+			except Exception:
+				pass
+			if hasattr(gesture, 'send'):
+				gesture.send()
+			return
+		
+		repeat_count = scriptHandler.getLastScriptRepeatCount()
+		now = datetime.datetime.now()
+		if repeat_count == 0:
+			msg = self.format_time_str(now, time_settings)
+		elif repeat_count == 1:
+			msg = self.format_date_str(now, time_settings)
+		else:
+			msg = self.format_full_year_countdown(now, time_settings)
+		
+		ui.message(msg)
+
 	def script_announceTime(self, gesture):
 		now = datetime.datetime.now()
+		time_settings = self.config.get_time_settings()
+		time_str = self.format_time_str(now, time_settings)
+		
 		cfg = self.config.get_time_reminder_config()
 		status = "aktif" if cfg.get("enabled", False) else "nonaktif"
 		interval = cfg.get("interval", 60)
-		msg = f"Sekarang jam {now.strftime('%H:%M')}. Pengingat waktu berkala saat ini {status} (tiap {interval} menit)."
+		msg = f"{time_str}. Pengingat waktu berkala saat ini {status} (tiap {interval} menit)."
 		ui.message(msg)
 
 	def script_nextAgenda(self, gesture):
@@ -332,12 +465,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			m = int(item.get("minute", 0))
 			int_h = int(item.get("interval_hour", 0))
 			if int_h > 0:
+				end_h = int(item.get("interval_end_hour", 23))
 				curr_h = h
-				while curr_h <= 23:
-					item_time = now.replace(hour=curr_h, minute=m, second=0, microsecond=0)
-					if item_time > now:
-						upcoming.append((item_time, item))
-					curr_h += int_h
+				if h <= end_h:
+					while curr_h <= end_h:
+						item_time = now.replace(hour=curr_h, minute=m, second=0, microsecond=0)
+						if item_time > now:
+							upcoming.append((item_time, item))
+						curr_h += int_h
+				else:  # Lintas malam
+					while curr_h <= 23:
+						item_time = now.replace(hour=curr_h, minute=m, second=0, microsecond=0)
+						if item_time > now:
+							upcoming.append((item_time, item))
+						curr_h += int_h
+					curr_h = (h + int_h * ((24 - h + int_h - 1) // int_h)) % 24
+					while curr_h <= end_h:
+						item_time = now.replace(hour=curr_h, minute=m, second=0, microsecond=0)
+						if item_time > now:
+							upcoming.append((item_time, item))
+						curr_h += int_h
 			else:
 				item_time = now.replace(hour=h, minute=m, second=0, microsecond=0)
 				if item_time > now:
@@ -355,7 +502,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				time_left_str = f"{diff_mins} menit lagi"
 			
 			int_h = int(next_item.get("interval_hour", 0))
-			repeat_str = f" (Tiap {int_h} Jam Sekali)" if int_h > 0 else ""
+			if int_h > 0:
+				end_h = int(next_item.get("interval_end_hour", 23))
+				repeat_str = f" (Tiap {int_h} Jam Sekali s.d. Jam {end_h:02d}:00)"
+			else:
+				repeat_str = ""
 			ui.message(f"Jadwal terdekat berikutnya: {next_item.get('name')}{repeat_str} pada jam {next_time.hour:02d}:{next_time.minute:02d} ({time_left_str}).")
 		else:
 			ui.message("Seluruh jadwal agenda hari ini sudah lewat.")
@@ -373,7 +524,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			h = int(item.get("hour", 0))
 			m = int(item.get("minute", 0))
 			int_h = int(item.get("interval_hour", 0))
-			repeat_str = f" (Tiap {int_h} jam sekali)" if int_h > 0 else ""
+			if int_h > 0:
+				end_h = int(item.get("interval_end_hour", 23))
+				repeat_str = f" (Tiap {int_h} jam sekali s.d. Jam {end_h:02d}:00)"
+			else:
+				repeat_str = ""
 			msg_lines.append(f"Jam {h:02d}:{m:02d}{repeat_str} - {item.get('name')}")
 		
 		ui.message(". ".join(msg_lines))
@@ -408,7 +563,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			ui.message("Fitur pemeriksa pembaruan tidak aktif.")
 
 	def script_showChangelog(self, gesture):
-		ui.message("JadwalKu Versi 1.4.2. Membuka riwayat pembaruan (Changelog)...")
+		ui.message("JadwalKu Versi 1.5.0. Membuka riwayat pembaruan (Changelog)...")
 		wx.CallAfter(self.show_changelog_dialog)
 
 	def script_exitLayer(self, gesture):

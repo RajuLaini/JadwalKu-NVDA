@@ -50,7 +50,15 @@ DEFAULT_DATA = {
 			"active": False,
 			"last_triggered_date": ""
 		}
-	]
+	],
+	"time_settings": {
+		"override_nvda_f12": True,
+		"time_format": "24",
+		"time_speech_style": "default",
+		"include_seconds": False,
+		"date_speech_style": "default",
+		"full_speech_style": "default"
+	}
 }
 
 
@@ -78,6 +86,8 @@ class ConfigManager:
 					self.data["audio_device"] = DEFAULT_DATA["audio_device"]
 				if "audio_volume" not in self.data:
 					self.data["audio_volume"] = DEFAULT_DATA["audio_volume"]
+				if "time_settings" not in self.data:
+					self.data["time_settings"] = DEFAULT_DATA["time_settings"].copy()
 				self.save_data()
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
@@ -161,5 +171,14 @@ class ConfigManager:
 
 	def set_audio_volume(self, volume):
 		self.data["audio_volume"] = int(volume)
+		self.save_data()
+
+	def get_time_settings(self):
+		return self.data.get("time_settings", DEFAULT_DATA["time_settings"].copy())
+
+	def update_time_settings(self, updated_dict):
+		if "time_settings" not in self.data:
+			self.data["time_settings"] = DEFAULT_DATA["time_settings"].copy()
+		self.data["time_settings"].update(updated_dict)
 		self.save_data()
 

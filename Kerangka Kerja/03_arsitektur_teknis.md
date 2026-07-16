@@ -39,7 +39,7 @@ Project_Jadwalku/
 
 ### 2. `configManager.py` (`ConfigManager`)
 - Membaca dan menulis ke `jadwalku_data.json`.
-- Menyediakan metode abstrak `get_schedules()`, `add_schedule()`, `update_schedule()`, `delete_schedule()`, serta `get_time_reminder_config()` dan `update_time_reminder_config()`.
+- Menyediakan metode abstrak `get_schedules()`, `add_schedule()`, `update_schedule()`, `delete_schedule()`, `get_time_reminder_config()`, `update_time_reminder_config()`, serta `get_time_settings()` dan `update_time_settings()` (v1.5.0).
 - Memastikan struktur data selalu valid menggunakan struktur `DEFAULT_DATA` sebagai *fallback*.
 
 ### 3. `audioManager.py` (`AudioManager` & `Single-Open WinMM Relooping Engine`)
@@ -53,8 +53,10 @@ Project_Jadwalku/
 - **Logika Agenda Rutin**: Memeriksa apakah hari ini cocok dengan `frequency` serta mencocokkan `hour` dan `minute`. Jika cocok dan belum dipicu pada menit tersebut, `ui.message()` dan/atau `audio.play_sound()` dijalankan.
 - **Logika Pengingat Waktu Berkala (*Time Reminder*)**: Memeriksa apakah `time_reminder["enabled"]` bernilai `True`. Jika menit saat ini habis dibagi `interval`, berada dalam rentang `start_hour` s/d `end_hour`, dan belum dipicu pada menit tersebut, sistem akan membacakan jam dan/atau memutar suara `chime.wav`.
 
-### 5. `guiDialogs.py` (`wxPython UI`)
-- `JadwalKuDialog`: Dialog utama dengan `ListBox` agenda dan tombol aksi (`Tambah`, `Edit`, `Hapus`, `Check/Uncheck`, `Pengingat Waktu Berkala`, `Bantuan`, dan `Cek Pembaruan`).
+### 5. `guiDialogs.py` (`wxPython UI` & `wx.Notebook`)
+- `JadwalKuDialog`: Dialog utama berbasis multi-tab (`wx.Notebook`). Tab 1 (`Manajemen Agenda & Jadwal`) memuat `ListBox` agenda dan tombol aksi (`Tambah`, `Edit`, `Hapus`, `Check/Uncheck`, `Pengingat Waktu Berkala`, `Bantuan`, dan `Cek Pembaruan`). Tab 2 (`Pengaturan Waktu & Kalender JadwalKu`) memuat kontrol opsi pelaporan waktu `NVDA + F12`, format 12/24 jam, opsi detik, serta tombol untuk membuka Kalender (`NVDA + /, K`) dan Jam Dunia (`NVDA + /, D`).
+- `CalendarDialog`: Dialog interaktif penghitung hari bulan aktif dan pemetakan hari libur nasional Indonesia (`get_indonesian_holidays`).
+- `WorldClockDialog`: Dialog interaktif yang memuat tabel offset zona waktu 20+ kota dunia (`WORLD_CLOCKS_DATA`) dan kalkulator perbedaan waktu modular dengan perhitungan pergeseran hari (*Day Shift Calculation*).
 - `AgendaDialog`: Form input agenda menggunakan `wx.Choice`/`ComboBox` untuk Jam, Menit, Frekuensi, dan Suara. Dilengkapi tombol `[ &Tes Suara ]` yang memanggil `audio_manager.play_sound()`.
 - `TimeReminderDialog`: Form pengaturan pengingat waktu berkala dengan Checkbox Aktifkan, serta Combo Box untuk Interval, Mode Notifikasi, Jam Mulai, dan Jam Selesai.
 - `HelpDialog`: Dialog bantuan aksesibel dengan kontrol `wx.TextCtrl(style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)` sehingga ramah navigasi panah atas/bawah dan eja karakter NVDA.
@@ -63,3 +65,12 @@ Project_Jadwalku/
 - Mengecek info JSON melalui panggilan HTTP/HTTPS mandiri (`urllib.request`).
 - Memiliki logika perbandingan angka versi `_is_newer_version()`.
 - **Direct Background Downloader (`_download_and_install_direct`)**: Mengunduh file `.nvda-addon` dari remote url secara langsung ke folder `tempfile.gettempdir()`, kemudian memanggil `os.startfile(temp_path)` sehingga dialog instalasi NVDA langsung muncul secara lokal tanpa perlu membuka peramban eksternal.
+
+### 7. Integrasi Global Plugin & Override `NVDA + F12` (`__init__.py`)
+- Mencegat tombol `NVDA + F12` melalui decorator `@scriptHandler.script(gesture="kb:NVDA+F12")` dan deklarasi kelas `__gestures`.
+- Mengecek `time_settings["override_nvda_f12"]`. Jika nonaktif, penanganan dikembalikan ke `globalCommands.commands.script_dateTime` atau `gesture.send()`.
+- Jika aktif, memeriksa `scriptHandler.getLastScriptRepeatCount()`:
+  - **Repeat 0 (1x tekan)**: Memanggil `format_time_str(now, time_settings)` sesuai format 12/24 jam & gaya pilihan.
+  - **Repeat 1 (2x tekan)**: Memanggil `format_date_str(now, time_settings)` sesuai gaya pengucapan tanggal.
+  - **Repeat >1 (3x tekan)**: Memanggil `format_full_year_countdown(now, time_settings)` yang mengalkulasi sisa waktu (`datetime.timedelta`) menuju `1 Januari` tahun berikutnya secara realtime.
+
