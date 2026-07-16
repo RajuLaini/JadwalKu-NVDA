@@ -75,6 +75,7 @@ class ChangelogDialog(wx.Dialog):
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
 			"--- Versi 1.6.2 (Terbaru - Kustomisasi Format & Gaya Ucapan Pengingat serta Kirim Laporan via Cloudflare Workers) ---\n"
+			"* Akurasi Menit pada Rentang Jam Aktif (Quiet Hours Fix): Pengecekan Jam Mulai dan Jam Selesai kini akurat hingga tingkat menit. Jika Anda mengatur Jam Selesai ke '23:00', pengingat terakhir akan berbunyi tepat pukul 23:00 dan berhenti (diam) pada pukul 23:15/23:30 seterusnya. Untuk aktif 24 jam penuh tanpa henti, tersedia opsi baru '23:59 (Sepanjang Hari / 24 Jam)'.\n"
 			"* Penyesuaian Format & Gaya Pengucapan Waktu Pengingat (Time Reminder Speech Style & 12/24 Jam): Pada Pengaturan Pengingat Waktu Berkala, kini tersedia pilihan format jam (24 Jam, 12 Jam AM/PM, atau Mengikuti Format NVDA+F12) serta pilihan gaya pengucapan suara (Mulai dari 'Sekarang jam [Jam]:[Menit]', mengikuti persis format & gaya pengucapan NVDA+F12, '[Jam]:[Menit] waktu sekarang', hingga 'Waktu sekarang pukul [Jam]:[Menit]').\n"
 			"* Fitur Laporan & Saran Aksesibel via Cloudflare Workers (NVDA + / lalu R): Memungkinkan pengguna mengirimkan permintaan fitur baru, kritik saran, atau melaporkan kesalahan/bug langsung dari dalam add-on JadwalKu ke Bot Telegram pengembang (Aileen Bot) melalui Web API Proxy berkecepatan tinggi yang aman tanpa mengekspos token bot.\n"
 			"* Kategori & Sub-Kategori Bug Transparan: Saat melaporkan bug, pengguna dapat memilih sub-fitur spesifik dan memeriksa/mengedit log diagnostik NVDA yang dilampirkan secara transparan.\n"
@@ -1192,16 +1193,19 @@ class TimeReminderDialog(wx.Dialog):
 		
 		# Jam Mulai & Jam Selesai
 		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		hours = [f"{i:02d}:00" for i in range(24)]
+		hours_start = [f"{i:02d}:00" for i in range(24)]
+		hours_end = [f"{i:02d}:00" for i in range(24)] + ["23:59 (Sepanjang Hari / 24 Jam)"]
 		
 		time_sizer.Add(wx.StaticText(self, label="Jam &Mulai Aktif:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-		self.cb_start = wx.ComboBox(self, choices=hours, style=wx.CB_READONLY)
-		self.cb_start.SetSelection(int(self.cfg.get("start_hour", 0)))
+		self.cb_start = wx.ComboBox(self, choices=hours_start, style=wx.CB_READONLY)
+		cur_start = int(self.cfg.get("start_hour", 0))
+		self.cb_start.SetSelection(cur_start if 0 <= cur_start <= 23 else 0)
 		time_sizer.Add(self.cb_start, 0, wx.ALL, 5)
 		
 		time_sizer.Add(wx.StaticText(self, label="Jam &Selesai Aktif:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-		self.cb_end = wx.ComboBox(self, choices=hours, style=wx.CB_READONLY)
-		self.cb_end.SetSelection(int(self.cfg.get("end_hour", 23)))
+		self.cb_end = wx.ComboBox(self, choices=hours_end, style=wx.CB_READONLY)
+		cur_end = int(self.cfg.get("end_hour", 24))
+		self.cb_end.SetSelection(cur_end if 0 <= cur_end <= 24 else 24)
 		time_sizer.Add(self.cb_end, 0, wx.ALL, 5)
 		sizer.Add(time_sizer, 0, wx.ALL, 5)
 		

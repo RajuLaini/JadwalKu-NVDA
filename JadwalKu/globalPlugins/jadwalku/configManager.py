@@ -24,7 +24,7 @@ DEFAULT_DATA = {
 		"speech_style": "default", # Pilihan: "default", "follow_f12", "waktu_sekarang", "only_time", "prefix_pukul", "pukul_tepat"
 		"time_format": "24",    # Pilihan: "24" (24 Jam), "12" (12 Jam AM/PM), "follow_f12" (Ikuti NVDA+F12)
 		"start_hour": 0,        # 00:00
-		"end_hour": 23,         # 23:59
+		"end_hour": 24,         # 23:59 (Sepanjang Hari / 24 Jam)
 		"last_triggered_minute": "" # Caching agar tidak bunyi 2x di menit yang sama
 	},
 	"schedules": [

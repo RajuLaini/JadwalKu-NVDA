@@ -17,7 +17,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
   - *Hanya Bicara Waktu* (Tanpa Chime)
   - *Hanya Putar Chime* (Tanpa Bicara)
 - **Format & Gaya Pengucapan Waktu Pengingat (*Time Reminder Format & Speech Style*)**: Pengguna dapat memilih format jam (24 Jam, 12 Jam AM/PM, atau mengikuti pengaturan NVDA+F12) serta memilih gaya kalimat yang dibacakan saat pengingat berbunyi (misal: "Sekarang jam 09:00 tepat", "Mengikuti gaya & format pengucapan NVDA+F12", "09:00 waktu sekarang", "Hanya 09:00", atau "Waktu sekarang pukul 09:00").
-- **Rentang Jam Aktif (*Quiet Hours*)**: Pengguna dapat mengatur Jam Mulai (misal jam `06:00`) dan Jam Selesai (misal jam `22:00`) agar pengingat tidak berbunyi di tengah malam saat tidur.
+- **Rentang Jam Aktif Akurat Menit (*Quiet Hours*)**: Pengguna dapat mengatur Jam Mulai (misal jam `06:00`) dan Jam Selesai (misal jam `23:00`). Pengecekan dilakukan secara akurat hingga tingkat menit, sehingga jika Jam Selesai diatur ke `23:00`, pengingat terakhir berbunyi tepat pukul `23:00` dan diam setelahnya (`23:30` tidak berbunyi). Tersedia juga opsi khusus `23:59 (Sepanjang Hari / 24 Jam)` jika ingin pengingat aktif non-stop sepanjang hari.
 
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:

@@ -169,15 +169,23 @@ class Scheduler:
 			if not time_cfg.get("enabled", False):
 				return
 
-			# Cek rentang jam aktif
+			# Cek rentang jam aktif dalam satuan menit (agar akurat sampai menit)
 			start_h = int(time_cfg.get("start_hour", 0))
-			end_h = int(time_cfg.get("end_hour", 23))
-			if start_h <= end_h:
-				if not (start_h <= now.hour <= end_h):
+			end_h = int(time_cfg.get("end_hour", 24))
+			
+			now_minutes = now.hour * 60 + now.minute
+			start_minutes = start_h * 60
+			if end_h >= 24:
+				end_minutes = 24 * 60 - 1 # 23:59 (Sepanjang Hari)
+			else:
+				end_minutes = end_h * 60 # tepat pada HH:00
+				
+			if start_minutes <= end_minutes:
+				if not (start_minutes <= now_minutes <= end_minutes):
 					return
 			else:
 				# Melewati tengah malam (misal 21:00 sampai 06:00)
-				if not (now.hour >= start_h or now.hour <= end_h):
+				if not (now_minutes >= start_minutes or now_minutes <= end_minutes):
 					return
 
 			interval = int(time_cfg.get("interval", 60))
