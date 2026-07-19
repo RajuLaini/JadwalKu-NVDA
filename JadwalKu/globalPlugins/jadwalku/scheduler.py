@@ -272,6 +272,51 @@ class Scheduler:
 						time_str = f"Sekarang jam {h_str}:{m_str}{ampm}"
 				
 				def speak_reminder():
+					active_vp = time_cfg.get("active_voice_pack", "")
+					if active_vp:
+						# Parse string ke array kata
+						import os
+						import re
+						# Buang ":00" agar tidak dibaca "nol" pada menit pas
+						# Hati-hati, JANGAN pakai .replace("am", " am") karena akan memecah kata "jam" menjadi "j am"!
+						# (Variabel ampm selalu memiliki spasi sebelumnya: " AM")
+						clean_str = time_str.lower().replace(":00", " ").replace(":", " ")
+						words = clean_str.split()
+						
+						vp_files = []
+						try:
+							from globalPlugins.jadwalku.voicePackManager import VoicePackManager
+							vp_mgr = VoicePackManager(os.path.dirname(os.path.abspath(__file__)))
+							pack_path = os.path.join(vp_mgr.pack_dir, active_vp)
+							if os.path.exists(pack_path):
+								temp_dir = vp_mgr.extract_pack_to_temp(pack_path)
+								if temp_dir:
+									valid = True
+									missing_words = []
+									for w in words:
+										if w.isdigit():
+											w = str(int(w)) # hapus leading zero ("09" -> "9")
+										wav_path = os.path.join(temp_dir, f"{w}.wav")
+										if os.path.exists(wav_path):
+											vp_files.append(wav_path)
+										else:
+											missing_words.append(w)
+											
+									if missing_words:
+										import logHandler
+										logHandler.log.warning(f"JadwalKu: Voice Pack kehilangan file berikut, namun tetap diputar: {missing_words}")
+											
+									if vp_files:
+										vp_vol = time_cfg.get("voice_pack_volume", 100)
+										self.audio.play_voice_pack_sequence(vp_files, volume_override=vp_vol)
+										return
+									else:
+										import logHandler
+										logHandler.log.warning("JadwalKu: Voice Pack tidak memiliki file yang dapat diputar.")
+						except Exception as e:
+							import logHandler
+							logHandler.log.error(f"JadwalKu: Gagal memutar Voice Pack: {e}")
+
 					if hasattr(self, "tts_manager") and self.tts_manager and self.tts_manager.is_enabled():
 						self.tts_manager.speak(time_str)
 					else:

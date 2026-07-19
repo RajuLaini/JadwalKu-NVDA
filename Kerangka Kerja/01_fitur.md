@@ -18,6 +18,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
   - *Hanya Putar Chime* (Tanpa Bicara)
 - **Format & Gaya Pengucapan Waktu Pengingat (*Time Reminder Format & Speech Style*)**: Pengguna dapat memilih format jam (24 Jam, 12 Jam AM/PM, atau mengikuti pengaturan NVDA+F12) serta memilih gaya kalimat yang dibacakan saat pengingat berbunyi (misal: "Sekarang jam 09:00 tepat", "Mengikuti gaya & format pengucapan NVDA+F12", "09:00 waktu sekarang", "Hanya 09:00", atau "Waktu sekarang pukul 09:00").
 - **Rentang Jam Aktif Akurat Menit (*Quiet Hours*)**: Pengguna dapat mengatur Jam Mulai (misal jam `06:00`) dan Jam Selesai (misal jam `23:00`). Pengecekan dilakukan secara akurat hingga tingkat menit, sehingga jika Jam Selesai diatur ke `23:00`, pengingat terakhir berbunyi tepat pukul `23:00` dan diam setelahnya (`23:30` tidak berbunyi). Tersedia juga opsi khusus `23:59 (Sepanjang Hari / 24 Jam)` jika ingin pengingat aktif non-stop sepanjang hari.
+- **JadwalKu Voice Pack Studio (Pengingat Tanpa TTS)**: Sebuah fasilitas mandiri bawaan yang memandu pengguna merekam 70 kata waktu menggunakan mikrofon mereka secara langsung. Rekaman akan otomatis dipotong jeda heningnya (*auto-trim*) dan dikompres menjadi file `.jvp` (*JadwalKu Voice Pack*). Paket ini kemudian dapat dibagikan atau digunakan sebagai pengganti suara TTS robotik untuk melaporkan waktu dengan suara manusia asli yang mengalir natural secara beruntun (*Concatenative Synthesis*).
 
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:
@@ -81,3 +82,59 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Pembatasan Pintar & Salin Clipboard Otomatis**: Dilengkapi pembatasan 1 laporan per pengguna per hari (maksimal 10 laporan/hari dari seluruh pengguna). Jika koneksi internet offline atau server proxy gagal, seluruh laporan beserta log diagnostik otomatis disalin ke clipboard (`api.copyToClip`) agar tidak ada pesan atau kontribusi pengguna yang hilang!
 
 
+
+
+## Update v1.6.4: NativeAudioIO & Pemilih Perangkat
+- **Pemilih Mikrofon & Speaker Bebas**: Pengguna dapat memilih mikrofon mana yang akan dipakai merekam, dan speaker mana untuk memutar hasil tes. Menuntaskan masalah Virtual Audio Cable.
+- **NativeAudioIO**: Menggantikan MCI usang dengan akses langsung ke winmm (waveIn/waveOut) menggunakan ctypes, menghasilkan arsitektur audio sinkron yang stabil tanpa library eksternal (PyAudio/sounddevice).
+- **3-Step Wizard**: Tampilan Voice Studio dipisah menjadi 3 halaman agar instruksinya fokus dan logis.
+
+
+## Update v1.6.5: Aksesibilitas Voice Pack Studio
+- **Fokus Teks Langsung**: Mengubah gaya teks kotak Penampil Kata di Studio dari `wx.TE_READONLY` menjadi mode biasa (tapi ditahan inputannya), agar pengguna NVDA bisa langsung mencapai kotak tersebut menggunakan tombol Tab dan bisa mengeja hurufnya dengan mudah.
+
+
+## Update v1.6.6: Peningkatan Algoritma Penggabungan Kata
+- **Translasi Angka ke Suara**: Memperbaiki kelemahan pada *Concatenative Synthesis* yang mana angka murni seperti '13' (tiga belas) dan '56' (lima puluh enam) gagal dibaca karena mencari file '13.wav' atau '56.wav'. Sistem kini cerdas merombak angka tersebut ke struktur ejaan bahasa Indonesia yang sesuai dengan potongan kata yang tersedia.
+
+
+## Update v1.6.7: Perbaikan Total Voice Pack Pagi/Malam
+- **Solusi Bug Penggantian AM/PM**: Memperbaiki fungsi internal yang sebelumnya menimpa huruf 'am' secara serampangan sehingga merusak kata 'jam' menjadi 'j am'. Ini yang membuat Voice Pack sebelumnya gagal mencari file suara 'j' dan terus-menerus jatuh ke fallback TTS standar.
+
+
+## Update v1.6.8: Uji Cepat Voice Pack via Pintasan W
+- **Simulasi Pengingat via Pintasan**: Pintasan utama pemeriksa waktu (NVDA + / lalu W) kini telah terintegrasi dengan mesin *Voice Pack* dan *Chime* (nada dering). Jika pengguna memilih paket suara kustom, menekan pintasan ini akan langsung menyimulasikan pengalaman pengingat waktu asli: membunyikan nada dering diikuti pembacaan waktu dengan suara manusia, sementara TTS hanya membacakan sisa pesan status saja.
+
+
+## Update v1.6.9: Perbaikan Playback Voice Pack
+- **Perbaikan Atribut AudioManager**: Mengatasi kegagalan diam-diam (*silent failure*) pada fungsi pemutar antrean paket suara yang selama ini mencari fungsi `get_active_audio_device_id` yang sudah diganti menjadi `get_output_device_id` sejak refaktor *WinMM*. Perbaikan ini memastikan fitur simulasi `NVDA + / lalu W` dan pengingat waktu otomatis berjalan mulus tanpa macet.
+
+
+## Update v1.6.11: Toleransi Missing Word Voice Pack
+- **Ketahanan Perakitan Suara**: Jika pengguna tidak merekam salah satu kata dalam Voice Pack (misalnya lupa merekam 'waktu' atau 'sekarang'), sistem tidak akan lagi menggagalkan perakitan suara dan kembali ke TTS. Sistem akan mentoleransi kata yang hilang tersebut dan merangkai kata-kata lain yang tersedia (misal hanya bunyi '15' dan '24'). Hal ini menghilangkan ilusi bahwa pintasan 'W' rusak jika pengguna menggunakan Voice Pack yang tidak lengkap.
+
+
+## Update v1.6.12: Perbaikan Race Condition Antrian Audio
+- **Masalah**: Sebelumnya, saat pengguna menekan `NVDA + /, W`, JadwalKu akan memutar suara bel (`chime.wav`), lalu dengan sangat cepat sistem mencoba menghentikan bel tersebut untuk langsung memutar antrian Voice Pack gabungan (`jadwalku_vp_seq.wav`). Sayangnya, terdapat *Race Condition* di mana sistem lama (bel) terlambat melapor bahwa ia sudah mati, sehingga ia secara tidak sengaja memicu perintah 'Stop' (*flag* `_is_playing = False`) **setelah** sistem baru (Voice Pack) baru saja mau hidup. Hal ini membuat Voice Pack langsung terpotong seketika bahkan sebelum sempat berbunyi, sehingga yang terdengar oleh pengguna hanyalah sisa suara bel saja.
+- **Solusi**: Saya telah merestrukturisasi manajemen status pemutaran (`has_active_sounds`, `has_active_playback`, dan pelepasan *handle* WinMM) agar tidak lagi memaksakan *flag* `_is_playing = False` secara buta ketika sebuah thread selesai, melainkan secara dinamis memeriksa jumlah antrian audio yang aktif (`_active_wave_outs`). Ini membebaskan Voice Pack dari pembunuhan karakter prematur!
+
+
+## Update v1.6.13: Volume Kustom Voice Pack
+- **Volume Voice Pack**: Menambahkan pengaturan volume khusus (hingga 300%) di Tab 3 Pengaturan Voice Pack. Nilai volume ini tidak mengganggu volume master atau volume TTS NVDA. Slider volume ini akan secara interaktif menyimpan perubahan ke `time_reminder_config` (dengan metode penundaan eksekusi *debounce 200ms* agar tidak membebani SSD saat *slider* digeser secara berkelanjutan). Hal ini menyelesaikan kendala di mana hasil rekaman Voice Pack sering kali kurang lantang dibandingkan suara bel.
+
+
+## Update v1.6.14: Pratinjau Audio Otomatis (Live Preview)
+- **Pratinjau Slider Voice Pack**: Menjawab kebutuhan pengguna untuk langsung merasakan perubahan volume saat menggeser *slider*, JadwalKu kini akan secara otomatis memutar sampel audio Voice Pack (berbunyi: "Waktu sekarang [Jam] [Menit]") setiap kali pengguna selesai menggeser slider volume khusus Voice Pack (dengan jeda pintar *debounce* 200 milidetik). Fitur ini mempermudah pencarian keseimbangan volume antara Voice Pack dan suara bel secara *real-time* tanpa harus menekan tombol tes terpisah.
+
+
+## Update v1.6.15: Stabilisasi Pratinjau Volume Kustom
+- **Hotfix Syntax Error**: Memperbaiki masalah di mana *string* tanda kutip ganda (`"`) bocor ke dalam riwayat rilis `guiDialogs.py` (yang menyebabkan seluruh *addon* mati dan pintasan utama `NVDA + /` tidak berfungsi).
+- **Pembuktian Volume 300%**: Fitur *Live Preview* Slider kini berjalan sempurna, memastikan bahwa volume audio benar-benar didongkrak secara matematis (`(arr[i] * factor) >> 8`) hingga 3 kali lipat (batas aman 16-bit PCM), dan dapat didengarkan secara instan oleh pengguna tanpa harus menekan `NVDA + /, W`.
+
+
+## Update v1.6.16: Peningkatan Batas Volume Voice Pack
+- **Penyetaraan Batas Volume Voice Pack (600%)**: Merespon masukan pengguna di mana slider maksimal 300% pada Voice Pack dirasa masih kurang keras (dibandingkan slider Ringtone yang bisa mencapai 600%), batas maksimal Slider Volume Voice Pack kini telah dinaikkan menjadi 600%. Algoritma pengganda PCM 16-bit JadwalKu mampu mengatasi amplitudo ini secara konsisten tanpa *error* di tingkat dasar.
+
+
+## Update v1.6.17: Penggandaan Ekstrem Volume 1200%
+- **Peningkatan Kapasitas Slider Volume (1200%)**: Untuk menjawab skenario langka di mana peralatan mikrofon pengguna (atau sampel audio bel) terekam dalam *gain* yang terlampau senyap, kedua Slider Volume (baik untuk Audio Ringtone di Tab 2 maupun Voice Pack Kustom di Tab 3) kini telah digandakan batas maksimalnya dari 600% menjadi **1200% (penggalian 12 kali lipat amplitudo dasar)**.

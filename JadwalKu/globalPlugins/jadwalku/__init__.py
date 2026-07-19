@@ -122,6 +122,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:enter": "openLayout",
 			"kb:1": "openQuickTimer",
 			"kb:2": "openOneTimeAlarm",
+			"kb:w": "announceTime",
 			"kb:r": "openFeedback",
 			"kb:k": "openCalendar",
 			"kb:d": "openWorldClock",
@@ -532,8 +533,61 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		cfg = self.config.get_time_reminder_config()
 		status = "aktif" if cfg.get("enabled", False) else "nonaktif"
 		interval = cfg.get("interval", 60)
-		msg = f"{time_str}. Pengingat waktu berkala saat ini {status} (tiap {interval} menit)."
-		ui.message(msg)
+		status_msg = f"Pengingat waktu berkala saat ini {status} (tiap {interval} menit)."
+		full_msg = f"{time_str}. {status_msg}"
+		
+		active_vp = cfg.get("active_voice_pack", "")
+		mode = cfg.get("mode", "both")
+		
+		if active_vp:
+			import os
+			if mode in ("audio", "both"):
+				self.audio.play_sound("chime.wav")
+						
+			import re
+			clean_str = time_str.lower().replace(":00", " ").replace(":", " ")
+			words = clean_str.split()
+			
+			vp_files = []
+			try:
+				from globalPlugins.jadwalku.voicePackManager import VoicePackManager
+				vp_mgr = VoicePackManager(os.path.dirname(os.path.abspath(__file__)))
+				pack_path = os.path.join(vp_mgr.pack_dir, active_vp)
+				if os.path.exists(pack_path):
+					temp_dir = vp_mgr.extract_pack_to_temp(pack_path)
+					if temp_dir:
+						for w in words:
+							if w.isdigit():
+								w = str(int(w))
+							wav_path = os.path.join(temp_dir, f"{w}.wav")
+							if os.path.exists(wav_path):
+								vp_files.append(wav_path)
+							else:
+								import logHandler
+								logHandler.log.warning(f"JadwalKu VoicePack: Word '{w}' not found in pack, skipping.")
+						
+						if vp_files:
+							import logHandler
+							logHandler.log.info(f"JadwalKu DEBUG: vp_files = {vp_files}")
+							def delayed_play():
+								vp_vol = cfg.get("voice_pack_volume", 100)
+								self.audio.play_voice_pack_sequence(vp_files, volume_override=vp_vol)
+							wx.CallLater(350 if mode == "both" else 50, delayed_play)
+							ui.message(status_msg)
+							return
+						else:
+							import logHandler
+							logHandler.log.error(f"JadwalKu DEBUG: No valid words found in {words}")
+			except Exception as e:
+				import logHandler
+				logHandler.log.error(f"JadwalKu DEBUG EXCEPTION: {e}")
+				pass
+				
+		# Fallback
+		if hasattr(self, "tts") and self.tts and self.tts.is_enabled():
+			self.tts.speak(full_msg)
+		else:
+			ui.message(full_msg)
 
 	def script_nextAgenda(self, gesture):
 		now = datetime.datetime.now()

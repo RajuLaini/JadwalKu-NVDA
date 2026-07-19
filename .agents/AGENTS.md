@@ -21,3 +21,10 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
 - Setelah seluruh kode, `ChangelogDialog` (`V`), dan dokumentasi diperbarui, selalu jalankan perintah:
   `python build_and_install.py`
 - Hal ini memastikan paket `.nvda-addon` terbaru langsung terbuat di folder akar proyek dan terpasang otomatis ke folder add-on NVDA pengguna (`%appdata%\nvda\addons\JadwalKu`).
+
+## 5. Investigasi Terarah (Research Before Assumption)
+- **Wajib Menelusuri Variabel Global / Konstan**: Sebelum membuat asumsi mengenai bagaimana sebuah fitur bekerja (misalnya asumsi bahwa sistem belum mendukung perekaman angka), agen WAJIB melakukan `grep_search` pada direktori proyek untuk mencari daftar konfigurasi atau array konstan yang sudah ada (seperti `WORDS_TO_RECORD`, konfigurasi config, dll).
+- **Wajib Membaca Kerangka Kerja**: Baca referensi desain di folder `Kerangka Kerja/` untuk memastikan perubahan yang dilakukan tidak melenceng dari arsitektur asli yang telah diusahakan. Jangan memodifikasi secara membabi buta tanpa melihat konteks ketersediaan data.
+
+## 6. Hati-Hati terhadap Pembaruan String (Gunakan Replace Secara Akurat)
+- **Hindari Skrip Pengganti Teks yang Mentah (Naive String Replace)**: Saat Anda diminta memperbarui riwayat versi/Changelog (misalnya pada variabel `changelog_text` di `guiDialogs.py`), JANGAN menggunakan perintah `replace()` string secara mentah (seperti skrip `bump_version.py`) karena dapat menyebabkan penggandaan awal *string* tak terduga (misalnya kurung buka ganda `changelog_text = (`) jika sebagian teks sebelumnya masih ada. **SELALU gunakan perangkat khusus modifikasi file `replace_file_content`** bawaan sistem agen yang menjamin penggantian kode dengan keakuratan tinggi dan memeriksa rentang baris secara tepat, guna menghindari *SyntaxError*.

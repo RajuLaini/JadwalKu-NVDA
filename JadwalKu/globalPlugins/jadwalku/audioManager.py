@@ -8,6 +8,7 @@ import wx
 import logHandler
 import nvwave
 import ui
+import tempfile
 
 SOUNDS_DIR = os.path.join(os.path.dirname(__file__), "sounds")
 
@@ -97,11 +98,11 @@ class AudioManager:
 
 	def has_active_playback(self):
 		with self._lock:
-			return self._is_playing or len(self._active_mp3_aliases) > 0
+			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0
 
 	def has_active_sounds(self):
 		with self._lock:
-			return self._is_playing or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
+			return len(self._active_wave_outs) > 0 or len(self._active_mp3_aliases) > 0 or self.is_alarm_ringing
 
 	def get_sound_path(self, filename):
 		if not filename:
@@ -199,7 +200,7 @@ class AudioManager:
 			logHandler.log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
 			return frames
 
-	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False, loop=False):
+	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False, loop=False, volume_override=None):
 		if not allow_overlap:
 			self.stop_sound(stop_alarm=stop_alarm)
 		
@@ -230,9 +231,8 @@ class AudioManager:
 		wfx.nAvgBytesPerSec = framerate * wfx.nBlockAlign
 		wfx.cbSize = 0
 
-		# Apply override volume / PCM boost if needed
 		try:
-			vol = getattr(self, "_override_volume", None)
+			vol = volume_override
 			if vol is None:
 				vol = self.config.get_audio_volume() if self.config else 100
 			if bitsPerSample == 16 and vol != 100:
@@ -317,10 +317,7 @@ class AudioManager:
 							time.sleep(0.02)
 							unprep_attempts += 1
 							if unprep_attempts > 100:
-								try:
-									ctypes.windll.winmm.waveOutReset(hWaveOut)
-								except Exception:
-									pass
+								break
 						else:
 							break
 
@@ -351,9 +348,6 @@ class AudioManager:
 						pass
 					with self._lock:
 						self._active_wave_outs.discard(handle_val)
-				with self._lock:
-					if len(self._active_mp3_aliases) == 0 and len(self._active_wave_outs) == 0:
-						self._is_playing = False
 
 		threading.Thread(target=worker, daemon=True).start()
 		return True
@@ -430,8 +424,6 @@ class AudioManager:
 									ctypes.windll.winmm.mciSendStringW(f"close {al}", None, 0, None)
 									with self._lock:
 										self._active_mp3_aliases.discard(al)
-										if len(self._active_wave_outs) == 0 and len(self._active_mp3_aliases) == 0:
-											self._is_playing = False
 
 							threading.Thread(target=mp3_worker, daemon=True).start()
 							return True
@@ -441,7 +433,55 @@ class AudioManager:
 			except Exception as e:
 				logHandler.log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
 		return False
-
+	def play_voice_pack_sequence(self, filepaths, volume_override=None):
+		"""Memutar kumpulan file WAV secara berurutan dan mulus."""
+		if not filepaths: return
+		
+		# Gabungkan semua frames menjadi satu bytearray
+		combined_frames = bytearray()
+		framerate = 44100
+		channels = 1
+		bitsPerSample = 16
+		
+		import logHandler
+		for fp in filepaths:
+			if not os.path.exists(fp): 
+				logHandler.log.warning(f"VP: File not found {fp}")
+				continue
+			try:
+				with wave.open(fp, 'rb') as wf:
+					c = wf.getnchannels()
+					f = wf.getframerate()
+					b = wf.getsampwidth() * 8
+					frames = wf.readframes(wf.getnframes())
+					combined_frames.extend(frames)
+					logHandler.log.info(f"VP: Parsed {fp} | {c}ch {f}Hz {b}bit | {len(frames)} bytes")
+					channels = c
+					framerate = f
+					bitsPerSample = b
+			except Exception as e:
+				logHandler.log.error(f"VP: Error reading {fp}: {e}")
+				
+		if not combined_frames: 
+			logHandler.log.error("VP: combined_frames is EMPTY! Aborting playback.")
+			return
+		
+		temp_path = os.path.join(tempfile.gettempdir(), "jadwalku_vp_seq.wav")
+		try:
+			with wave.open(temp_path, 'wb') as wf:
+				wf.setnchannels(channels)
+				wf.setsampwidth(bitsPerSample // 8)
+				wf.setframerate(framerate)
+				wf.writeframes(combined_frames)
+			
+			logHandler.log.info(f"VP: Playing combined WAV {temp_path} | {channels}ch {framerate}Hz {bitsPerSample}bit | Total {len(combined_frames)} bytes")
+			# Mainkan file gabungan tersebut menggunakan WinMM
+			device_id = self.get_output_device_id()
+			t = threading.Thread(target=self._play_wav_winmm, args=(temp_path, device_id, False, False, False, volume_override))
+			t.daemon = True
+			t.start()
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu VoicePack: Gagal memutar sequence: {e}")
 	def stop_sound(self, stop_alarm=True):
 		try:
 			if stop_alarm:

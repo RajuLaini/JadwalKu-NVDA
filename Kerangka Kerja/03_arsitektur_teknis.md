@@ -54,8 +54,14 @@ Project_Jadwalku/
 - **Single-Open WinMM Relooping Engine**: Membuka *handle* hardware kartu suara (`ctypes.windll.winmm.waveOutOpen`) **tepat 1 kali** di awal thread dengan parameter numeric `uDeviceID` pilihan pengguna (`Dynamic Device Routing`).
 - **Penyuapan Ulang Tanpa Tutup-Buka (`Seamless Re-Feeding`)**: Selama alarm berulang (`loop=True`), data audio disuapkan ke *handle* tunggal tersebut tanpa pernah melakukan `waveOutClose` di tengah jalan. Hal ini menjamin suara berdering utuh tanpa potongan, tidak mengunci driver (*error 4*), dan mengulang tanpa batas dengan jeda 2 detik.
 - **Dukungan Routing TTS Mandiri (`is_tts` flag)**: Memiliki flag khusus `is_tts=True` pada `play_sound` dan `notify` yang memungkinkan suara hasil render SAPI 5 diputar secara mulus di perangkat audio yang sama dengan audio JadwalKu lainnya.
+- **Pemutar Voice Pack Beruntun (*Concatenative Player*)**: Memiliki metode `play_voice_pack_sequence` yang menyatukan (*concatenate*) puluhan file WAV (paket suara) ke dalam satu buffer PCM secara langsung di memori (asinkron), lalu memutarnya melalui `_play_wav_winmm` sehingga suara terputus menjadi satu kalimat yang mengalir tanpa henti.
 
-### 4. `ttsManager.py` (`TTSManager` - Mesin Sintesis Suara Mandiri SAPI 5)
+### 4. `voicePackManager.py` (`VoiceRecorder` & `VoicePackManager`)
+- **Perekaman Asli API Windows (`VoiceRecorder`)**: Menggunakan `ctypes.windll.winmm.mciSendStringW` untuk merekam suara kualitas studio (16-bit 44.1kHz mono) ke dalam format WAV. Sepenuhnya mandiri, tidak memerlukan modul *third-party* seperti PyAudio.
+- **Pemotongan Hening Otomatis (*Auto-Trimmer*)**: Menganalisa nilai energi audio (RMS) menggunakan modul bawaan `wave` dan `struct` untuk menemukan titik mulai dan akhir suara secara matematis, lalu memotong sisa keheningan (*silence*) di awal/akhir file agar saat digabungkan, kata-kata terdengar alami.
+- **Sistem Pengemasan Zip (`.jvp`)**: Membungkus seluruh sesi audio (`.wav`) dan `manifest.json` menjadi satu paket arsip ZIP (`.jvp`) yang mudah dibagikan.
+
+### 5. `ttsManager.py` (`TTSManager` - Mesin Sintesis Suara Mandiri SAPI 5)
 - **Sintesis Mandiri Terpisah dari NVDA**: Menggunakan API `comtypes.client.CreateObject("SAPI.SpVoice")` untuk melakukan render ucapan teks ke file audio sementara (`jadwalku_tts.wav`) di folder temporary sistem.
 - **Asinkron & Non-Blocking**: Seluruh proses sintesis (`SpFileStream` + `Speak`) dijalankan pada thread terpisah (`threading.Thread`) dan diputar melalui `audioManager.play_sound(..., is_tts=True)`, sehingga pembaca layar NVDA tidak pernah terblokir dan suara notifikasi latar belakang tidak menabrak atau terpotong oleh ucapan NVDA.
 - **Dynamic Voice & Parameter Override**: Memuat daftar seluruh suara SAPI 5 yang terinstal di sistem (`voice.GetTokens()`) serta mendukung penyesuaian kecepatan (`Rate` dari `-10` sampai `+10`) dan volume (`Volume` dari `0` sampai `100`).
@@ -88,3 +94,9 @@ Project_Jadwalku/
   - **Repeat >1 (3x tekan)**: Memanggil `format_full_year_countdown(now, time_settings)` yang mengalkulasi sisa waktu (`datetime.timedelta`) menuju `1 Januari` tahun berikutnya secara realtime.
   - **Pengecualian TTS Mandiri**: Pembacaan manual `NVDA + F12` sengaja tetap diarahkan ke `ui.message()` (suara NVDA utama), tidak menggunakan `tts_manager`, sesuai prinsip pemisahan fungsi notifikasi latar belakang dengan pelaporan aktif manual oleh pengguna.
 
+
+
+### Perubahan Arsitektur Audio di v1.6.4 (NativeAudioIO)
+- Meninggalkan `mciSendString` yang tidak mendukung pemilihan `device_index` mikrofon secara langsung di era Windows modern.
+- Menerapkan modul buatan sendiri `NativeAudioIO` di `voicePackManager.py` yang membungkus fungsi C dari `winmm.dll` seperti `waveInOpen`, `waveInStart`, `waveInAddBuffer`, `waveOutOpen`, dan `waveOutWrite`.
+- Keuntungan utama: Bisa beroperasi murni dengan `ctypes` bawaan Python, tidak bergantung pada library pihak ketiga, dan sepenuhnya mendukung `device_index` untuk multi-mikrofon (seperti headset USB, F999X, Virtual Audio Cable).

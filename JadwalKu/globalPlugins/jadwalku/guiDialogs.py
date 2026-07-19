@@ -74,7 +74,16 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.2 (Terbaru - Kustomisasi Format & Gaya Ucapan Pengingat serta Kirim Laporan via Cloudflare Workers) ---\n"
+			"--- Versi 1.6.3 (JadwalKu Voice Pack Studio & Pengingat Suara Manusia) ---\n"
+			"* Fitur JadwalKu Voice Pack Studio (Tersedia di Tab 3 Pengaturan Utama): Fasilitas bawaan dengan 3-Step Wizard elegan yang memandu Anda merekam 70 kata kustom menggunakan mikrofon Anda sendiri. JadwalKu akan otomatis memotong jeda hening (*auto-trim*) dan mengompresnya menjadi paket suara `.jvp`.\n"
+			"* Pengingat Waktu Beruntun (*Concatenative Synthesis*): JadwalKu kini dapat menyatukan potongan suara manusia secara langsung di memori untuk melaporkan waktu (misal: 'sekarang' + 'jam' + 'sembilan' + 'tepat') tanpa bergantung pada mesin TTS robotik SAPI 5 sama sekali! Termasuk dukungan penuh translasi angka menit (seperti '13' menjadi 'tiga' dan 'belas').\n"
+			"* Pemilih Perangkat Audio Langsung: Anda kini dapat memilih perangkat mikrofon dan speaker secara spesifik saat tes perekaman. Mekanisme perekaman juga dirombak total menggunakan ctypes winmm murni, menjadikannya sangat tangguh (mendukung toleransi kata hilang) dan bebas dari kegagalan sinkronisasi.\n"
+			"* Voice Pack pada Pintasan Pemeriksa Waktu: Saat pengguna menekan `NVDA + /` lalu `W`, sistem kini langsung memainkan paket suara (beserta nada dering latar) untuk menyebutkan waktu saat ini secara instan, layaknya simulasi pengingat otomatis.\n"
+			"* Slider Volume Super 1200% & Live Preview: Untuk menjawab kebutuhan amplifikasi, batas maksimal Slider Volume Audio (Ringtone) dan Slider Voice Pack ditingkatkan hingga 1200%. Setiap kali melepaskan geseran pada Slider Voice Pack, sampel audio akan langsung diputar (*real-time preview*) tanpa perlu menekan tombol apapun!\n"
+			"* Sistem Draft (Simpan Progress) & Keamanan Sandi: Anda kini bisa menyimpan progress rekaman (draft) dan melanjutkannya nanti. Anda juga dapat melindungi paket suara Anda dengan kata sandi (SHA-256) agar tidak bisa diedit orang lain, serta menandainya sebagai Contoh Permanen yang tidak bisa dihapus.\n"
+			"* Pencegahan Kehilangan Data (Auto-Migration): Paket suara kini disimpan dengan aman di direktori konfigurasi global NVDA, sehingga karya rekaman Anda dijamin 100% aman dan tidak akan terhapus saat sistem melakukan pembaruan (update) add-on di masa mendatang!\n"
+			"* Dukungan Impor/Ekspor Metadata Paket Suara: Anda dapat membuat, memberi nama, dan membagikan paket suara karya Anda sendiri ke seluruh pengguna JadwalKu.\n\n"
+			"--- Versi 1.6.2 (Kustomisasi Format & Gaya Ucapan Pengingat serta Kirim Laporan via Cloudflare Workers) ---\n"
 			"* Akurasi Menit pada Rentang Jam Aktif (Quiet Hours Fix): Pengecekan Jam Mulai dan Jam Selesai kini akurat hingga tingkat menit. Jika Anda mengatur Jam Selesai ke '23:00', pengingat terakhir akan berbunyi tepat pukul 23:00 dan berhenti (diam) pada pukul 23:15/23:30 seterusnya. Untuk aktif 24 jam penuh tanpa henti, tersedia opsi baru '23:59 (Sepanjang Hari / 24 Jam)'.\n"
 			"* Penyesuaian Format & Gaya Pengucapan Waktu Pengingat (Time Reminder Speech Style & 12/24 Jam): Pada Pengaturan Pengingat Waktu Berkala, kini tersedia pilihan format jam (24 Jam, 12 Jam AM/PM, atau Mengikuti Format NVDA+F12) serta pilihan gaya pengucapan suara (Mulai dari 'Sekarang jam [Jam]:[Menit]', mengikuti persis format & gaya pengucapan NVDA+F12, '[Jam]:[Menit] waktu sekarang', hingga 'Waktu sekarang pukul [Jam]:[Menit]').\n"
 			"* Fitur Laporan & Saran Aksesibel via Cloudflare Workers (NVDA + / lalu R): Memungkinkan pengguna mengirimkan permintaan fitur baru, kritik saran, atau melaporkan kesalahan/bug langsung dari dalam add-on JadwalKu ke Bot Telegram pengembang (Aileen Bot) melalui Web API Proxy berkecepatan tinggi yang aman tanpa mengekspos token bot.\n"
@@ -346,12 +355,12 @@ class AudioManagerDialog(wx.Dialog):
 		self.btnTestDevice.Bind(wx.EVT_BUTTON, self.onTestDevice)
 		sizer.Add(self.btnTestDevice, 0, wx.ALL, 6)
 		
-		# 2. Pengaturan Volume Audio (Maksimal 600%)
+		# 2. Pengaturan Volume Audio (Maksimal 1200%)
 		cur_vol = self.config.get_audio_volume() if self.config else 100
 		self.lbl_volume = wx.StaticText(self, label=f"&Volume Audio Suara ({cur_vol}%):")
 		sizer.Add(self.lbl_volume, 0, wx.ALL, 6)
 		
-		self.slider_volume = wx.Slider(self, value=cur_vol, minValue=1, maxValue=600, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_volume = wx.Slider(self, value=cur_vol, minValue=1, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
 		self.slider_volume.Bind(wx.EVT_SLIDER, self.onVolumeScroll)
 		sizer.Add(self.slider_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
 		
@@ -1406,6 +1415,53 @@ class JadwalKuDialog(wx.Dialog):
 		self.notebook.AddPage(self.panel_tab1, "1. Manajemen Agenda & Jadwal")
 		self.notebook.AddPage(self.panel_tab2, "2. Pengaturan Waktu & Kalender JadwalKu")
 		
+		# --- Tab 3: Voice Pack Studio ---
+		self.panel_tab3 = wx.Panel(self.notebook)
+		sizer_tab3 = wx.BoxSizer(wx.VERTICAL)
+		
+		info_vp = wx.StaticText(self.panel_tab3, label="JadwalKu Voice Pack Studio memandu Anda merekam 70 kata kustom untuk dijadikan pengingat waktu tanpa bergantung pada TTS.\nAnda dapat membuat rekaman Anda sendiri dan membagikannya dalam format .jvp")
+		sizer_tab3.Add(info_vp, 0, wx.ALL, 10)
+		
+		# Pilihan Voice Pack Aktif
+		vp_hz_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		vp_hz_sizer.Add(wx.StaticText(self.panel_tab3, label="Paket Suara (&Voice Pack) Aktif:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		
+		from .voicePackManager import VoicePackManager
+		add_on_dir = os.path.dirname(os.path.abspath(__file__))
+		self.vp_mgr = VoicePackManager(add_on_dir)
+		self.vp_list = [p for p in self.vp_mgr.get_available_packs() if not p.get("is_draft")]
+		choices = ["(Bawaan SAPI 5 / TTS Standar)"] + [p["name"] for p in self.vp_list]
+		
+		self.cb_active_vp = wx.ComboBox(self.panel_tab3, choices=choices, style=wx.CB_READONLY)
+		# Load from config
+		active_vp_file = self.config.get_time_reminder_config().get("active_voice_pack", "")
+		sel_idx = 0
+		for i, p in enumerate(self.vp_list):
+			if p["id"] == active_vp_file:
+				sel_idx = i + 1
+				break
+		self.cb_active_vp.SetSelection(sel_idx)
+		self.cb_active_vp.Bind(wx.EVT_COMBOBOX, self.onVoicePackChanged)
+		vp_hz_sizer.Add(self.cb_active_vp, 1, wx.EXPAND | wx.ALL, 5)
+		
+		sizer_tab3.Add(vp_hz_sizer, 0, wx.EXPAND | wx.ALL, 5)
+		
+		# Slider Volume Khusus Voice Pack
+		vp_vol_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		vp_vol_sizer.Add(wx.StaticText(self.panel_tab3, label="Volume Voice Pack Kustom (0 - 1200%):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		vp_vol_val = self.config.get_time_reminder_config().get("voice_pack_volume", 100)
+		self.sld_vp_vol = wx.Slider(self.panel_tab3, value=vp_vol_val, minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.sld_vp_vol.Bind(wx.EVT_SLIDER, self.onVoicePackVolumeChanged)
+		vp_vol_sizer.Add(self.sld_vp_vol, 1, wx.EXPAND | wx.ALL, 5)
+		sizer_tab3.Add(vp_vol_sizer, 0, wx.EXPAND | wx.ALL, 5)
+		
+		self.btnOpenVoiceStudio = wx.Button(self.panel_tab3, label="Buka &Studio Rekaman Suara JadwalKu...")
+		self.btnOpenVoiceStudio.Bind(wx.EVT_BUTTON, self.onOpenVoiceStudio)
+		sizer_tab3.Add(self.btnOpenVoiceStudio, 0, wx.ALL | wx.ALIGN_LEFT, 10)
+		
+		self.panel_tab3.SetSizer(sizer_tab3)
+		self.notebook.AddPage(self.panel_tab3, "3. Voice Pack & Studio Suara")
+		
 		main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 6)
 		
 		bottom_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1524,6 +1580,68 @@ class JadwalKuDialog(wx.Dialog):
 				status = "Aktif" if updated["enabled"] else "Nonaktif"
 				ui.message(f"Pengaturan pengingat waktu berkala berhasil disimpan ({status}, tiap {updated['interval']} menit).")
 			dlg.Destroy()
+		finally:
+			gui.mainFrame.postPopup()
+
+	def onVoicePackChanged(self, event):
+		sel = self.cb_active_vp.GetSelection()
+		filename = ""
+		if sel > 0 and sel - 1 < len(self.vp_list):
+			filename = self.vp_list[sel - 1]["id"]
+			
+		time_cfg = self.config.get_time_reminder_config()
+		time_cfg["active_voice_pack"] = filename
+		self.config.update_time_reminder_config(time_cfg)
+		ui.message("Paket suara aktif berhasil diubah.")
+
+	def onVoicePackVolumeChanged(self, event):
+		vol = self.sld_vp_vol.GetValue()
+		
+		if not hasattr(self, "_vp_vol_timer"):
+			self._vp_vol_timer = wx.Timer(self)
+			self.Bind(wx.EVT_TIMER, self._onSaveVoicePackVolume, self._vp_vol_timer)
+		self._vp_vol_timer.Start(200, wx.TIMER_ONE_SHOT)
+		
+	def _onSaveVoicePackVolume(self, event):
+		vol = self.sld_vp_vol.GetValue()
+		time_cfg = self.config.get_time_reminder_config()
+		time_cfg["voice_pack_volume"] = vol
+		self.config.update_time_reminder_config(time_cfg)
+		if hasattr(self, "audio") and self.audio:
+			active_vp = time_cfg.get("active_voice_pack", "")
+			if active_vp:
+				import os, datetime
+				pack_path = os.path.join(self.vp_mgr.pack_dir, active_vp)
+				if os.path.exists(pack_path):
+					temp_dir = self.vp_mgr.extract_pack_to_temp(pack_path)
+					if temp_dir:
+						now = datetime.datetime.now()
+						h_12 = now.hour % 12 or 12
+						words = ["waktu", "sekarang", str(now.hour), str(now.minute)]
+						vp_files = []
+						for w in words:
+							wav_path = os.path.join(temp_dir, f"{w}.wav")
+							if os.path.exists(wav_path):
+								vp_files.append(wav_path)
+						if vp_files:
+							self.audio.play_voice_pack_sequence(vp_files, volume_override=vol)
+
+	def onOpenVoiceStudio(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			from . import voicePackManager
+			# add_on_dir is the jadwalku directory
+			add_on_dir = os.path.dirname(os.path.abspath(__file__))
+			try:
+				dlg = VoicePackManagementDialog(self, add_on_dir, audio_manager=self.audio)
+				dlg.ShowModal()
+			except Exception as e:
+				import traceback
+				err = traceback.format_exc()
+				import ui
+				ui.message(f"Error opening Studio: {e}")
+				import logHandler
+				logHandler.log.error(f"JadwalKu Studio Error: {err}")
 		finally:
 			gui.mainFrame.postPopup()
 
@@ -2006,3 +2124,575 @@ class WorldClockDialog(wx.Dialog):
 
 
 
+
+
+import wx
+import os
+import threading
+from globalPlugins.jadwalku.voicePackManager import VoiceRecorder, VoicePackManager, trim_silence
+
+WORDS_TO_RECORD = ["sekarang", "waktu", "pukul", "jam", "tepat", "lewat", "menit", "detik", "am", "pm"] + [str(i) for i in range(60)]
+
+
+
+import hashlib
+def hash_password(pwd):
+	if not pwd: return ""
+	return hashlib.sha256(pwd.encode('utf-8')).hexdigest()
+
+
+class VoicePackManagementDialog(wx.Dialog):
+	def __init__(self, parent, add_on_dir, audio_manager=None):
+		super().__init__(parent, title="JadwalKu Voice Pack Manager", size=(600, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.add_on_dir = add_on_dir
+		self.audio = audio_manager
+		from .voicePackManager import VoicePackManager
+		self.vp_manager = VoicePackManager(add_on_dir)
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		lbl = wx.StaticText(self, label="Daftar Paket Suara (Voice Packs):")
+		sizer.Add(lbl, 0, wx.ALL, 10)
+		
+		self.lst_packs = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+		self.lst_packs.InsertColumn(0, "Nama Paket", width=200)
+		self.lst_packs.InsertColumn(1, "Status", width=120)
+		self.lst_packs.InsertColumn(2, "Privasi", width=100)
+		self.lst_packs.InsertColumn(3, "Pembuat", width=150)
+		sizer.Add(self.lst_packs, 1, wx.EXPAND | wx.ALL, 10)
+		
+		btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_new = wx.Button(self, label="&Buat Paket Baru")
+		self.btn_new.Bind(wx.EVT_BUTTON, self.onNew)
+		btn_sizer.Add(self.btn_new, 0, wx.ALL, 5)
+		
+		self.btn_edit = wx.Button(self, label="&Lanjutkan / Edit")
+		self.btn_edit.Bind(wx.EVT_BUTTON, self.onEdit)
+		btn_sizer.Add(self.btn_edit, 0, wx.ALL, 5)
+		
+		self.btn_del = wx.Button(self, label="&Hapus")
+		self.btn_del.Bind(wx.EVT_BUTTON, self.onDelete)
+		btn_sizer.Add(self.btn_del, 0, wx.ALL, 5)
+		
+		self.btn_close = wx.Button(self, id=wx.ID_CANCEL, label="&Tutup (Esc)")
+		btn_sizer.Add(self.btn_close, 0, wx.ALL, 5)
+		
+		sizer.Add(btn_sizer, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 10)
+		
+		self.SetSizer(sizer)
+		self.refresh_list()
+		self.lst_packs.SetFocus()
+
+	def refresh_list(self):
+		self.lst_packs.DeleteAllItems()
+		self.packs = self.vp_manager.get_available_packs()
+		for i, p in enumerate(self.packs):
+			status = "Draft ({}%)".format(int((p['recorded_words']/70)*100)) if p.get("is_draft") else "Selesai"
+			privacy = "Terkunci" if p.get("password_hash") else "Publik"
+			if p.get("is_permanent"):
+				privacy += " (Permanen)"
+			
+			self.lst_packs.InsertItem(i, p["name"])
+			self.lst_packs.SetItem(i, 1, status)
+			self.lst_packs.SetItem(i, 2, privacy)
+			self.lst_packs.SetItem(i, 3, p["author"])
+			self.lst_packs.SetItemData(i, i)
+
+	def onNew(self, evt):
+		try:
+			dlg = VoiceStudioDialog(self, self.add_on_dir, audio_manager=self.audio)
+			dlg.ShowModal()
+			dlg.Destroy()
+			self.refresh_list()
+		except Exception as e:
+			import traceback
+			import ui
+			ui.message(f"Error onNew: {e}\n{traceback.format_exc().splitlines()[-1]}")
+
+	def onEdit(self, evt):
+		sel = self.lst_packs.GetFirstSelected()
+		if sel < 0: return
+		p = self.packs[self.lst_packs.GetItemData(sel)]
+		
+		pwd_hash = p.get("password_hash", "")
+		if pwd_hash:
+			import wx
+			pwd_dlg = wx.TextEntryDialog(self, "Masukkan kata sandi untuk mengedit paket ini:", "Otorisasi Diperlukan", style=wx.TE_PASSWORD | wx.OK | wx.CANCEL)
+			if pwd_dlg.ShowModal() == wx.ID_OK:
+				inp = pwd_dlg.GetValue()
+				if hash_password(inp) != pwd_hash:
+					import ui
+					ui.message("Kata sandi salah!")
+					pwd_dlg.Destroy()
+					return
+			else:
+				pwd_dlg.Destroy()
+				return
+			pwd_dlg.Destroy()
+			
+		# Ekstrak untuk edit
+		import os
+		pack_path = os.path.join(self.vp_manager.pack_dir, p["id"])
+		meta = self.vp_manager.extract_for_edit(pack_path)
+		if not meta:
+			import ui
+			ui.message("Gagal mengekstrak paket suara.")
+			return
+			
+		try:
+			dlg = VoiceStudioDialog(self, self.add_on_dir, audio_manager=self.audio, edit_meta=meta, edit_filename=p["id"])
+			dlg.ShowModal()
+			dlg.Destroy()
+			self.refresh_list()
+		except Exception as e:
+			import traceback
+			import ui
+			ui.message(f"Error onEdit: {e}\n{traceback.format_exc().splitlines()[-1]}")
+
+	def onDelete(self, evt):
+		sel = self.lst_packs.GetFirstSelected()
+		if sel < 0: return
+		p = self.packs[self.lst_packs.GetItemData(sel)]
+		
+		if p.get("is_permanent"):
+			import ui
+			ui.message("Paket suara ini adalah contoh permanen dan tidak dapat dihapus.")
+			return
+			
+		pwd_hash = p.get("password_hash", "")
+		if pwd_hash:
+			import wx
+			pwd_dlg = wx.TextEntryDialog(self, "Masukkan kata sandi untuk menghapus paket ini:", "Otorisasi Diperlukan", style=wx.TE_PASSWORD | wx.OK | wx.CANCEL)
+			if pwd_dlg.ShowModal() == wx.ID_OK:
+				inp = pwd_dlg.GetValue()
+				if hash_password(inp) != pwd_hash:
+					import ui
+					ui.message("Kata sandi salah!")
+					pwd_dlg.Destroy()
+					return
+			else:
+				pwd_dlg.Destroy()
+				return
+			pwd_dlg.Destroy()
+			
+		import wx
+		confirm = wx.MessageDialog(self, f"Apakah Anda yakin ingin menghapus paket suara '{p['name']}'?", "Konfirmasi Hapus", wx.YES_NO | wx.ICON_WARNING)
+		if confirm.ShowModal() == wx.ID_YES:
+			import os
+			pack_path = os.path.join(self.vp_manager.pack_dir, p["id"])
+			try:
+				os.remove(pack_path)
+				import ui
+				ui.message("Paket suara berhasil dihapus.")
+				self.refresh_list()
+			except Exception as e:
+				import ui
+				ui.message(f"Gagal menghapus: {e}")
+		confirm.Destroy()
+
+class VoiceStudioDialog(wx.Dialog):
+
+	def __init__(self, parent, add_on_dir, audio_manager=None, edit_meta=None, edit_filename=None):
+		super().__init__(parent, title="JadwalKu Voice Pack Studio", size=(650, 500), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.add_on_dir = add_on_dir
+		self.audio = audio_manager
+		self.edit_meta = edit_meta
+		self.edit_filename = edit_filename
+		
+		from .voicePackManager import VoicePackManager, VoiceRecorder
+		self.vp_manager = VoicePackManager(add_on_dir)
+		self.recorder = VoiceRecorder()
+		if not edit_meta:
+			self.session_dir = self.vp_manager.init_recording_session()
+		else:
+			self.session_dir = self.vp_manager.temp_session_dir
+		
+		self.current_step = 0 # 0: Test Mic, 1: Metadata, 2: Studio
+		self.current_word_idx = 0
+		
+		self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		# --- Panel 1: Tes Mikrofon (Langkah 1) ---
+		self.pnl_step1 = wx.Panel(self)
+		step1_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		step1_sizer.Add(wx.StaticText(self.pnl_step1, label="Langkah 1: Tes Kesiapan Mikrofon & Speaker"), 0, wx.ALL, 5)
+		
+		self.in_devices = self.recorder.get_input_devices()
+		self.out_devices = self.recorder.get_output_devices()
+		in_names = [d[1] for d in self.in_devices]
+		out_names = [d[1] for d in self.out_devices]
+
+		grid_audio = wx.FlexGridSizer(2, 2, 5, 5)
+		grid_audio.AddGrowableCol(1)
+		
+		grid_audio.Add(wx.StaticText(self.pnl_step1, label="Pilih &Mikrofon:"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.cbo_mic = wx.Choice(self.pnl_step1, choices=in_names)
+		self.cbo_mic.SetSelection(0)
+		self.cbo_mic.Bind(wx.EVT_CHOICE, self.onChangeAudioDevice)
+		grid_audio.Add(self.cbo_mic, 1, wx.EXPAND)
+		
+		grid_audio.Add(wx.StaticText(self.pnl_step1, label="Pilih &Speaker:"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.cbo_spk = wx.Choice(self.pnl_step1, choices=out_names)
+		self.cbo_spk.SetSelection(0)
+		self.cbo_spk.Bind(wx.EVT_CHOICE, self.onChangeAudioDevice)
+		grid_audio.Add(self.cbo_spk, 1, wx.EXPAND)
+		
+		step1_sizer.Add(grid_audio, 0, wx.EXPAND | wx.ALL, 10)
+		
+		step1_sizer.Add(wx.StaticText(self.pnl_step1, label="Tekan tombol di bawah untuk merekam suara selama 3 detik. Pastikan tidak ada suara bising di sekitar Anda."), 0, wx.ALL, 5)
+		
+		btn_sizer_mic = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_test_mic = wx.Button(self.pnl_step1, label="&Mulai Rekam 3 Detik")
+		self.btn_test_mic.Bind(wx.EVT_BUTTON, self.onTestMic)
+		btn_sizer_mic.Add(self.btn_test_mic, 0, wx.ALL, 5)
+		
+		self.btn_play_test = wx.Button(self.pnl_step1, label="&Putar Hasil Tes")
+		self.btn_play_test.Bind(wx.EVT_BUTTON, self.onPlayTestMic)
+		self.btn_play_test.Disable()
+		btn_sizer_mic.Add(self.btn_play_test, 0, wx.ALL, 5)
+		
+		step1_sizer.Add(btn_sizer_mic, 0, wx.EXPAND | wx.ALL, 5)
+		
+		btn_sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_next_step1 = wx.Button(self.pnl_step1, label="Lanjut ke &Langkah 2")
+		self.btn_next_step1.Bind(wx.EVT_BUTTON, self.onNextStep1)
+		btn_sizer1.Add(self.btn_next_step1, 0, wx.ALL, 5)
+		
+		self.btn_close1 = wx.Button(self.pnl_step1, id=wx.ID_CANCEL, label="&Tutup")
+		btn_sizer1.Add(self.btn_close1, 0, wx.ALL, 5)
+		
+		step1_sizer.Add(btn_sizer1, 0, wx.ALIGN_RIGHT | wx.ALL, 10)
+		
+		self.pnl_step1.SetSizer(step1_sizer)
+		self.main_sizer.Add(self.pnl_step1, 1, wx.EXPAND)
+		
+		# --- Panel 2: Metadata Paket (Langkah 2) ---
+		self.pnl_step2 = wx.Panel(self)
+		step2_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		step2_sizer.Add(wx.StaticText(self.pnl_step2, label="Langkah 2: Identitas Paket Suara"), 0, wx.ALL, 5)
+		
+		grid = wx.FlexGridSizer(0, 2, 10, 10)
+		grid.AddGrowableCol(1)
+		
+		grid.Add(wx.StaticText(self.pnl_step2, label="&Nama Paket Suara:"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.txt_pack_name = wx.TextCtrl(self.pnl_step2, value="Suara Kustom")
+		grid.Add(self.txt_pack_name, 1, wx.EXPAND)
+		
+		grid.Add(wx.StaticText(self.pnl_step2, label="Nama &Pembuat:"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.txt_author = wx.TextCtrl(self.pnl_step2, value="Pengguna JadwalKu")
+		grid.Add(self.txt_author, 1, wx.EXPAND)
+		
+		grid.Add(wx.StaticText(self.pnl_step2, label="&Deskripsi:"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.txt_desc = wx.TextCtrl(self.pnl_step2, value="Paket suara buatanku.")
+		grid.Add(self.txt_desc, 1, wx.EXPAND)
+		
+		grid.Add(wx.StaticText(self.pnl_step2, label="&Kata Sandi (Opsional):"), 0, wx.ALIGN_CENTER_VERTICAL)
+		self.txt_pwd = wx.TextCtrl(self.pnl_step2, style=wx.TE_PASSWORD)
+		grid.Add(self.txt_pwd, 1, wx.EXPAND)
+		
+		if self.edit_meta:
+			self.txt_pack_name.SetValue(self.edit_meta.get("name", ""))
+			self.txt_author.SetValue(self.edit_meta.get("author", ""))
+			self.txt_desc.SetValue(self.edit_meta.get("description", ""))
+			if self.edit_meta.get("password_hash"):
+				self.txt_pwd.SetValue("********") # Dummy password representation
+		
+		step2_sizer.Add(grid, 0, wx.EXPAND | wx.ALL, 10)
+		
+		btn_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_next_step2 = wx.Button(self.pnl_step2, label="&Lanjut ke Langkah 3 (Studio Rekaman)")
+		self.btn_next_step2.Bind(wx.EVT_BUTTON, self.onNextStep2)
+		btn_sizer2.Add(self.btn_next_step2, 0, wx.ALL, 5)
+		
+		self.btn_close2 = wx.Button(self.pnl_step2, id=wx.ID_CANCEL, label="&Tutup")
+		btn_sizer2.Add(self.btn_close2, 0, wx.ALL, 5)
+		
+		step2_sizer.Add(btn_sizer2, 0, wx.ALIGN_RIGHT | wx.ALL, 10)
+		
+		self.pnl_step2.SetSizer(step2_sizer)
+		self.main_sizer.Add(self.pnl_step2, 1, wx.EXPAND)
+		
+		# --- Panel 3: Studio Rekaman ---
+		self.pnl_studio = wx.Panel(self)
+		studio_sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		self.lbl_progress = wx.StaticText(self.pnl_studio, label="")
+		studio_sizer.Add(self.lbl_progress, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 10)
+		
+		studio_sizer.Add(wx.StaticText(self.pnl_studio, label="Kata/Frasa yang Harus Diucapkan:"), 0, wx.LEFT | wx.TOP, 10)
+		
+		self.txt_word = wx.TextCtrl(self.pnl_studio, style=wx.TE_CENTER)
+		self.txt_word.Bind(wx.EVT_CHAR, self.onWordChar)
+		font = self.txt_word.GetFont()
+		font.SetPointSize(18)
+		font.SetWeight(wx.FONTWEIGHT_BOLD)
+		self.txt_word.SetFont(font)
+		studio_sizer.Add(self.txt_word, 0, wx.EXPAND | wx.ALL, 10)
+		
+		btn_sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_record = wx.Button(self.pnl_studio, label="&Mulai Rekam (Spasi)")
+		self.btn_record.Bind(wx.EVT_BUTTON, self.onRecordToggle)
+		btn_sizer1.Add(self.btn_record, 0, wx.ALL, 5)
+		
+		self.btn_play_result = wx.Button(self.pnl_studio, label="Putar &Hasil")
+		self.btn_play_result.Bind(wx.EVT_BUTTON, self.onPlayResult)
+		btn_sizer1.Add(self.btn_play_result, 0, wx.ALL, 5)
+		
+		self.btn_play_sample = wx.Button(self.pnl_studio, label="Putar &Contoh")
+		self.btn_play_sample.Bind(wx.EVT_BUTTON, self.onPlaySample)
+		btn_sizer1.Add(self.btn_play_sample, 0, wx.ALL, 5)
+		
+		studio_sizer.Add(btn_sizer1, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
+		
+		btn_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_prev = wx.Button(self.pnl_studio, label="<- S&ebelumnya")
+		self.btn_prev.Bind(wx.EVT_BUTTON, self.onPrevWord)
+		btn_sizer2.Add(self.btn_prev, 0, wx.ALL, 5)
+		
+		self.btn_next = wx.Button(self.pnl_studio, label="Sela&njutnya ->")
+		self.btn_next.Bind(wx.EVT_BUTTON, self.onNextWord)
+		btn_sizer2.Add(self.btn_next, 0, wx.ALL, 5)
+		
+		studio_sizer.Add(btn_sizer2, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5)
+		
+		btn_sizer3 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btn_draft = wx.Button(self.pnl_studio, label="Simpan P&rogress (Draft)")
+		self.btn_draft.Bind(wx.EVT_BUTTON, lambda e: self.onFinish(e, is_draft=True))
+		btn_sizer3.Add(self.btn_draft, 0, wx.ALL, 5)
+		
+		self.btn_finish = wx.Button(self.pnl_studio, label="&Simpan & Ekspor Paket Suara...")
+		self.btn_finish.Bind(wx.EVT_BUTTON, lambda e: self.onFinish(e, is_draft=False))
+		btn_sizer3.Add(self.btn_finish, 0, wx.ALL, 5)
+		
+		self.btn_close3 = wx.Button(self.pnl_studio, id=wx.ID_CANCEL, label="&Tutup (Esc)")
+		btn_sizer3.Add(self.btn_close3, 0, wx.ALL, 5)
+		
+		studio_sizer.Add(btn_sizer3, 0, wx.ALIGN_RIGHT | wx.ALL, 10)
+		
+		self.pnl_studio.SetSizer(studio_sizer)
+		self.main_sizer.Add(self.pnl_studio, 1, wx.EXPAND)
+		
+		self.pnl_step2.Hide()
+		self.pnl_studio.Hide()
+		self.SetSizer(self.main_sizer)
+		self.btn_test_mic.SetFocus()
+
+	def play_audio(self, filepath):
+		if not os.path.exists(filepath):
+			import ui
+			ui.message("Audio belum direkam atau file tidak ditemukan.")
+			return
+		# Gunakan play_audio dari NativeAudioIO
+		self.recorder.play_audio(filepath)
+
+	def onChangeAudioDevice(self, evt):
+		in_idx = self.cbo_mic.GetSelection()
+		out_idx = self.cbo_spk.GetSelection()
+		if in_idx >= 0 and in_idx < len(self.in_devices):
+			self.recorder.set_input_device(self.in_devices[in_idx][0])
+		if out_idx >= 0 and out_idx < len(self.out_devices):
+			self.recorder.set_output_device(self.out_devices[out_idx][0])
+
+	def onTestMic(self, evt):
+		if self.recorder.is_recording():
+			return
+		self.btn_test_mic.Disable()
+		self.btn_play_test.Disable()
+		self.btn_next_step1.Disable()
+		self.btn_test_mic.SetLabel("Merekam... (Bicara Sekarang!)")
+		import ui
+		ui.message("Mulai merekam. Silakan bicara sekarang selama 3 detik.")
+		
+		if self.recorder.start_recording():
+			def record_task():
+				import time
+				time.sleep(3)
+				import wx
+				wx.CallAfter(self.finishTestMic)
+			import threading
+			t = threading.Thread(target=record_task)
+			t.daemon = True
+			t.start()
+		else:
+			ui.message("Gagal mengakses mikrofon.")
+			self.btn_test_mic.Enable()
+			self.btn_next_step1.Enable()
+			self.btn_test_mic.SetLabel("&Mulai Rekam 3 Detik")
+			
+	def finishTestMic(self):
+		import os
+		test_wav = os.path.join(self.session_dir, "test_mic.wav")
+		if self.recorder.stop_and_save(test_wav):
+			import ui
+			ui.message("Selesai merekam. Silakan tekan Putar Hasil Tes.")
+			self.btn_play_test.Enable()
+			self.btn_play_test.SetFocus()
+		self.btn_test_mic.Enable()
+		self.btn_next_step1.Enable()
+		self.btn_test_mic.SetLabel("&Ulangi Rekam 3 Detik")
+		
+	def onPlayTestMic(self, evt):
+		import os
+		test_wav = os.path.join(self.session_dir, "test_mic.wav")
+		self.play_audio(test_wav)
+
+	def onNextStep1(self, evt):
+		self.pnl_step1.Hide()
+		self.pnl_step2.Show()
+		self.Layout()
+		self.txt_pack_name.SetFocus()
+		
+	def onNextStep2(self, evt):
+		# Validasi
+		if not self.txt_pack_name.GetValue().strip():
+			import ui
+			ui.message("Nama paket tidak boleh kosong.")
+			return
+		self.pnl_step2.Hide()
+		self.pnl_studio.Show()
+		self.Layout()
+		
+		if self.edit_meta:
+			import os
+			# Cari kata pertama yang belum direkam
+			for i, w in enumerate(WORDS_TO_RECORD):
+				if not os.path.exists(self.vp_manager.get_session_wav_path(w)):
+					self.current_word_idx = i
+					break
+					
+		self.updateStudioUI()
+		self.btn_record.SetFocus()
+
+	def updateStudioUI(self):
+		import os
+		
+		word = WORDS_TO_RECORD[self.current_word_idx]
+		self.lbl_progress.SetLabel(f"Item {self.current_word_idx + 1} dari {len(WORDS_TO_RECORD)}")
+		self.txt_word.SetValue(word)
+		
+		self.btn_prev.Enable(self.current_word_idx > 0)
+		self.btn_next.Enable(self.current_word_idx < len(WORDS_TO_RECORD) - 1)
+		
+		# Cek apakah sudah direkam
+		path = self.vp_manager.get_session_wav_path(word)
+		if os.path.exists(path):
+			self.btn_play_result.Enable(True)
+		else:
+			self.btn_play_result.Enable(False)
+
+	def onWordChar(self, evt):
+		key = evt.GetKeyCode()
+		# Allow navigation keys (arrows, home, end) and Tab
+		if key in (wx.WXK_LEFT, wx.WXK_RIGHT, wx.WXK_UP, wx.WXK_DOWN, wx.WXK_HOME, wx.WXK_END, wx.WXK_PAGEUP, wx.WXK_PAGEDOWN, wx.WXK_TAB):
+			evt.Skip()
+
+	def onRecordToggle(self, evt):
+		import ui
+		import os
+		if not self.recorder.is_recording():
+			# Stop NativeAudioIO playback if any
+			# Since we are recording now, we don't need to purge winsound
+			if self.recorder.start_recording():
+				self.btn_record.SetLabel("&Berhenti Rekam (Spasi)")
+				ui.message("Merekam...")
+				self.btn_play_result.Disable()
+				self.btn_play_sample.Disable()
+				self.btn_prev.Disable()
+				self.btn_next.Disable()
+		else:
+			from .voicePackManager import trim_silence
+			word = WORDS_TO_RECORD[self.current_word_idx]
+			raw_wav = self.vp_manager.get_session_wav_path(word + "_raw")
+			final_wav = self.vp_manager.get_session_wav_path(word)
+			
+			if self.recorder.stop_and_save(raw_wav):
+				# Trim hening
+				trim_silence(raw_wav, final_wav)
+				if os.path.exists(raw_wav): os.remove(raw_wav)
+				
+				# Putar otomatis
+				ui.message("Disimpan.")
+				self.play_audio(final_wav)
+				
+			self.btn_record.SetLabel("&Mulai Rekam (Spasi)")
+			self.btn_play_sample.Enable(True)
+			self.updateStudioUI()
+			
+	def onPlayResult(self, evt):
+		
+		word = WORDS_TO_RECORD[self.current_word_idx]
+		path = self.vp_manager.get_session_wav_path(word)
+		self.play_audio(path)
+		
+	def onPlaySample(self, evt):
+		import os
+		
+		word = WORDS_TO_RECORD[self.current_word_idx]
+		sample_path = os.path.join(self.add_on_dir, "voice_master", f"{word}.wav")
+		if os.path.exists(sample_path):
+			self.play_audio(sample_path)
+		else:
+			import ui
+			ui.message("Suara contoh master belum tersedia.")
+			
+	def onPrevWord(self, evt):
+		if self.current_word_idx > 0:
+			self.current_word_idx -= 1
+			self.updateStudioUI()
+			self.txt_word.SetFocus()
+			
+	def onNextWord(self, evt):
+		
+		if self.current_word_idx < len(WORDS_TO_RECORD) - 1:
+			self.current_word_idx += 1
+			self.updateStudioUI()
+			self.txt_word.SetFocus()
+			
+	def onFinish(self, evt, is_draft=False):
+		import os
+		
+		if not is_draft:
+			# Cek apakah semua 70 item sudah direkam
+			missing = []
+			for w in WORDS_TO_RECORD:
+				if not os.path.exists(self.vp_manager.get_session_wav_path(w)):
+					missing.append(w)
+			
+			if missing:
+				import ui
+				ui.message(f"Masih ada {len(missing)} item yang belum direkam. Silakan lengkapi terlebih dahulu, atau gunakan Simpan Progress (Draft).")
+				return
+				
+		meta = {
+			"name": self.txt_pack_name.GetValue().strip(),
+			"author": self.txt_author.GetValue().strip(),
+			"description": self.txt_desc.GetValue().strip(),
+			"version": "1.0",
+			"words": WORDS_TO_RECORD
+		}
+		
+		pwd_input = self.txt_pwd.GetValue()
+		if pwd_input != "********": # If it changed or is new
+			pwd_hash = hash_password(pwd_input)
+		else:
+			pwd_hash = self.edit_meta.get("password_hash", "") if self.edit_meta else ""
+			
+		is_perm = self.edit_meta.get("is_permanent", False) if self.edit_meta else False
+		
+		safe_name = "".join(c for c in meta["name"] if c.isalnum() or c in " _-").strip().replace(" ", "_")
+		if not safe_name: safe_name = "MyVoice"
+		
+		out_file = self.edit_filename if self.edit_filename else f"{safe_name}.jvp"
+		try:
+			path = self.vp_manager.export_pack(meta, out_file, is_draft=is_draft, password_hash=pwd_hash, is_permanent=is_perm)
+			import ui
+			if is_draft:
+				ui.message(f"Progress disimpan sebagai draft!")
+			else:
+				ui.message(f"Berhasil! Paket suara telah diekspor dan siap digunakan.")
+			self.Destroy()
+		except Exception as e:
+			import ui
+			ui.message(f"Gagal mengekspor: {str(e)}")
