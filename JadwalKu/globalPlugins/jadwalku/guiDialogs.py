@@ -74,6 +74,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.6.4 (Terbaru - Fitur Undangan JadwalKu) ---\n"
+			"* Fitur Bagikan Add-on (NVDA + / lalu G) kini dilengkapi opsi untuk mengirimkan Pesan Undangan (Promosi) khusus untuk teman Anda via WhatsApp atau media sosial lainnya.\n\n"
 			"--- Versi 1.6.3 (JadwalKu Voice Pack Studio & Pengingat Suara Manusia) ---\n"
 			"* Fitur JadwalKu Voice Pack Studio (Tersedia di Tab 3 Pengaturan Utama): Fasilitas bawaan dengan 3-Step Wizard elegan yang memandu Anda merekam 70 kata kustom menggunakan mikrofon Anda sendiri. JadwalKu akan otomatis memotong jeda hening (*auto-trim*) dan mengompresnya menjadi paket suara `.jvp`.\n"
 			"* Pengingat Waktu Beruntun (*Concatenative Synthesis*): JadwalKu kini dapat menyatukan potongan suara manusia secara langsung di memori untuk melaporkan waktu (misal: 'sekarang' + 'jam' + 'sembilan' + 'tepat') tanpa bergantung pada mesin TTS robotik SAPI 5 sama sekali! Termasuk dukungan penuh translasi angka menit (seperti '13' menjadi 'tiga' dan 'belas').\n"
