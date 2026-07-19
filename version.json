@@ -1,6 +1,6 @@
 {
-    "version": "1.6.3",
-    "changelog": "v1.6.3: JadwalKu Voice Pack Studio (Pembaruan Masif!).\n\n- FITUR BARU: Studio Rekaman Suara JadwalKu. Kini Anda dapat merekam suara Anda sendiri (atau suara orang terdekat) dan menjadikannya penyiar waktu di NVDA Anda!\n- PENGELOLA PAKET: Akses 'Voice Pack Manager' dari Pengaturan Tab 3 untuk membuat, mengedit, atau menghapus paket suara buatan Anda.\n- SIMPAN PROGRESS (DRAFT): Anda tidak perlu menyelesaikan seluruh 70 rekaman sekaligus. Rekam semampu Anda, lalu tekan 'Simpan Progress (Draft)' untuk melanjutkannya di lain waktu secara otomatis!\n- ENKRIPSI SANDI: Amankan paket suara buatan Anda dengan kata sandi. Tanpa kata sandi, tidak ada orang yang bisa mengutak-atik karya Anda.\n- VOLUME SUPER: Tambahan penguat volume hingga 1200% (12x lipat) khusus untuk Voice Pack Anda dengan pratinjau instan saat Anda menggeser slider!\n- PENCEGAHAN HILANG DATA: Paket suara kini disimpan dengan aman di sistem, sehingga tidak akan pernah hilang meskipun Anda memperbarui versi add-on JadwalKu di masa mendatang.",
-    "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.3.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.3/JadwalKu-v1.6.3.nvda-addon"
+    "version": "1.6.4",
+    "changelog": "v1.6.4: Tambahan Fitur Undangan JadwalKu. Kini Anda dapat membagikan tautan unduhan langsung atau mengirimkan pesan promosi elegan ke WhatsApp kolega Anda! (v1.6.3: JadwalKu Voice Pack Studio).",
+    "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.4.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.4/JadwalKu-v1.6.4.nvda-addon"
 }
