@@ -74,7 +74,13 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.4 (Terbaru - Fitur Undangan JadwalKu) ---\n"
+			"--- Versi 1.6.5 (Terbaru - JadwalKu Voice Pack Store) ---\n"
+			"* Terobosan Baru: JadwalKu Voice Pack Store! Kini Anda dapat mengunduh paket suara kustom dari seluruh pengguna JadwalKu di dunia, atau mengunggah (membagikan) karya rekaman Anda sendiri langsung dari dalam NVDA.\n"
+			"* Sistem Store Hibrida: Menggunakan kombinasi Cloudflare Workers (untuk pelacakan jumlah unduhan & keamanan perlindungan kata sandi) dan Hugging Face (sebagai gudang penyimpanan tanpa batas).\n"
+			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
+			"* Bugfixes (Patch): Perbaikan pada Store termasuk penyesuaian transmisi NDJSON ke HF API, perbaikan sinkronisasi refresh daftar Store (cache-busting), serta perbaikan NVDA Freeze (deadlock) pada UI unggahan saat menyertakan file draft.\n"
+			"* Voice Pack Pronunciation (Patch): Format pengucapan waktu khusus menggunakan pintasan `NVDA + /` lalu `W` kini dibacakan secara lebih natural dan eksplisit (menyebutkan kata 'jam', 'menit', 'detik') agar tidak ada lagi ambiguitas angka yang digabungkan tanpa jeda.\n\n"
+			"--- Versi 1.6.4 (Fitur Undangan JadwalKu) ---\n"
 			"* Fitur Bagikan Add-on (NVDA + / lalu G) kini dilengkapi opsi untuk mengirimkan Pesan Undangan (Promosi) khusus untuk teman Anda via WhatsApp atau media sosial lainnya.\n\n"
 			"--- Versi 1.6.3 (JadwalKu Voice Pack Studio & Pengingat Suara Manusia) ---\n"
 			"* Fitur JadwalKu Voice Pack Studio (Tersedia di Tab 3 Pengaturan Utama): Fasilitas bawaan dengan 3-Step Wizard elegan yang memandu Anda merekam 70 kata kustom menggunakan mikrofon Anda sendiri. JadwalKu akan otomatis memotong jeda hening (*auto-trim*) dan mengompresnya menjadi paket suara `.jvp`.\n"
@@ -1461,6 +1467,10 @@ class JadwalKuDialog(wx.Dialog):
 		self.btnOpenVoiceStudio.Bind(wx.EVT_BUTTON, self.onOpenVoiceStudio)
 		sizer_tab3.Add(self.btnOpenVoiceStudio, 0, wx.ALL | wx.ALIGN_LEFT, 10)
 		
+		self.btnOpenStore = wx.Button(self.panel_tab3, label="Buka &Toko Voice Pack (JadwalKu Store)...")
+		self.btnOpenStore.Bind(wx.EVT_BUTTON, self.onOpenVoicePackStore)
+		sizer_tab3.Add(self.btnOpenStore, 0, wx.ALL | wx.ALIGN_LEFT, 10)
+		
 		self.panel_tab3.SetSizer(sizer_tab3)
 		self.notebook.AddPage(self.panel_tab3, "3. Voice Pack & Studio Suara")
 		
@@ -1644,6 +1654,26 @@ class JadwalKuDialog(wx.Dialog):
 				ui.message(f"Error opening Studio: {e}")
 				import logHandler
 				logHandler.log.error(f"JadwalKu Studio Error: {err}")
+		finally:
+			gui.mainFrame.postPopup()
+
+	def onOpenVoicePackStore(self, event):
+		gui.mainFrame.prePopup()
+		try:
+			from . import guiVoicePackStore
+			from . import voicePackManager
+			add_on_dir = os.path.dirname(os.path.abspath(__file__))
+			vp_mgr = voicePackManager.VoicePackManager(add_on_dir)
+			try:
+				dlg = guiVoicePackStore.VoicePackStoreDialog(self, add_on_dir, vp_manager=vp_mgr)
+				dlg.ShowModal()
+			except Exception as e:
+				import traceback
+				err = traceback.format_exc()
+				import ui
+				ui.message(f"Error opening Store: {e}")
+				import logHandler
+				logHandler.log.error(f"JadwalKu Store Error: {err}")
 		finally:
 			gui.mainFrame.postPopup()
 

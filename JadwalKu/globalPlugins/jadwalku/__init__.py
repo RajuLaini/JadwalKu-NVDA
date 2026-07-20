@@ -557,10 +557,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if mode in ("audio", "both"):
 				self.audio.play_sound("chime.wav")
 						
-			import re
-			clean_str = time_str.lower().replace(":00", " ").replace(":", " ")
-			words = clean_str.split()
+			is_24 = time_settings.get("time_format", "24") == "24"
+			style = time_settings.get("time_speech_style", "default")
+			inc_sec = time_settings.get("include_seconds", False) or style == "full_seconds" or style == "with_seconds"
 			
+			h = now.hour
+			h_val = h if is_24 else (h % 12 or 12)
+			
+			words = ["sekarang", "jam", str(h_val)]
+			
+			if inc_sec:
+				words.extend(["lewat", str(now.minute), "menit", str(now.second), "detik"])
+			else:
+				if now.minute == 0:
+					words.append("tepat")
+				else:
+					words.extend(["lewat", str(now.minute), "menit"])
+					
+			if not is_24:
+				words.append("am" if h < 12 else "pm")
 			vp_files = []
 			try:
 				from globalPlugins.jadwalku.voicePackManager import VoicePackManager

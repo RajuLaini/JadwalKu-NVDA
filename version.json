@@ -1,6 +1,6 @@
 {
-    "version": "1.6.4",
-    "changelog": "v1.6.4: Tambahan Fitur Undangan JadwalKu. Kini Anda dapat membagikan tautan unduhan langsung atau mengirimkan pesan promosi elegan ke WhatsApp kolega Anda! (v1.6.3: JadwalKu Voice Pack Studio).",
-    "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.4.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.4/JadwalKu-v1.6.4.nvda-addon"
+    "version": "1.6.5",
+    "changelog": "Terobosan Baru: JadwalKu Voice Pack Store! Kini Anda dapat mengunduh paket suara kustom dari seluruh pengguna JadwalKu di dunia, atau mengunggah (membagikan) karya rekaman Anda sendiri. (Termasuk Hotfix UI Store & Patch perbaikan naturalisasi pengucapan pengingat Voice Pack).",
+    "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.5.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5/JadwalKu-v1.6.5.nvda-addon"
 }
