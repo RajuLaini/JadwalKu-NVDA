@@ -80,6 +80,8 @@ class ChangelogDialog(wx.Dialog):
 			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
 			"* Bugfixes (Patch): Perbaikan pada Store termasuk penyesuaian transmisi NDJSON ke HF API, perbaikan sinkronisasi refresh daftar Store (cache-busting), serta perbaikan NVDA Freeze (deadlock) pada UI unggahan saat menyertakan file draft.\n"
 			"* Voice Pack Pronunciation (Patch): Format pengucapan waktu khusus menggunakan pintasan `NVDA + /` lalu `W` kini dibacakan secara lebih natural dan eksplisit (menyebutkan kata 'jam', 'menit', 'detik') agar tidak ada lagi ambiguitas angka yang digabungkan tanpa jeda.\n\n"
+			"--- Versi 1.6.5.5 (Hotfix Instalasi Store Final) ---\n"
+			"* Memperbaiki bug validasi zip ('manifest.json') yang menyebabkan kegagalan tahap akhir instalasi paket pasca-unduh.\n\n"
 			"--- Versi 1.6.5.4 (Hotfix UI Store Lanjutan) ---\n"
 			"* Memperbaiki bug kegagalan instalasi paket akibat metode 'install_pack' yang hilang pada VoicePackManager di rilis sebelumnya.\n\n"
 			"--- Versi 1.6.5.3 (Hotfix URL Unduhan) ---\n"

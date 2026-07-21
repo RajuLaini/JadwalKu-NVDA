@@ -442,7 +442,7 @@ class VoicePackManager:
 			import zipfile
 			# Verifikasi integritas zip
 			with zipfile.ZipFile(temp_path, 'r') as zf:
-				if "metadata.json" not in zf.namelist():
+				if "manifest.json" not in zf.namelist():
 					return False
 			
 			dest_path = os.path.join(self.pack_dir, os.path.basename(temp_path))
