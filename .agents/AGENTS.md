@@ -21,6 +21,7 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
 - Setelah seluruh kode, `ChangelogDialog` (`V`), dan dokumentasi diperbarui, selalu jalankan perintah:
   `python build_and_install.py`
 - Hal ini memastikan paket `.nvda-addon` terbaru langsung terbuat di folder akar proyek dan terpasang otomatis ke folder add-on NVDA pengguna (`%appdata%\nvda\addons\JadwalKu`).
+- **SANGAT PENTING (Prosedur Rilis ke GitHub):** Jika Anda merilis versi baru (atau menaikkan versi untuk Auto-Updater), Anda **WAJIB** melakukan `git add JadwalKu-vX.X.X.nvda-addon` dan mem-*push* file tersebut ke *branch main* di GitHub. Sistem Auto-Updater milik pengguna mengunduh rilis langsung dari file `.nvda-addon` yang ada di branch `main`. Mengubah kode di folder `JadwalKu/` saja TANPA melakukan build ulang dan mem-*push* file hasil `.nvda-addon` ke GitHub akan mengakibatkan pengguna gagal mendapatkan pembaruan karena file instalernya masih versi usang.
 
 ## 5. Investigasi Terarah (Research Before Assumption)
 - **Wajib Menelusuri Variabel Global / Konstan**: Sebelum membuat asumsi mengenai bagaimana sebuah fitur bekerja (misalnya asumsi bahwa sistem belum mendukung perekaman angka), agen WAJIB melakukan `grep_search` pada direktori proyek untuk mencari daftar konfigurasi atau array konstan yang sudah ada (seperti `WORDS_TO_RECORD`, konfigurasi config, dll).
