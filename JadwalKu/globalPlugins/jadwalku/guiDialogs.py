@@ -80,6 +80,8 @@ class ChangelogDialog(wx.Dialog):
 			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
 			"* Bugfixes (Patch): Perbaikan pada Store termasuk penyesuaian transmisi NDJSON ke HF API, perbaikan sinkronisasi refresh daftar Store (cache-busting), serta perbaikan NVDA Freeze (deadlock) pada UI unggahan saat menyertakan file draft.\n"
 			"* Voice Pack Pronunciation (Patch): Format pengucapan waktu khusus menggunakan pintasan `NVDA + /` lalu `W` kini dibacakan secara lebih natural dan eksplisit (menyebutkan kata 'jam', 'menit', 'detik') agar tidak ada lagi ambiguitas angka yang digabungkan tanpa jeda.\n\n"
+			"--- Versi 1.6.5.3 (Hotfix URL Unduhan) ---\n"
+			"* Hotfix Kritis UI Store: Memperbaiki kegagalan unduh paket suara akibat bug karakter spasi (URL Control Characters) pada ID Pengguna dengan menerapkan enkoding URL secara menyeluruh.\n\n"
 			"--- Versi 1.6.5.2 (Patch Awan & Format Fleksibel) ---\n"
 			"* Pembaruan kritis pada sistem mesin Cloudflare untuk mengizinkan unggahan/unduhan Paket Suara tanpa Error 500 (Base64 Binary Patch).\n"
 			"* Pemeriksaan waktu manual (NVDA+/, W) kini pengucapan Voice Pack-nya menjadi fleksibel, secara otomatis mengikuti aturan Format Pembacaan Waktu yang dipilih pada tab Pengaturan JadwalKu.\n\n"

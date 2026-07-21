@@ -1,6 +1,6 @@
 {
-    "version": "1.6.5.2",
-    "changelog": "- Pembaruan kritis pada sistem Cloudflare untuk mengizinkan unggahan/unduhan Paket Suara tanpa Error 500\n- Pemeriksaan waktu manual (NVDA+/, W) kini pengucapannya fleksibel mengikuti Format Pembacaan Waktu yang dipilih di Pengaturan.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.5.2.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5.2/JadwalKu-v1.6.5.2.nvda-addon"
+    "version": "1.6.5.3",
+    "changelog": "- Hotfix Kritis UI Store: Memperbaiki kegagalan unduh akibat bug karakter spasi (URL Control Characters) pada ID Pengguna.\n- Pembaruan kritis pada sistem Cloudflare untuk mengizinkan unggahan/unduhan Paket Suara tanpa Error 500\n- Pemeriksaan waktu manual (NVDA+/, W) kini pengucapannya fleksibel mengikuti Format Pembacaan Waktu yang dipilih di Pengaturan.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.5.3.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5.3/JadwalKu-v1.6.5.3.nvda-addon"
 }

@@ -131,7 +131,7 @@ class VoicePackStoreDialog(wx.Dialog):
 			return
 		pack = self.packs_data[sel]
 		
-		dl_url = f"{API_URL}/download/{pack['hardwareId']}"
+		dl_url = f"{API_URL}/download/{urllib.parse.quote(pack['hardwareId'])}"
 		
 		dlg = wx.ProgressDialog("Mengunduh", f"Sedang mengunduh {pack['filename']}...", maximum=100, parent=self, style=wx.PD_APP_MODAL | wx.PD_AUTO_HIDE)
 		
