@@ -80,6 +80,8 @@ class ChangelogDialog(wx.Dialog):
 			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
 			"* Bugfixes (Patch): Perbaikan pada Store termasuk penyesuaian transmisi NDJSON ke HF API, perbaikan sinkronisasi refresh daftar Store (cache-busting), serta perbaikan NVDA Freeze (deadlock) pada UI unggahan saat menyertakan file draft.\n"
 			"* Voice Pack Pronunciation (Patch): Format pengucapan waktu khusus menggunakan pintasan `NVDA + /` lalu `W` kini dibacakan secara lebih natural dan eksplisit (menyebutkan kata 'jam', 'menit', 'detik') agar tidak ada lagi ambiguitas angka yang digabungkan tanpa jeda.\n\n"
+			"--- Versi 1.6.5.6 (Gaya Pengucapan Interval Baru) ---\n"
+			"* Fitur Baru: Menambahkan dua gaya pengucapan waktu baru ('Jam X lewat Y menit' dan 'Jam X lewat Y menit Z detik') yang tersedia secara fleksibel baik pada Pengingat Waktu Berkala (Interval) maupun Pemeriksaan Waktu Manual (NVDA+F12 & NVDA+/, W).\n\n"
 			"--- Versi 1.6.5.5 (Hotfix Instalasi Store Final) ---\n"
 			"* Memperbaiki bug validasi zip ('manifest.json') yang menyebabkan kegagalan tahap akhir instalasi paket pasca-unduh.\n\n"
 			"--- Versi 1.6.5.4 (Hotfix UI Store Lanjutan) ---\n"
@@ -1192,7 +1194,9 @@ class TimeReminderDialog(wx.Dialog):
 			("[Jam]:[Menit] waktu sekarang (Contoh: 09:00 waktu sekarang)", "waktu_sekarang"),
 			("Hanya [Jam]:[Menit] (Contoh: 09:00 atau 09:00 AM)", "only_time"),
 			("Waktu sekarang pukul [Jam]:[Menit] (Contoh: Waktu sekarang pukul 09:00)", "prefix_pukul"),
-			("Pukul [Jam]:[Menit] tepat (Contoh: Pukul 09:00 tepat / Pukul 09:15)", "pukul_tepat")
+			("Pukul [Jam]:[Menit] tepat (Contoh: Pukul 09:00 tepat / Pukul 09:15)", "pukul_tepat"),
+			("Jam [Jam] lewat [Menit] menit (Contoh: Jam 09 lewat 15 menit)", "jam_lewat_menit"),
+			("Jam [Jam] lewat [Menit] menit [Detik] detik (Contoh: Jam 09 lewat 15 menit 30 detik)", "jam_lewat_menit_detik")
 		]
 		self.speech_style_values = [v for k, v in speech_style_choices]
 		self.cb_speech_style = wx.ComboBox(self, choices=[k for k, v in speech_style_choices], style=wx.CB_READONLY)
@@ -1374,10 +1378,12 @@ class JadwalKuDialog(wx.Dialog):
 			"Hanya [Jam]:[Menit] (Contoh: 09:15 atau 09:15 AM)",
 			"Waktu sekarang pukul [Jam]:[Menit] (Contoh: Waktu sekarang pukul 09:15)",
 			"Pukul [Jam]:[Menit] lewat [Detik] detik (Contoh: Pukul 09:15 lewat 30 detik)",
-			"Waktu sekarang pukul [Jam]:[Menit]:[Detik] (Contoh: Waktu sekarang pukul 09:15:30)"
+			"Waktu sekarang pukul [Jam]:[Menit]:[Detik] (Contoh: Waktu sekarang pukul 09:15:30)",
+			"Jam [Jam] lewat [Menit] menit (Contoh: Jam 09 lewat 15 menit)",
+			"Jam [Jam] lewat [Menit] menit [Detik] detik (Contoh: Jam 09 lewat 15 menit 30 detik)"
 		]
 		self.cb_time_speech_style = wx.ComboBox(self.panel_tab2, choices=time_style_choices, style=wx.CB_READONLY)
-		style_map = {"default": 0, "only_time": 1, "prefix_pukul": 2, "with_seconds": 3, "full_seconds": 4}
+		style_map = {"default": 0, "only_time": 1, "prefix_pukul": 2, "with_seconds": 3, "full_seconds": 4, "jam_lewat_menit": 5, "jam_lewat_menit_detik": 6}
 		self.cb_time_speech_style.SetSelection(style_map.get(time_cfg.get("time_speech_style", "default"), 0))
 		sizer_tab2.Add(self.cb_time_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
 		
@@ -1484,6 +1490,118 @@ class JadwalKuDialog(wx.Dialog):
 		
 		self.panel_tab3.SetSizer(sizer_tab3)
 		self.notebook.AddPage(self.panel_tab3, "3. Voice Pack & Studio Suara")
+		
+		# --- Tab 4: Voice Command ---
+		self.panel_tab4 = wx.Panel(self.notebook)
+		sizer_tab4 = wx.BoxSizer(wx.VERTICAL)
+		
+		info_vc = wx.StaticText(self.panel_tab4, label="Perintah Suara (Voice Command) memungkinkan Anda bertanya 'Jam berapa sekarang' ke mikrofon.\nModul AI (Vosk) akan berjalan 100% offline dan membalas melalui suara.")
+		sizer_tab4.Add(info_vc, 0, wx.ALL, 10)
+		
+		from .voiceCommandManager import VoiceCommandManager
+		self.vc_mgr = VoiceCommandManager(None)
+		
+		if not self.vc_mgr.is_module_installed():
+			warn_text = wx.StaticText(self.panel_tab4, label="Modul Perintah Suara (AI Offline) belum terpasang di perangkat Anda.")
+			sizer_tab4.Add(warn_text, 0, wx.ALL, 10)
+			
+			self.btnDownloadVC = wx.Button(self.panel_tab4, label="&Unduh & Pasang Modul (±45 MB)")
+			self.btnDownloadVC.Bind(wx.EVT_BUTTON, self.onDownloadVCModule)
+			sizer_tab4.Add(self.btnDownloadVC, 0, wx.ALL, 10)
+		else:
+			vc_cfg = self.config.get_voice_command()
+			
+			self.chk_vc_enabled = wx.CheckBox(self.panel_tab4, label="&Aktifkan Pemantauan Mikrofon Latar Belakang (Shortcut: NVDA+/, M)")
+			self.chk_vc_enabled.SetValue(vc_cfg.get("enabled", False))
+			sizer_tab4.Add(self.chk_vc_enabled, 0, wx.ALL, 10)
+			
+			# Input Device
+			lbl_vc_in_dev = wx.StaticText(self.panel_tab4, label="Perangkat &Mikrofon (Input):")
+			sizer_tab4.Add(lbl_vc_in_dev, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			self.vc_in_devs = self.vc_mgr.get_input_devices()
+			in_dev_names = [d[1] for d in self.vc_in_devs]
+			self.cb_vc_in_dev = wx.ComboBox(self.panel_tab4, choices=in_dev_names, style=wx.CB_READONLY)
+			cur_in_dev = vc_cfg.get("input_device", "Default (Microsoft Sound Mapper)")
+			if cur_in_dev in in_dev_names:
+				self.cb_vc_in_dev.SetSelection(in_dev_names.index(cur_in_dev))
+			else:
+				self.cb_vc_in_dev.SetSelection(0)
+			sizer_tab4.Add(self.cb_vc_in_dev, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			# Output Engine
+			lbl_vc_engine = wx.StaticText(self.panel_tab4, label="Mesin Penjawab (&Output Engine):")
+			sizer_tab4.Add(lbl_vc_engine, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			engine_choices = ["NVDA Default", "TTS Standar (SAPI 5)", "Voice Pack Kustom"]
+			self.cb_vc_engine = wx.ComboBox(self.panel_tab4, choices=engine_choices, style=wx.CB_READONLY)
+			cur_engine = vc_cfg.get("tts_engine", "NVDA Default")
+			if cur_engine in engine_choices:
+				self.cb_vc_engine.SetSelection(engine_choices.index(cur_engine))
+			else:
+				self.cb_vc_engine.SetSelection(0)
+			sizer_tab4.Add(self.cb_vc_engine, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			# Output Device (only relevant if not NVDA Default)
+			lbl_vc_out_dev = wx.StaticText(self.panel_tab4, label="Perangkat S&peaker (Khusus SAPI 5 / Voice Pack):")
+			sizer_tab4.Add(lbl_vc_out_dev, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			out_dev_names = self.audio.get_available_output_devices() if hasattr(self, 'audio') else ["Default (Microsoft Sound Mapper)"]
+			self.cb_vc_out_dev = wx.ComboBox(self.panel_tab4, choices=out_dev_names, style=wx.CB_READONLY)
+			cur_out_dev = vc_cfg.get("output_device", "Default (Microsoft Sound Mapper)")
+			if cur_out_dev in out_dev_names:
+				self.cb_vc_out_dev.SetSelection(out_dev_names.index(cur_out_dev))
+			else:
+				self.cb_vc_out_dev.SetSelection(0)
+			sizer_tab4.Add(self.cb_vc_out_dev, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			# Time Format
+			lbl_vc_format = wx.StaticText(self.panel_tab4, label="F&ormat Waktu:")
+			sizer_tab4.Add(lbl_vc_format, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			fmt_choices = [("Format 24 Jam (Contoh: 15:30)", "24"), ("Format 12 Jam AM/PM (Contoh: 3:30 PM)", "12")]
+			self.vc_fmt_values = [v for k, v in fmt_choices]
+			self.cb_vc_format = wx.ComboBox(self.panel_tab4, choices=[k for k,v in fmt_choices], style=wx.CB_READONLY)
+			cur_fmt = vc_cfg.get("time_format", "24")
+			if cur_fmt in self.vc_fmt_values:
+				self.cb_vc_format.SetSelection(self.vc_fmt_values.index(cur_fmt))
+			else:
+				self.cb_vc_format.SetSelection(0)
+			sizer_tab4.Add(self.cb_vc_format, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			vc_style_choices = [
+				("Gunakan Gaya Pengucapan Default", "default"),
+				("Jam [Jam] lewat [Menit] menit", "jam_lewat_menit"),
+				("Jam [Jam] lewat [Menit] menit [Detik] detik", "jam_lewat_menit_detik")
+			]
+			self.vc_style_values = [v for k, v in vc_style_choices]
+			
+			lbl_vc_style = wx.StaticText(self.panel_tab4, label="Gaya Pengucapan Jawaban Waktu:")
+			sizer_tab4.Add(lbl_vc_style, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			self.cb_vc_style = wx.ComboBox(self.panel_tab4, choices=[k for k,v in vc_style_choices], style=wx.CB_READONLY)
+			cur_vc_style = vc_cfg.get("speech_style", "jam_lewat_menit")
+			if cur_vc_style in self.vc_style_values:
+				self.cb_vc_style.SetSelection(self.vc_style_values.index(cur_vc_style))
+			else:
+				self.cb_vc_style.SetSelection(0)
+			sizer_tab4.Add(self.cb_vc_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			self.chk_vc_mute = wx.CheckBox(self.panel_tab4, label="D&iamkan NVDA jika Mesin Penjawab Kustom (SAPI/Voice Pack) berhasil bersuara")
+			self.chk_vc_mute.SetValue(vc_cfg.get("mute_nvda_fallback", True))
+			sizer_tab4.Add(self.chk_vc_mute, 0, wx.ALL, 10)
+			
+			# Volume Output
+			sizer_tab4.Add(wx.StaticText(self.panel_tab4, label="&Volume Keluaran Voice Command (10% - 1200%):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			self.sld_vc_volume = wx.Slider(self.panel_tab4, value=vc_cfg.get("vc_volume", 100), minValue=10, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+			sizer_tab4.Add(self.sld_vc_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			# Mic Boost
+			sizer_tab4.Add(wx.StaticText(self.panel_tab4, label="S&ensitivitas Mikrofon / Boost (100% - 1200%):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
+			self.sld_mic_boost = wx.Slider(self.panel_tab4, value=vc_cfg.get("mic_boost", 100), minValue=100, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+			sizer_tab4.Add(self.sld_mic_boost, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
+			
+			self.btnSaveVC = wx.Button(self.panel_tab4, label="&Simpan Pengaturan Perintah Suara")
+			self.btnSaveVC.Bind(wx.EVT_BUTTON, self.onSaveVCConfig)
+			sizer_tab4.Add(self.btnSaveVC, 0, wx.ALL, 10)
+
+		self.panel_tab4.SetSizer(sizer_tab4)
+		self.notebook.AddPage(self.panel_tab4, "4. Perintah Suara (Voice Command)")
 		
 		main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 6)
 		
@@ -1749,7 +1867,7 @@ class JadwalKuDialog(wx.Dialog):
 			gui.mainFrame.postPopup()
 
 	def onSaveTimeSettings(self, event):
-		t_style_inv = {0: "default", 1: "only_time", 2: "prefix_pukul", 3: "with_seconds", 4: "full_seconds"}
+		t_style_inv = {0: "default", 1: "only_time", 2: "prefix_pukul", 3: "with_seconds", 4: "full_seconds", 5: "jam_lewat_menit", 6: "jam_lewat_menit_detik"}
 		d_style_inv = {0: "default", 1: "prefix_hari", 2: "numeric", 3: "suffix_hari"}
 		f_style_inv = {0: "default", 1: "short"}
 		
@@ -1763,6 +1881,100 @@ class JadwalKuDialog(wx.Dialog):
 		}
 		self.config.update_time_settings(updated)
 		ui.message("Pengaturan pelaporan waktu dan kalender JadwalKu berhasil disimpan!")
+
+	def onDownloadVCModule(self, event):
+		import urllib.request
+		import zipfile
+		import tempfile
+		import threading
+		
+		dlg = wx.ProgressDialog("Mengunduh Modul", "Menyambung ke server...", 100, self, wx.PD_AUTO_HIDE | wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+		
+		def download_thread():
+			url = "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/voice-module-v1/jadwalku_voice_module.zip"
+			temp_dir = tempfile.mkdtemp()
+			local_zip = os.path.join(temp_dir, "jadwalku_voice_module.zip")
+			try:
+				req = urllib.request.urlopen(url)
+				total_size = int(req.info().get('Content-Length', 0))
+				downloaded = 0
+				block_size = 8192
+				with open(local_zip, 'wb') as f:
+					while True:
+						buffer = req.read(block_size)
+						if not buffer:
+							break
+						f.write(buffer)
+						downloaded += len(buffer)
+						if total_size > 0:
+							percent = int(downloaded * 100 / total_size)
+							# Update UI thread
+							wx.CallAfter(dlg.Update, percent, f"Mengunduh... {percent}%")
+				
+				wx.CallAfter(dlg.Update, 100, "Mengekstrak...")
+				
+				from .voiceCommandManager import VoiceCommandManager
+				mgr = VoiceCommandManager(None)
+				if not os.path.isdir(mgr.module_path):
+					os.makedirs(mgr.module_path)
+				
+				with zipfile.ZipFile(local_zip, 'r') as zip_ref:
+					zip_ref.extractall(mgr.module_path)
+					
+				wx.CallAfter(dlg.Destroy)
+				wx.CallAfter(wx.MessageBox, "Modul Perintah Suara berhasil dipasang dari Cloud! Silakan tutup dialog ini dan buka kembali pengaturan (NVDA+/, P) untuk melihat menu baru.", "Sukses", wx.OK | wx.ICON_INFORMATION, self)
+			except Exception as e:
+				wx.CallAfter(dlg.Destroy)
+				wx.CallAfter(wx.MessageBox, f"Gagal mengunduh modul: {str(e)}", "Error", wx.OK | wx.ICON_ERROR, self)
+			finally:
+				try:
+					if os.path.exists(local_zip):
+						os.remove(local_zip)
+					os.rmdir(temp_dir)
+				except:
+					pass
+					
+		threading.Thread(target=download_thread, daemon=True).start()
+			
+	def onSaveVCConfig(self, event):
+		enabled = self.chk_vc_enabled.GetValue()
+		in_dev = self.cb_vc_in_dev.GetStringSelection()
+		engine = self.cb_vc_engine.GetStringSelection()
+		out_dev = self.cb_vc_out_dev.GetStringSelection()
+		t_fmt = self.vc_fmt_values[self.cb_vc_format.GetSelection()]
+		style = self.vc_style_values[self.cb_vc_style.GetSelection()]
+		mute = self.chk_vc_mute.GetValue()
+		vol = self.sld_vc_volume.GetValue()
+		boost = self.sld_mic_boost.GetValue()
+		
+		self.config.update_voice_command({
+			"enabled": enabled,
+			"input_device": in_dev,
+			"tts_engine": engine,
+			"output_device": out_dev,
+			"time_format": t_fmt,
+			"speech_style": style,
+			"mute_nvda_fallback": mute,
+			"vc_volume": vol,
+			"mic_boost": boost
+		})
+		
+		import globalVars
+		try:
+			plugin = globalVars.extensionManager.getGlobalPlugin("jadwalku")
+			if plugin:
+				if enabled:
+					plugin.script_toggleVoiceCommand(None) # Call toggle logic to apply settings properly
+					if plugin.vc_manager and not plugin.vc_manager.is_listening:
+						# If toggle disabled it, re-enable it because we want it enabled. 
+						plugin.script_toggleVoiceCommand(None)
+				else:
+					if plugin.vc_manager and plugin.vc_manager.is_listening:
+						plugin.script_toggleVoiceCommand(None)
+		except Exception:
+			pass
+		
+		ui.message("Pengaturan Perintah Suara berhasil disimpan!")
 
 
 def get_indonesian_holidays(year):

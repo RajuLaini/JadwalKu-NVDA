@@ -41,20 +41,24 @@ class TTSManager:
 			logHandler.log.error(f"JadwalKu TTSManager: Gagal memuat daftar suara SAPI: {e}")
 		return voices_list
 
-	def speak(self, text):
+	def speak(self, text, volume_override=None):
 		if not self.is_enabled():
 			ui.message(text)
 			return
 
-		threading.Thread(target=self._worker_speak, args=(text,), daemon=True).start()
+		threading.Thread(target=self._worker_speak, args=(text, volume_override), daemon=True).start()
 
-	def _worker_speak(self, text):
+	def _worker_speak(self, text, volume_override=None):
 		with self.lock:
 			try:
 				cfg = self.config.get_tts_config()
 				voice_id = int(cfg.get("voice_id", 0))
 				rate = int(cfg.get("rate", 0))
 				volume = int(cfg.get("volume", 100))
+				if volume_override is not None:
+					volume = int(volume_override)
+					# SAPI 5 Volume ranges from 0 to 100 natively.
+					volume = max(0, min(100, volume))
 
 				voice = comtypes.client.CreateObject("SAPI.SpVoice")
 				voices = voice.GetVoices()

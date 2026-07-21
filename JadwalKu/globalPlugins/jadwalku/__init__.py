@@ -111,6 +111,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.scheduler = Scheduler(self.config, self.audio, self.tts)
 		self.scheduler.start()
 		
+		try:
+			from .voiceCommandManager import VoiceCommandManager
+			self.vc_manager = VoiceCommandManager(self._on_voice_command_triggered)
+			vc_cfg = self.config.get_voice_command()
+			
+			in_dev_name = vc_cfg.get("input_device", "Default (Microsoft Sound Mapper)")
+			devs = self.vc_manager.get_input_devices()
+			idx = -1
+			for d_idx, d_name in devs:
+				if d_name == in_dev_name:
+					idx = d_idx
+					break
+			self.vc_manager.set_input_device(idx)
+			
+			if vc_cfg.get("enabled", False):
+				self.vc_manager.start_listening()
+		except Exception as e:
+			logHandler.log.error(f"JadwalKu: Gagal memuat VoiceCommandManager: {e}")
+			self.vc_manager = None
+		
 		self.updater = UpdateChecker(self.config, self)
 		self.updater.start_auto_check()
 		
@@ -130,8 +150,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
-			"kb:m": "openTTSManager",
-			"kb:p": "openTTSManager",
+			"kb:m": "toggleVoiceCommand",
+			"kb:t": "openTTSManager",
+			"kb:p": "openLayout",
 			"kb:g": "shareAddon",
 			"kb:u": "checkUpdate",
 			"kb:v": "showChangelog",
@@ -415,7 +436,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 
 	@scriptHandler.script(
-		description="Mengaktifkan mode perintah JadwalKu (Tekan L Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, M/P Mesin TTS Mandiri, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
+		description="Mengaktifkan mode perintah JadwalKu (Tekan P Pengaturan, T TTS, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
 		gesture="kb:NVDA+/"
 	)
 	def script_activateCommandLayer(self, gesture):
@@ -472,6 +493,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return f"Pukul {h_str}:{m_str}{ampm} lewat {now.second} detik"
 		elif style == "full_seconds":
 			return f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}"
+		elif style == "jam_lewat_menit":
+			return f"Jam {h_str} lewat {m_str} menit{ampm}"
+		elif style == "jam_lewat_menit_detik":
+			return f"Jam {h_str} lewat {m_str} menit {s_str} detik{ampm}"
 		else:
 			# default
 			return f"{h_str}:{m_str}:{s_str}{ampm} waktu sekarang" if inc_sec else f"{h_str}:{m_str}{ampm} waktu sekarang"
@@ -730,3 +755,123 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def script_exitLayer(self, gesture):
 		pass
+
+	def script_toggleVoiceCommand(self, gesture):
+		if not getattr(self, "vc_manager", None):
+			ui.message("Modul perintah suara tidak tersedia.")
+			return
+			
+		if not self.vc_manager.is_module_installed():
+			ui.message("Modul Perintah Suara belum dipasang. Buka Pengaturan untuk mengunduhnya.")
+			return
+			
+		vc_cfg = self.config.get_voice_command()
+		is_enabled = vc_cfg.get("enabled", False)
+		
+		if is_enabled:
+			self.vc_manager.stop_listening()
+			vc_cfg["enabled"] = False
+			self.config.update_voice_command(vc_cfg)
+			ui.message("Pemantauan Mikrofon untuk perintah suara dinonaktifkan.")
+		else:
+			in_dev_name = vc_cfg.get("input_device", "Default (Microsoft Sound Mapper)")
+			devs = self.vc_manager.get_input_devices()
+			idx = -1
+			for d_idx, d_name in devs:
+				if d_name == in_dev_name:
+					idx = d_idx
+					break
+			self.vc_manager.set_input_device(idx)
+			
+			mic_boost = vc_cfg.get("mic_boost", 100)
+			self.vc_manager.mic_boost = mic_boost
+			
+			if self.vc_manager.start_listening():
+				vc_cfg["enabled"] = True
+				self.config.update_voice_command(vc_cfg)
+				ui.message("Pemantauan Mikrofon untuk perintah suara aktif.")
+			else:
+				ui.message("Gagal mengaktifkan mikrofon. Pastikan modul terpasang dan mikrofon tersedia.")
+
+	def _on_voice_command_triggered(self):
+		import datetime
+		now = datetime.datetime.now()
+		vc_cfg = self.config.get_voice_command()
+		style = vc_cfg.get("speech_style", "jam_lewat_menit")
+		
+		# Build time string
+		h = now.hour
+		ampm = ""
+		h_str = str(h)
+		if self.config.get_time_settings().get("time_format", "24") == "12":
+			ampm = " AM" if h < 12 else " PM"
+			h = h % 12
+			if h == 0: h = 12
+			h_str = str(h)
+			
+		m_str = f"{now.minute:02d}"
+		s_str = f"{now.second:02d}"
+		
+		# Format according to style
+		if style == "jam_lewat_menit":
+			time_str = f"Jam {h_str} lewat {now.minute} menit{ampm}"
+		elif style == "jam_lewat_menit_detik":
+			time_str = f"Jam {h_str} lewat {now.minute} menit {now.second} detik{ampm}"
+		elif style == "default":
+			time_str = f"Sekarang jam {h_str}:{m_str}{ampm}"
+		else:
+			# Fallback logic to full formatting can be added here, but default is fine
+			time_str = f"Pukul {h_str} {now.minute} menit"
+			
+		# Routing Output
+		out_engine = vc_cfg.get("tts_engine", "NVDA Default")
+		out_dev = vc_cfg.get("output_device", "Default (Microsoft Sound Mapper)")
+		mute_nvda = vc_cfg.get("mute_nvda_fallback", True)
+		vc_vol = vc_cfg.get("vc_volume", 100)
+		
+		# If user wants to mute NVDA and we're not using NVDA Default, skip ui.message
+		if not (mute_nvda and out_engine != "NVDA Default"):
+			ui.message(time_str)
+		else:
+			# Just log it or send to braille only, but ui.message does speech+braille.
+			# Using braille.handler.message avoids speech if we only want braille, but NVDA might not need it.
+			import logHandler
+			logHandler.log.info("VC Triggered: " + time_str)
+		
+		if out_engine == "NVDA Default":
+			pass
+		elif out_engine == "TTS Standar (SAPI 5)":
+			self.tts.speak(time_str, volume_override=vc_vol)
+		elif out_engine == "Voice Pack Kustom":
+			vp_config = self.config.get_time_reminder_config()
+			vp_id = vp_config.get("active_voice_pack", "")
+			if vp_id:
+				import os
+				clean_str = time_str.lower().replace(":00", " ").replace(":", " ")
+				words = clean_str.split()
+				vp_files = []
+				try:
+					from globalPlugins.jadwalku.voicePackManager import VoicePackManager
+					vp_mgr = VoicePackManager(os.path.dirname(os.path.abspath(__file__)))
+					pack_path = os.path.join(vp_mgr.pack_dir, vp_id)
+					if os.path.exists(pack_path):
+						temp_dir = vp_mgr.extract_pack_to_temp(pack_path)
+						if temp_dir:
+							for w in words:
+								if w.isdigit():
+									w = str(int(w))
+								wav_path = os.path.join(temp_dir, f"{w}.wav")
+								if os.path.exists(wav_path):
+									vp_files.append(wav_path)
+							
+							if vp_files:
+								self.audio.play_voice_pack_sequence(vp_files, volume_override=vc_vol)
+				except Exception as e:
+					import logHandler
+					logHandler.log.error(f"JadwalKu: Error playing VC voice pack: {e}")
+			else:
+				if mute_nvda: ui.message("Tidak ada Voice Pack aktif. " + time_str)
+		else:
+			pass
+
+	script_toggleVoiceCommand.__doc__ = _("Mengaktifkan atau menonaktifkan pemantauan mikrofon untuk Perintah Suara.")

@@ -138,3 +138,11 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 
 ## Update v1.6.17: Penggandaan Ekstrem Volume 1200%
 - **Peningkatan Kapasitas Slider Volume (1200%)**: Untuk menjawab skenario langka di mana peralatan mikrofon pengguna (atau sampel audio bel) terekam dalam *gain* yang terlampau senyap, kedua Slider Volume (baik untuk Audio Ringtone di Tab 2 maupun Voice Pack Kustom di Tab 3) kini telah digandakan batas maksimalnya dari 600% menjadi **1200% (penggalian 12 kali lipat amplitudo dasar)**.
+
+
+## Update v1.6.6: Perintah Suara (Voice Command) Modular
+- **Sistem Pengenalan Suara Offline**: Pengguna kini dapat bertanya 'Jam berapa sekarang' secara langsung melalui mikrofon, dan JadwalKu akan menjawabnya. Sistem ini ditenagai oleh mesin *Vosk* (C++) yang diimplementasikan secara Zero Disk Wear (langsung di RAM). Modul AI-nya diunduh secara terpisah (modular) sehingga ukuran *add-on* tetap sangat ringan.
+- **Kustomisasi Penuh**: Tab 4 (Pengaturan Perintah Suara) memungkinkan pengguna memilih secara bebas perangkat *Microphone* (Input), mesin penjawab (Output Engine) baik SAPI 5 maupun Voice Pack kustom, serta menentukan ke perangkat *Speaker* mana suara akan dikeluarkan.
+- **Mic Boost (Amplifikasi Audio)**: Modul Voice Command telah dilengkapi dengan penguat sinyal mikrofon berbasis _bitwise shift_ di RAM yang dapat mendongkrak sensitivitas mikrofon dari 100% hingga 1200%. Ini berguna untuk merekam ucapan dari jarak jauh atau pada mikrofon bawaan yang bergain rendah tanpa memicu _delay_ pemrosesan.
+- **Mute NVDA Fallback**: Pilihan untuk mendiamkan suara NVDA agar tidak terjadi tabrakan pembacaan teks ketika Voice Command diarahkan untuk menggunakan SAPI 5 atau Voice Pack Kustom.
+- **VC Volume Override**: Penguatan volume keluaran (hingga 1200%) yang bekerja secara independen khusus untuk pembacaan Perintah Suara (Voice Command).

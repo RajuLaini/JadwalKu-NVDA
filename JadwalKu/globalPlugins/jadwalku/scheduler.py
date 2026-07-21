@@ -251,6 +251,10 @@ class Scheduler:
 						time_str = f"Pukul {h_str}:{m_str}{ampm} lewat {now.second} detik"
 					elif f12_style == "full_seconds":
 						time_str = f"Waktu sekarang pukul {h_str}:{m_str}:{s_str}{ampm}"
+					elif f12_style == "jam_lewat_menit":
+						time_str = f"Jam {h_str} lewat {m_str} menit{ampm}"
+					elif f12_style == "jam_lewat_menit_detik":
+						time_str = f"Jam {h_str} lewat {m_str} menit {s_str} detik{ampm}"
 					else:
 						time_str = f"{h_str}:{m_str}:{s_str}{ampm} waktu sekarang" if inc_sec else f"{h_str}:{m_str}{ampm} waktu sekarang"
 				elif speech_style == "only_time":
@@ -264,6 +268,10 @@ class Scheduler:
 						time_str = f"Pukul {h_str}:00{ampm} tepat"
 					else:
 						time_str = f"Pukul {h_str}:{m_str}{ampm}"
+				elif speech_style == "jam_lewat_menit":
+					time_str = f"Jam {h_str} lewat {m_str} menit{ampm}"
+				elif speech_style == "jam_lewat_menit_detik":
+					time_str = f"Jam {h_str} lewat {m_str} menit {s_str} detik{ampm}"
 				else:
 					# default
 					if now.minute == 0:

@@ -61,6 +61,17 @@ DEFAULT_DATA = {
 		"date_speech_style": "default",
 		"full_speech_style": "default"
 	},
+	"voice_command": {
+		"enabled": False,
+		"input_device": "Default (Microsoft Sound Mapper)",
+		"output_device": "Default (Microsoft Sound Mapper)",
+		"tts_engine": "NVDA Default",
+		"time_format": "24",
+		"speech_style": "jam_lewat_menit",
+		"mute_nvda_fallback": True,
+		"vc_volume": 100,
+		"mic_boost": 100
+	},
 	"tts_config": {
 		"enabled": False,
 		"voice_id": 0,
@@ -101,6 +112,8 @@ class ConfigManager:
 					self.data["audio_volume"] = DEFAULT_DATA["audio_volume"]
 				if "time_settings" not in self.data:
 					self.data["time_settings"] = DEFAULT_DATA["time_settings"].copy()
+				if "voice_command" not in self.data:
+					self.data["voice_command"] = DEFAULT_DATA["voice_command"].copy()
 				if "tts_config" not in self.data:
 					self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
 				self.save_data()
@@ -204,6 +217,15 @@ class ConfigManager:
 		if "tts_config" not in self.data:
 			self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
 		self.data["tts_config"].update(updated_dict)
+		self.save_data()
+
+	def get_voice_command(self):
+		return self.data.get("voice_command", DEFAULT_DATA["voice_command"].copy())
+
+	def update_voice_command(self, updated_dict):
+		if "voice_command" not in self.data:
+			self.data["voice_command"] = DEFAULT_DATA["voice_command"].copy()
+		self.data["voice_command"].update(updated_dict)
 		self.save_data()
 
 	def get_feedback_config(self):

@@ -1,6 +1,6 @@
 {
-    "version": "1.6.5.5",
-    "changelog": "- Hotfix Instalasi Store (Final): Memperbaiki bug validasi zip (manifest.json) yang menyebabkan kegagalan instalasi paket pasca-unduh.\n- Hotfix Kritis UI Store: Memperbaiki kegagalan instalasi paket akibat metode fungsi yang hilang.\n- Hotfix Kritis UI Store: Memperbaiki kegagalan unduh paket suara akibat bug karakter spasi (URL Control Characters) pada ID Pengguna dengan menerapkan enkoding URL secara menyeluruh.\n- Pembaruan kritis pada sistem Cloudflare untuk mengizinkan unggahan/unduhan Paket Suara tanpa Error 500\n- Pemeriksaan waktu manual (NVDA+/, W) kini pengucapannya fleksibel mengikuti Format Pembacaan Waktu yang dipilih di Pengaturan.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.5.5.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5.5/JadwalKu-v1.6.5.5.nvda-addon"
+    "version": "1.6.6",
+    "changelog": "- Fitur Besar: Memperkenalkan Sistem Perintah Suara (Voice Command) 100% Offline (Eksperimental).\n- Bertanya 'Jam berapa' langsung ke mikrofon tanpa menekan tombol. Pemantauan berjalan sepenuhnya di memori RAM sehingga tidak merusak SSD.\n- Moduler Cloud: Modul AI (45 MB) kini dapat diunduh secara otomatis dari Cloud langsung melalui pengaturan JadwalKu.\n- Penyempurnaan Voice Command:\n  1. Mute NVDA Fallback: Pilihan mendiamkan suara bacaan dasar NVDA agar tidak tabrakan dengan SAPI 5 / Voice Pack.\n  2. Mic Boost: Mendongkrak sensitivitas mikrofon hingga 1200% di level PCM.\n  3. VC Volume: Penggandaan volume keluaran perintah suara khusus hingga 1200%.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.6.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.6/JadwalKu-v1.6.6.nvda-addon"
 }
