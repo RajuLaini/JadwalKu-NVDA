@@ -1,6 +1,6 @@
 {
-    "version": "1.6.5.1",
-    "changelog": "Terobosan Baru: JadwalKu Voice Pack Store! Kini Anda dapat mengunduh paket suara kustom dari seluruh pengguna JadwalKu di dunia, atau mengunggah (membagikan) karya rekaman Anda sendiri. (Termasuk Hotfix UI Store & Patch perbaikan naturalisasi pengucapan pengingat Voice Pack, serta rilis master example Voice Pack resmi).",
-    "download_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.5.1.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5.1/JadwalKu-v1.6.5.1.nvda-addon"
+    "version": "1.6.5.2",
+    "changelog": "- Pembaruan kritis pada sistem Cloudflare untuk mengizinkan unggahan/unduhan Paket Suara tanpa Error 500\n- Pemeriksaan waktu manual (NVDA+/, W) kini pengucapannya fleksibel mengikuti Format Pembacaan Waktu yang dipilih di Pengaturan.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.5.2.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.5.2/JadwalKu-v1.6.5.2.nvda-addon"
 }
