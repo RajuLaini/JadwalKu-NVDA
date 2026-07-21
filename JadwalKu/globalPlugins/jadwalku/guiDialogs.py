@@ -80,6 +80,8 @@ class ChangelogDialog(wx.Dialog):
 			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
 			"* Bugfixes (Patch): Perbaikan pada Store termasuk penyesuaian transmisi NDJSON ke HF API, perbaikan sinkronisasi refresh daftar Store (cache-busting), serta perbaikan NVDA Freeze (deadlock) pada UI unggahan saat menyertakan file draft.\n"
 			"* Voice Pack Pronunciation (Patch): Format pengucapan waktu khusus menggunakan pintasan `NVDA + /` lalu `W` kini dibacakan secara lebih natural dan eksplisit (menyebutkan kata 'jam', 'menit', 'detik') agar tidak ada lagi ambiguitas angka yang digabungkan tanpa jeda.\n\n"
+			"--- Versi 1.6.5.1 (Patch Master Example) ---\n"
+			"* Menambahkan Master Example Voice Pack resmi milik Raju Laini ke dalam add-on bawaan untuk menjadi standar pengetesan (*Play Sample*) di dalam Voice Pack Studio.\n\n"
 			"--- Versi 1.6.4 (Fitur Undangan JadwalKu) ---\n"
 			"* Fitur Bagikan Add-on (NVDA + / lalu G) kini dilengkapi opsi untuk mengirimkan Pesan Undangan (Promosi) khusus untuk teman Anda via WhatsApp atau media sosial lainnya.\n\n"
 			"--- Versi 1.6.3 (JadwalKu Voice Pack Studio & Pengingat Suara Manusia) ---\n"
