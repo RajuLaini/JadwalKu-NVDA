@@ -66,6 +66,11 @@ class VoiceCommandManager:
 			sys.path.insert(0, self.module_path)
 		
 		try:
+			import types
+			for mod_name in ['srt', 'tqdm', 'requests']:
+				if mod_name not in sys.modules:
+					sys.modules[mod_name] = types.ModuleType(mod_name)
+			
 			import vosk
 			vosk.SetLogLevel(-1) # Disable verbose logs
 			model = vosk.Model(self.model_path)

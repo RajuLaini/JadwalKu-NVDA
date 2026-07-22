@@ -74,7 +74,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.7 (Terbaru - Hotfix Instalasi & Log Presisi) ---\n"
+			"--- Versi 1.6.8 (Terbaru - Hotfix Dependensi Vosk) ---\n"
+			"* Perbaikan Kritis Voice Command: Memperbaiki *bug* tersembunyi (*No module named srt/tqdm/requests*) yang menyebabkan modul Perintah Suara mogok di beberapa komputer. Kini modul disuntikkan dependensi tiruan (*mock*) agar berjalan 100% mulus tanpa menuntut pustaka eksternal.\n\n"
+			"--- Versi 1.6.7 (Hotfix Instalasi & Log Presisi) ---\n"
 			"* Perbaikan Ekstraksi Log: Tangkapan log otomatis kini lebih akurat mendeteksi Voice Command dan Traceback secara utuh (hingga 100 baris terbaru) tanpa menyebabkan NVDA *freeze* berkat algoritma *deque* berkecepatan tinggi.\n"
 			"* Perbaikan Installer: Menghilangkan bug skrip bawaan yang menyebabkan Add-on terhapus secara otomatis oleh NVDA ketika melakukan pembaruan (update).\n"
 			"* Dukungan Penuh 32-bit: Kini JadwalKu dengan cerdas mendeteksi mesin NVDA 32-bit/64-bit milik pengguna dan akan menyajikan modul Voice Command yang kompatibel sehingga mencegah *crash* tersembunyi.\n\n"
