@@ -74,7 +74,17 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"--- Versi 1.6.5 (Terbaru - JadwalKu Voice Pack Store) ---\n"
+			"--- Versi 1.6.7 (Terbaru - Hotfix Instalasi & Log Presisi) ---\n"
+			"* Perbaikan Ekstraksi Log: Tangkapan log otomatis kini lebih akurat mendeteksi Voice Command dan Traceback secara utuh (hingga 100 baris terbaru) tanpa menyebabkan NVDA *freeze* berkat algoritma *deque* berkecepatan tinggi.\n"
+			"* Perbaikan Installer: Menghilangkan bug skrip bawaan yang menyebabkan Add-on terhapus secara otomatis oleh NVDA ketika melakukan pembaruan (update).\n"
+			"* Dukungan Penuh 32-bit: Kini JadwalKu dengan cerdas mendeteksi mesin NVDA 32-bit/64-bit milik pengguna dan akan menyajikan modul Voice Command yang kompatibel sehingga mencegah *crash* tersembunyi.\n\n"
+			"--- Versi 1.6.6 (Perintah Suara 100% Offline) ---\n"
+			"* Era Baru Aksesibilitas: Fitur Perintah Suara (Voice Command) 100% Offline dan Privat! Anda dapat memanggil waktu atau jadwal menggunakan mikrofon Anda (misal: 'Jam berapa').\n"
+			"* Arsitektur Modular: Untuk menjaga ukuran add-on tetap mungil (< 3MB), modul pustaka suara Vosk raksasa dipisahkan menjadi paket cerdas yang bisa diunduh terpisah melalui Pengaturan (Tab 4).\n"
+			"* Penguat Suara (*Mic Boost*): Jangan khawatir jika mikrofon laptop Anda kurang peka. JadwalKu menyertakan fitur penguat audio hingga 1200%.\n"
+			"* NVDA *Mute Fallback*: NVDA dapat dibuat terdiam otomatis saat suara robot/TTS sedang berbicara membalas ucapan Anda.\n"
+			"* Ramah Umur SSD: Pemrosesan mikrofon 100% berjalan dalam buffer RAM dan tidak menyentuh _hardisk_ sama sekali.\n\n"
+			"--- Versi 1.6.5 (JadwalKu Voice Pack Store) ---\n"
 			"* Terobosan Baru: JadwalKu Voice Pack Store! Kini Anda dapat mengunduh paket suara kustom dari seluruh pengguna JadwalKu di dunia, atau mengunggah (membagikan) karya rekaman Anda sendiri langsung dari dalam NVDA.\n"
 			"* Sistem Store Hibrida: Menggunakan kombinasi Cloudflare Workers (untuk pelacakan jumlah unduhan & keamanan perlindungan kata sandi) dan Hugging Face (sebagai gudang penyimpanan tanpa batas).\n"
 			"* Fitur Unggah & Hapus: Lindungi karya paket suara Anda dengan kata sandi (dihash secara aman) agar tidak dapat ditimpa atau dihapus oleh orang lain.\n"
