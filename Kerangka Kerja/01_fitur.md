@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.6.2
+# Daftar Fitur Lengkap Add-on JadwalKu v1.6.7
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -75,7 +75,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Salin Tautan Unduhan Langsung (*Direct Download Link*)**: Memungkinkan pengguna dengan 1x tekan tombol (`NVDA + /` lalu `G`) atau melalui tombol `Bagikan Add-on` di Panel Pengaturan NVDA menyalin tautan unduhan `.nvda-addon` terbaru secara otomatis ke clipboard (`api.copyToClip`).
 - **Berbagi Tanpa Browser**: Teman pengguna dapat langsung menempel (*paste*) tautan ke browser atau download manager dan mengunduh file `.nvda-addon` terbaru tanpa perlu membuka dan menavigasi halaman repositori GitHub yang kompleks.
 
-## 11. Fitur Kirim Laporan, Kritik, Saran & Bug Fix (`NVDA + / lalu R`) (v1.6.2)
+## 11. Fitur Kirim Laporan, Kritik, Saran & Bug Fix (`NVDA + / lalu R`) (v1.6.7)
 - **Terhubung ke Bot Telegram Aileen via Web API Proxy Aman**: Memungkinkan pengguna dengan 1x tekan tombol (`NVDA + /` lalu `R`) atau melalui tombol `Kirim Laporan & Saran` di Panel Pengaturan NVDA mengirimkan permintaan fitur baru, kritik saran, atau melaporkan bug langsung ke Telegram pengembang (`Aileen Bot`). Seluruh komunikasi melewati Web API Proxy (`jadwalku_telegram_proxy.php`) untuk menjaga keamanan mutlak dan mencegah kebocoran token Bot Telegram.
 - **Kategori & Sub-Kategori Bug Spesifik**: Pengguna dapat memilih kategori (`Minta Fitur Baru`, `Laporkan Kesalahan`, atau `Kritik Saran`). Saat memilih `Laporkan Kesalahan`, dropdown sub-fitur (10 modul utama JadwalKu) ditampilkan untuk memudahkan diagnosis cepat.
 - **Pratinjau Log Transparan & Bisa Diedit**: Sistem mengekstrak baris log diagnostik NVDA/JadwalKu terkini dan menampilkannya pada kotak edit transparan yang dapat dibaca dan diedit pengguna sebelum dikirimkan.
@@ -146,3 +146,10 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Mic Boost (Amplifikasi Audio)**: Modul Voice Command telah dilengkapi dengan penguat sinyal mikrofon berbasis _bitwise shift_ di RAM yang dapat mendongkrak sensitivitas mikrofon dari 100% hingga 1200%. Ini berguna untuk merekam ucapan dari jarak jauh atau pada mikrofon bawaan yang bergain rendah tanpa memicu _delay_ pemrosesan.
 - **Mute NVDA Fallback**: Pilihan untuk mendiamkan suara NVDA agar tidak terjadi tabrakan pembacaan teks ketika Voice Command diarahkan untuk menggunakan SAPI 5 atau Voice Pack Kustom.
 - **VC Volume Override**: Penguatan volume keluaran (hingga 1200%) yang bekerja secara independen khusus untuk pembacaan Perintah Suara (Voice Command).
+
+## 9. Sistem Perintah Suara (Voice Command) 100% Offline (Eksperimental)
+- **Tanya Jam Secara Langsung**: Pengguna dapat bertanya 'Jam berapa', 'Sekarang jam', atau 'What time' langsung ke mikrofon tanpa menekan tombol shortcut apa pun, dan NVDA akan merespons dengan laporan waktu saat ini.
+- **Arsitektur Modular Cloud (32-bit & 64-bit)**: Untuk menjaga ukuran JadwalKu tetap ringan (dibawah 3MB), modul AI Vosk (sekitar 45 MB) dipisahkan menjadi paket cloud. Pengguna dapat mengunduhnya langsung melalui Pengaturan JadwalKu (Tab 4). Sistem cerdas akan mendeteksi otomatis apakah NVDA berjalan pada sistem 32-bit atau 64-bit dan memberikan file yang sesuai agar anti-*crash*.
+- **Aman Bagi Hardisk (RAM-Based)**: Sistem pendengaran mikrofon hanya menggunakan buffer di memori RAM tanpa menyimpan data ke disk, sehingga tidak memperpendek umur SSD/Hardisk, sekalipun dibiarkan memantau seharian.
+- **Penguat Mikrofon (Mic Boost) hingga 1200%**: JadwalKu memproses bit PCM audio secara mandiri sehingga perintah Anda tetap terdengar dari kejauhan meskipun sensitivitas bawaan mikrofon Windows Anda sangat rendah.
+- **Dukungan Mute NVDA**: Saat modul Voice Pack atau SAPI 5 sedang membacakan waktu, suara bacaan layar standar NVDA bisa dikonfigurasi untuk diam sesaat (Mute NVDA Fallback) agar suara tidak saling bertabrakan.
