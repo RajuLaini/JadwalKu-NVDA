@@ -33,25 +33,37 @@ def get_nvda_version():
 	except Exception:
 		return "NVDA Modern"
 
-def extract_recent_logs(max_lines=35):
+def extract_recent_logs(max_lines=100):
 	try:
-		log_path = logHandler.getLogFileName()
+		import globalVars
+		log_path = getattr(globalVars.appArgs, 'logFileName', None)
+		if not log_path and hasattr(logHandler, 'getLogFileName'):
+			log_path = logHandler.getLogFileName()
 		if not log_path or not os.path.exists(log_path):
 			return "File log NVDA tidak ditemukan."
 		
+		import collections
 		with open(log_path, "r", encoding="utf-8", errors="replace") as f:
-			lines = f.readlines()
+			lines = list(collections.deque(f, maxlen=3000))
 		
 		# Ambil baris-baris yang relevan dengan JadwalKu atau Error
 		relevant = []
-		keywords = ["jadwalku", "exception", "traceback", "error", "audiomanager", "ttsmanager", "scheduler", "guidialogs"]
-		for line in lines[-200:]: # periksa 200 baris terakhir
+		keywords = ["jadwalku", "exception", "traceback", "error", "audiomanager", "ttsmanager", "scheduler", "guidialogs", "voicecommand", "vosk", "vp:"]
+		
+		include_next = False
+		for line in lines[-1000:]: # periksa 1000 baris terakhir
 			lower_line = line.lower()
+			
 			if any(k in lower_line for k in keywords):
-				relevant.append(line.strip())
+				relevant.append(line.strip('\r\n'))
+				include_next = True if "traceback" in lower_line or "exception" in lower_line else False
+			elif include_next and line.startswith((' ', '\t')):
+				relevant.append(line.strip('\r\n'))
+			else:
+				include_next = False
 		
 		if not relevant:
-			relevant = [l.strip() for l in lines[-15:] if l.strip()]
+			relevant = [l.strip('\r\n') for l in lines[-20:] if l.strip('\r\n')]
 			
 		# Ambil maksimal max_lines terakhir
 		return "\n".join(relevant[-max_lines:])

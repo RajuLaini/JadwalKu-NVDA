@@ -201,6 +201,7 @@ class FeedbackDialog(wx.Dialog):
 			"Manajemen Agenda Rutin (Tambah/Edit/Hapus)",
 			"Pengingat Waktu Berkala (Time Reminder)",
 			"Mesin Suara TTS Mandiri SAPI 5",
+			"Perintah Suara (Voice Command & Voice Pack)",
 			"Audio Manager & Single-Open WinMM Relooping Engine",
 			"Timer Mundur Cepat (Quick Timer)",
 			"Alarm Sekali Pakai (One-Time Alarm & Snooze)",
