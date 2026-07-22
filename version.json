@@ -1,6 +1,6 @@
 {
-    "version": "1.6.8",
+    "version": "1.6.8.1",
     "changelog": "- Hotfix: Perbaikan dependensi palsu (No module named 'srt', 'tqdm', 'requests') yang menyebabkan fitur Perintah Suara (Voice Command) gagal dimuat di beberapa komputer meskipun modul sudah diunduh.\n- Pemutakhiran sistem pencegah crash saat memuat Vosk API di latar belakang.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.8.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.8/JadwalKu-v1.6.8.nvda-addon"
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.8.1.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.8.1/JadwalKu-v1.6.8.1.nvda-addon"
 }
