@@ -1891,7 +1891,12 @@ class JadwalKuDialog(wx.Dialog):
 		dlg = wx.ProgressDialog("Mengunduh Modul", "Menyambung ke server...", 100, self, wx.PD_AUTO_HIDE | wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
 		
 		def download_thread():
-			url = "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/voice-module-v1/jadwalku_voice_module.zip"
+			import sys
+			is_64bit = sys.maxsize > 2**32
+			if is_64bit:
+				url = "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/voice-module-v1/jadwalku_voice_module.zip"
+			else:
+				url = "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/voice-module-v1/jadwalku_voice_module_32.zip"
 			temp_dir = tempfile.mkdtemp()
 			local_zip = os.path.join(temp_dir, "jadwalku_voice_module.zip")
 			try:
