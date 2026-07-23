@@ -26,6 +26,15 @@ def get_machine_name():
 	except Exception:
 		return "PC-Windows"
 
+def get_addon_version():
+	try:
+		import addonHandler
+		addon = addonHandler.getCodeAddon()
+		if addon: return addon.manifest['version']
+	except Exception:
+		pass
+	return "Unknown"
+
 def get_nvda_version():
 	try:
 		import versionInfo
@@ -88,7 +97,7 @@ def check_can_send_report(config_manager):
 			check_url,
 			headers={
 				"Content-Type": "application/json; charset=utf-8",
-				"User-Agent": "JadwalKu-NVDA-Addon/1.6.2"
+				"User-Agent": f"JadwalKu-NVDA-Addon/{get_addon_version()}"
 			}
 		)
 		
@@ -139,7 +148,7 @@ def send_report_async(config_manager, report_data, on_complete_callback):
 				data=json_bytes,
 				headers={
 					"Content-Type": "application/json; charset=utf-8",
-					"User-Agent": "JadwalKu-NVDA-Addon/1.6.2"
+					"User-Agent": f"JadwalKu-NVDA-Addon/{get_addon_version()}"
 				},
 				method="POST"
 			)

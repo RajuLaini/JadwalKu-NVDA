@@ -62,28 +62,36 @@ async function handleUpload(request, env) {
             oldFilename = existingData.filename;
         }
 
-        // Siapkan operasi Commit Hugging Face (Format JSON)
-        const ops = [];
+        // Siapkan operasi Commit Hugging Face (Format NDJSON)
+        const ndjsonLines = [];
+        ndjsonLines.push(JSON.stringify({
+            key: "header",
+            value: { summary: `Upload VP by ${uploaderName}` }
+        }));
         if (oldFilename && oldFilename !== finalFilename) {
-            ops.push({ keyDeletion: oldFilename });
+            ndjsonLines.push(JSON.stringify({
+                key: "deletedFile",
+                value: { path: oldFilename }
+            }));
         }
-        ops.push({
-            keyAddition: finalFilename,
-            base64Content: b64content
-        });
-        
-        const hfPayload = {
-            operations: ops,
-            summary: `Upload VP by ${uploaderName}`
-        };
+        ndjsonLines.push(JSON.stringify({
+            key: "file",
+            value: {
+                content: b64content,
+                path: finalFilename,
+                encoding: "base64"
+            }
+        }));
+
+        const ndjsonBody = ndjsonLines.join('\n');
 
         const hfResponse = await fetch(`https://huggingface.co/api/datasets/OrionWood/JadwalKu-VoicePacks/commit/main`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${env.HF_TOKEN}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-ndjson'
             },
-            body: JSON.stringify(hfPayload)
+            body: ndjsonBody
         });
 
         if (!hfResponse.ok) {

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JadwalKu v1.6.6: Asisten Waktu & Agenda Aksesibel Terbaik untuk NVDA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        article {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #16a085;
+            margin-top: 30px;
+        }
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .highlight {
+            background-color: #f1c40f;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .shortcut {
+            background-color: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .cta-button {
+            display: block;
+            width: 250px;
+            margin: 50px auto;
+            padding: 15px 20px;
+            background-color: #27ae60;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #2ecc71;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <article>
+        <h1>JadwalKu v1.6.6: Asisten Waktu & Agenda Aksesibel Terbaik untuk NVDA</h1>
+        <p class="subtitle">Bukan sekadar alarm biasa, JadwalKu adalah revolusi manajemen waktu yang didesain 100% ramah Screen Reader!</p>
+
+        <p>Halo, teman-teman! Pernahkah kamu merasa kesulitan mengatur jadwal, sering lupa minum air, atau kelewatan waktu istirahat saat sedang asyik bekerja di depan komputer? Buat kita para pengguna pembaca layar (Screen Reader) NVDA, mencari aplikasi alarm atau pengingat waktu yang benar-benar <em>accessible</em> (mudah diakses) kadang bisa jadi tantangan tersendiri.</p>
+        
+        <p>Nah, sekarang kamu nggak perlu bingung lagi! Kenalin nih, <strong>JadwalKu</strong> versi terbaru <strong>1.6.6</strong>. Add-on super keren ini dibuat khusus untuk menyatu dengan NVDA kamu. Yuk, kita bedah tuntas apa saja fitur gila yang dibawa oleh JadwalKu!</p>
+
+        <h2>1. Manajemen Agenda Rutin yang Sangat Fleksibel</h2>
+        <p>Fitur utama JadwalKu adalah mengatur jadwal harian dan mingguanmu dengan sangat rapi. Lupakan mengetik jam manual yang rentan salah ketik (typo)!</p>
+        <ul>
+            <li><strong>Input Super Gampang:</strong> Cukup pilih Jam, Menit, dan Frekuensi (Setiap Hari atau Hari Tertentu) lewat Combo Box.</li>
+            <li><strong>Pengingat Berkala (Interval):</strong> Mau diingatkan minum air setiap 2 jam sekali dari jam 8 pagi sampai 5 sore? Bisa banget! JadwalKu punya pengaturan <em>Interval & End Hour</em> agar alarm berhenti otomatis di jam yang kamu mau.</li>
+            <li><strong>Dua Mode Suara:</strong> Pilih mode <em>Chime</em> (bunyi sekali) atau <em>Alarm Weker</em> (bunyi terus-menerus) yang bisa kamu tunda (snooze) dengan menekan huruf <span class="shortcut">Z</span>.</li>
+            <li><strong>Gabung Hari Sesuka Hati:</strong> Butuh jadwal hanya di hari Senin, Rabu, dan Jumat? Tersedia Checkbox khusus untuk menyesuaikan hari sesuai jadwal aktifmu.</li>
+        </ul>
+
+        <h2>2. Pengingat Waktu Berkala (Hourly Chime)</h2>
+        <p>Biar nggak lupa waktu, JadwalKu bisa ngasih tahu kamu jam berapa sekarang secara otomatis!</p>
+        <ul>
+            <li><strong>Interval Bebas:</strong> Atur mulai dari setiap 5 menit, 15 menit, 30 menit, hingga 1 jam sekali.</li>
+            <li><strong>Banyak Pilihan Gaya:</strong> Bisa diatur mau pakai notifikasi suara NVDA, bunyi bel saja, atau kombinasi keduanya.</li>
+            <li><strong>Quiet Hours (Jam Tenang):</strong> Atur agar pengingat hanya aktif dari jam 06:00 sampai 22:00. Lewat dari itu? JadwalKu akan diam dan membiarkanmu tidur nyenyak.</li>
+        </ul>
+
+        <h2>3. Voice Pack Studio: Jadikan Suaramu Sendiri Sebagai Pengingat!</h2>
+        <p>Bosan dengan suara robot TTS? Di JadwalKu v1.6.6, terdapat <strong>Voice Pack Studio</strong> yang memungkinkan kamu merekam 70 kata dasar menggunakan suaramu sendiri!</p>
+        <p>Mesin pintar JadwalKu akan otomatis memotong jeda hening (auto-trim) dan merangkainya menjadi ucapan waktu yang sangat natural. Misalnya, mesin bisa merangkai kata "Jam", "Sembilan", "Lewat", "Lima Belas", "Menit" menggunakan rekaman suaramu. Bahkan jika kamu lupa merekam beberapa kata, sistem memiliki toleransi yang pintar agar pengucapannya tetap berjalan.</p>
+
+        <h2>4. Perintah Suara (Voice Command) AI Offline</h2>
+        <p>Ini dia yang bikin JadwalKu v1.6.6 makin <em>mind-blowing</em>! Kamu bisa bertanya, <em>"Jam berapa sekarang?"</em> langsung lewat mikrofon, dan JadwalKu akan menjawabnya.</p>
+        <ul>
+            <li><strong>100% Offline & Aman:</strong> Ditenagai mesin Vosk yang berjalan langsung di RAM (Zero Disk Wear). Tidak butuh koneksi internet sama sekali!</li>
+            <li><strong>Mic Boost:</strong> Suara mic kamu pelan? JadwalKu bisa melipatgandakan sensitivitas mic kamu hingga <strong>1200%</strong> langsung di memori!</li>
+        </ul>
+
+        <h2>5. Audio Manager Super Canggih</h2>
+        <p>Pernah sebal karena suara alarm bertabrakan dengan suara bacaan NVDA? JadwalKu memecahkan masalah ini dengan sistem <strong>Audio Manager</strong> independen.</p>
+        <ul>
+            <li><strong>Routing Audio Bebas:</strong> Kamu bisa mengatur suara alarm JadwalKu keluar di speaker eksternal, sementara suara NVDA tetap di Headset. Keren kan?</li>
+            <li><strong>Volume Ekstrem (Hingga 1200%):</strong> Kalau suara alarm atau Voice Pack terasa kurang keras, dorong saja slider volumenya sampai 12 kali lipat!</li>
+            <li><strong>Mesin TTS Mandiri SAPI 5:</strong> JadwalKu punya mesin pembaca sendiri di latar belakang. Jadi saat pengingat waktu berbunyi, dia tidak akan memotong atau menumpuk suara NVDA yang sedang kamu pakai membaca.</li>
+        </ul>
+
+        <h2>6. Pintu Gerbang "Command Layer" (Shortcut Klasik)</h2>
+        <p>Untuk mengakses semua fitur canggih di atas, kamu nggak perlu menghafal puluhan shortcut rumit. Cukup tekan <span class="shortcut">NVDA + /</span>, lalu tekan satu huruf untuk perintah spesifik. Cukup sederhana, bukan?</p>
+        <ul>
+            <li><span class="shortcut">L</span> : Buka Menu Utama (Manajemen Agenda).</li>
+            <li><span class="shortcut">1</span> : Pasang Timer Mundur Cepat (Bisa hitung mundur pakai detik persiapan!).</li>
+            <li><span class="shortcut">2</span> : Pasang Alarm Sekali Pakai.</li>
+            <li><span class="shortcut">W</span> : Bacakan jam sekarang (dengan pratinjau Voice Pack atau TTS).</li>
+            <li><span class="shortcut">K</span> : Buka Kalender Bulanan & Cek Tanggal Merah Indonesia.</li>
+            <li><span class="shortcut">D</span> : Jam Dunia & Kalkulator Konversi Waktu Antar Negara.</li>
+            <li><span class="shortcut">T</span> : pengaturan TTs Mandiri.</li>
+            <li><span class="shortcut">M</span> : hidup matikan Microphone perintah suara.</li>
+            <li><span class="shortcut">Spasi</span> : Matikan alarm yang sedang berbunyi.</li>
+        </ul>
+
+        <h2>7. Terhubung Langsung ke Developer via Telegram</h2>
+        <p>Menemukan Bug? Punya ide fitur baru? Tekan <span class="shortcut">NVDA + /</span> lalu <span class="shortcut">R</span>. Kamu bisa langsung mengirim pesan, log NVDA, dan laporan error langsung ke bot Telegram Aileen milik developer dari dalam NVDA tanpa harus buka browser!</p>
+
+        <h2>8. Auto-Updater & Bagikan Add-on dengan Mudah</h2>
+        <p>JadwalKu selalu mengecek pembaruan versi di latar belakang. Kalau ada versi baru, kamu tinggal klik 'Ya', dan update akan langsung terpasang otomatis!</p>
+        <p>Mau pamer ke teman? Tekan <span class="shortcut">NVDA + /</span> lalu <span class="shortcut">G</span>. Link download versi terbaru JadwalKu akan otomatis tersalin ke Clipboard kamu, siap di-paste dan dikirim ke grup WhatsApp!</p>
+
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+        <h3>Kesimpulan</h3>
+        <p>JadwalKu v1.6.6 bukan lagi sekadar add-on kalender biasa. Ia telah bertransformasi menjadi asisten virtual pintar, mesin audio mandiri, dan pengingat waktu canggih berbahasa indonesia yang pernah ada untuk NVDA. Semuanya dibungkus dalam antarmuka yang sangat mudah dipahami dan dinavigasikan.</p>
+        
+        <div class="note">
+            <strong>Catatan Penting:</strong> Add-on ini kompatibel dengan NVDA versi 2022.1.0 hingga versi terbaru 2026.1.0.
+        </div>
+
+        <p>Tunggu apa lagi? Tingkatkan produktivitasmu dan jangan biarkan waktu terbuang sia-sia. Unduh JadwalKu sekarang juga!</p>
+
+        <a href="https://github.com/RajuLaini/JadwalKu-NVDA/releases/latest" class="cta-button" target="_blank">Download JadwalKu v1.6.6</a>
+        
+    </article>
+
+</body>
+</html>

@@ -205,21 +205,26 @@ class VoicePackStoreDialog(wx.Dialog):
 		
 		def worker():
 			try:
+				import base64
 				with open(pack_path, 'rb') as f:
-					body_bytes = f.read()
+					b64_content = base64.b64encode(f.read()).decode('utf-8')
+				
+				payload = {
+					'uploader_name': uploader_name,
+					'pack_name': pack_name,
+					'b64content': b64_content
+				}
+				body_bytes = json.dumps(payload).encode('utf-8')
 				
 				headers = {
-					'Content-Type': 'application/octet-stream',
-					'Content-Length': str(len(body_bytes)),
+					'Content-Type': 'application/json',
 					'X-Hardware-ID': self.hardware_id,
 					'X-Password': password,
-					'X-Uploader-Name': urllib.parse.quote(uploader_name),
-					'X-Pack-Name': urllib.parse.quote(pack_name),
-					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+					'User-Agent': 'JadwalKu-NVDA'
 				}
 				
 				req = urllib.request.Request(f"{API_URL}/upload", data=body_bytes, headers=headers, method='POST')
-				with urllib.request.urlopen(req, timeout=60) as resp:
+				with urllib.request.urlopen(req, timeout=120) as resp:
 					resp_data = json.loads(resp.read().decode('utf-8'))
 					
 					def on_success():

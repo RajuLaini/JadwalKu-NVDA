@@ -1,0 +1,8 @@
+name = "jadwalku-vp-api"
+main = "index.js"
+compatibility_date = "2023-12-01"
+account_id = "f1c51aceeeb7e5cd6c6fc1fa2b5cef96"
+
+[[kv_namespaces]]
+binding = "VP_STORE_DB"
+id = "8980146972214c73a268943d679f7776"

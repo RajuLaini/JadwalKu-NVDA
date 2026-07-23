@@ -74,6 +74,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.6.8.4 ---\n"
+			"* Perbaikan Kritis: Memperbaiki masalah Daftar Paket Suara kosong di JadwalKu VoicePack Store setelah melakukan upload, yang disebabkan oleh perubahan format API pada peladen pusat (migrasi dari struktur JSON ke NDJSON/JSON Lines).\n\n"
 			"--- Versi 1.6.8.3 (Hotfix Cloudflare API) ---\n"
 			"* Memperbaiki arsitektur peladen Cloudflare JadwalKu yang memicu error 'List Kosong' pada Voice Pack Store karena ketidakcocokan format karakter spasi bawaan Hugging Face, serta menambahkan fitur cerdas *Fallback* agar Store selalu tangguh meskipun *database* kosong.\n\n"
 			"--- Versi 1.6.8.2 (Terbaru - Patch Laporan Bug) ---\n"

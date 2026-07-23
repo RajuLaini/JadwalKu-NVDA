@@ -69,7 +69,10 @@ class VoiceCommandManager:
 			import types
 			for mod_name in ['srt', 'tqdm', 'requests']:
 				if mod_name not in sys.modules:
-					sys.modules[mod_name] = types.ModuleType(mod_name)
+					mock_mod = types.ModuleType(mod_name)
+					if mod_name == 'tqdm':
+						mock_mod.tqdm = lambda *args, **kwargs: None
+					sys.modules[mod_name] = mock_mod
 			
 			import vosk
 			vosk.SetLogLevel(-1) # Disable verbose logs
