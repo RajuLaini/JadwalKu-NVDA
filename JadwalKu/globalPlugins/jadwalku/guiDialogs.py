@@ -74,6 +74,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.0 ---\n"
+			"* Penyempurnaan Voice Pack Store: Memperbaiki masalah pengunggahan dan pengunduhan paket suara dengan mengimplementasikan arsitektur LFS secara manual pada peladen Cloudflare, sehingga terbebas dari batasan CPU (Error 1102).\n"
+			"* Perbaikan Bug Anonim: Mengatasi masalah nama pembuat (uploader) yang tampil sebagai 'Anonim' di daftar paket suara karena ketidakcocokan format metadata pada backend.\n\n"
 			"--- Versi 1.6.8.4 ---\n"
 			"* Perbaikan Kritis: Memperbaiki masalah Daftar Paket Suara kosong di JadwalKu VoicePack Store setelah melakukan upload, yang disebabkan oleh perubahan format API pada peladen pusat (migrasi dari struktur JSON ke NDJSON/JSON Lines).\n\n"
 			"--- Versi 1.6.8.3 (Hotfix Cloudflare API) ---\n"
