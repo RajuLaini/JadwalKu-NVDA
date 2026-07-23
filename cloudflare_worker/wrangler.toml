@@ -1,6 +1,7 @@
 name = "jadwalku-vp-api"
 main = "index.js"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = [ "nodejs_compat" ]
 account_id = "f1c51aceeeb7e5cd6c6fc1fa2b5cef96"
 
 [[kv_namespaces]]

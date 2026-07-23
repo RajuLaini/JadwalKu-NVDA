@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@huggingface/hub": "^2.13.3"
+  }
+}

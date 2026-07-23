@@ -1,7 +1,11 @@
 /**
  * JadwalKu Voice Pack Store - Cloudflare Worker
- * Menggunakan FormData Stream untuk menghindari Error 1102 (CPU Time Limit).
+ * Menggunakan @huggingface/hub untuk manajemen dataset.
  */
+
+import { commit, listFiles } from "@huggingface/hub";
+
+const HF_REPO = "OrionWood/JadwalKu-VoicePacks";
 
 export default {
     async fetch(request, env, ctx) {
@@ -62,41 +66,36 @@ async function handleUpload(request, env) {
             oldFilename = existingData.filename;
         }
 
-        // Siapkan operasi Commit Hugging Face (Format NDJSON)
-        const ndjsonLines = [];
-        ndjsonLines.push(JSON.stringify({
-            key: "header",
-            value: { summary: `Upload VP by ${uploaderName}` }
-        }));
-        if (oldFilename && oldFilename !== finalFilename) {
-            ndjsonLines.push(JSON.stringify({
-                key: "deletedFile",
-                value: { path: oldFilename }
-            }));
+        // Convert base64 to Blob
+        const binaryString = atob(b64content);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
         }
-        ndjsonLines.push(JSON.stringify({
-            key: "file",
-            value: {
-                content: b64content,
-                path: finalFilename,
-                encoding: "base64"
-            }
-        }));
+        const contentBlob = new Blob([bytes]);
 
-        const ndjsonBody = ndjsonLines.join('\n');
-
-        const hfResponse = await fetch(`https://huggingface.co/api/datasets/OrionWood/JadwalKu-VoicePacks/commit/main`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${env.HF_TOKEN}`,
-                'Content-Type': 'application/x-ndjson'
-            },
-            body: ndjsonBody
+        // Siapkan operasi Commit Hugging Face (Format @huggingface/hub)
+        const ops = [];
+        if (oldFilename && oldFilename !== finalFilename) {
+            ops.push({ operation: 'delete', path: oldFilename });
+        }
+        ops.push({
+            operation: 'addOrUpdate',
+            path: finalFilename,
+            content: contentBlob
         });
 
-        if (!hfResponse.ok) {
-            const err = await hfResponse.text();
-            throw new Error(`HF API Error: ${err}`);
+        try {
+            await commit({
+                repo: { type: "dataset", name: HF_REPO },
+                credentials: { accessToken: env.HF_TOKEN },
+                title: `Upload VP by ${uploaderName}`,
+                operations: ops
+            });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `HF API Error: ${e.message}` }), {
+                status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+            });
         }
 
         // Simpan metadata baru ke KV
