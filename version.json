@@ -1,6 +1,6 @@
 {
-    "version": "1.6.8.1",
-    "changelog": "- Hotfix: Perbaikan dependensi palsu (No module named 'srt', 'tqdm', 'requests') yang menyebabkan fitur Perintah Suara (Voice Command) gagal dimuat di beberapa komputer meskipun modul sudah diunduh.\n- Pemutakhiran sistem pencegah crash saat memuat Vosk API di latar belakang.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.8.1.nvda-addon",
-    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.8.1/JadwalKu-v1.6.8.1.nvda-addon"
+    "version": "1.6.8.3",
+    "changelog": "Versi 1.6.8.3:\n- Hotfix Cloudflare API: Memperbaiki arsitektur peladen Cloudflare JadwalKu yang memicu error 'List Kosong' pada Voice Pack Store karena ketidakcocokan format karakter spasi bawaan Hugging Face.\n- Fallback System: Menambahkan fitur cerdas Fallback agar Store selalu tangguh meskipun database kosong.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.6.8.3.nvda-addon",
+    "url": "https://github.com/rajulaini/JadwalKu/releases/download/v1.6.8.3/JadwalKu-v1.6.8.3.nvda-addon"
 }
