@@ -178,7 +178,18 @@ class UpdateChecker:
 			
 			logHandler.log.info(f"JadwalKu: Pembaruan berhasil diunduh ke {temp_file}")
 			wx.CallAfter(ui.message, "Unduhan selesai! Menampilkan dialog pemasangan add-on NVDA...")
-			wx.CallAfter(os.startfile, temp_file)
+			
+			def launch_installer():
+				import sys
+				import subprocess
+				try:
+					executable = sys.executable if getattr(sys, 'frozen', False) else sys.argv[0]
+					subprocess.Popen([executable, temp_file])
+				except Exception as popen_e:
+					logHandler.log.warning(f"JadwalKu: subprocess.Popen gagal ({popen_e}), mencoba os.startfile...")
+					os.startfile(temp_file)
+					
+			wx.CallAfter(launch_installer)
 		except Exception as e:
 			logHandler.log.warning(f"JadwalKu: Unduhan langsung di latar belakang gagal ({e}). Mengalihkan ke browser...")
 			wx.CallAfter(ui.message, "Mengalihkan tautan unduhan ke browser...")

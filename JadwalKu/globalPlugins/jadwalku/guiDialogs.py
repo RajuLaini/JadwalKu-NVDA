@@ -74,6 +74,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.1 ---\n"
+			"* Fitur Share Dinamis: Tombol bagikan Add-on (NVDA + / lalu G) kini otomatis dan dinamis menyalin tautan dari versi terbaru yang terpasang di komputer Anda.\n"
+			"* Perbaikan Auto Update: Memperbaiki installer latar belakang yang terkadang membuat NVDA Portable hang/stuck di dialog instalasi.\n\n"
 			"--- Versi 1.7.0 ---\n"
 			"* Penyempurnaan Voice Pack Store: Memperbaiki masalah pengunggahan dan pengunduhan paket suara dengan mengimplementasikan arsitektur LFS secara manual pada peladen Cloudflare, sehingga terbebas dari batasan CPU (Error 1102).\n"
 			"* Perbaikan Bug Anonim: Mengatasi masalah nama pembuat (uploader) yang tampil sebagai 'Anonim' di daftar paket suara karena ketidakcocokan format metadata pada backend.\n\n"

@@ -308,25 +308,29 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def share_addon_link(self):
 		import gui
 		import wx
+		import addonHandler
+		import api
 		dlg = wx.SingleChoiceDialog(gui.mainFrame, "Pilih metode untuk membagikan JadwalKu:", "Bagikan JadwalKu", ["Salin Tautan Unduhan (Direct Link)", "Salin Pesan Undangan (WhatsApp/Medsos)"])
 		if dlg.ShowModal() == wx.ID_OK:
 			sel = dlg.GetSelection()
-			url = "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/JadwalKu-v1.6.4.nvda-addon"
-			if sel == 0:
-				text = url
-				msg = "Tautan unduhan langsung JadwalKu v1.6.4 berhasil disalin ke clipboard!"
-			else:
-				text = f"Halo! Ayo coba JadwalKu, Add-on NVDA keren untuk pengingat jadwal, alarm, dan Voice Pack Studio!\n\nUnduh versi terbarunya (v1.6.4) langsung di sini:\n{url}"
-				msg = "Pesan undangan berhasil disalin! Silakan paste di obrolan WhatsApp atau Medsos teman Anda."
 			
 			try:
-				if api.copyToClip(text):
-					ui.message(msg)
-				else:
-					ui.message("Gagal menyalin ke clipboard.")
-			except Exception as e:
-				logHandler.log.error(f"JadwalKu: Error saat salin tautan bagikan: {e}")
-				ui.message("Gagal menyalin ke clipboard.")
+				addon = addonHandler.getCodeAddon()
+				current_version = addon.manifest['version']
+			except Exception:
+				current_version = "1.7.0"
+				
+			url = f"https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v{current_version}.nvda-addon"
+			if sel == 0:
+				text = url
+				msg = f"Tautan unduhan langsung JadwalKu v{current_version} berhasil disalin ke clipboard!"
+			else:
+				text = f"Halo! Ayo coba JadwalKu, Add-on NVDA keren untuk pengingat jadwal, alarm, dan Voice Pack Store!\n\nUnduh versi terbarunya (v{current_version}) langsung di sini:\n{url}"
+				msg = "Pesan undangan berhasil disalin! Silakan paste di obrolan WhatsApp atau Medsos teman Anda."
+			
+			if api.copyToClip(text):
+				import ui
+				ui.message(msg)
 		dlg.Destroy()
 
 	def show_quick_timer_dialog(self):

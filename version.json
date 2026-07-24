@@ -1,6 +1,6 @@
 {
-    "version": "1.7.0",
-    "changelog": "- Memperbaiki pengunggahan dan pengunduhan paket suara menggunakan arsitektur LFS baru\n- Menghapus bug nama anonim di menu daftar paket suara\n- Mengoptimalkan backend Worker Cloudflare.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.0.nvda-addon",
-    "url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/v1.7.0/JadwalKu-v1.7.0.nvda-addon"
+    "version": "1.7.1",
+    "changelog": "- Perbaikan Auto Update: Memperbaiki installer latar belakang yang terkadang membuat NVDA Portable hang/stuck.\n- Fitur Share Dinamis: Tombol bagikan Add-on (NVDA + / lalu G) kini otomatis menyalin tautan dari versi terbaru yang terpasang.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.1.nvda-addon",
+    "url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/v1.7.1/JadwalKu-v1.7.1.nvda-addon"
 }
