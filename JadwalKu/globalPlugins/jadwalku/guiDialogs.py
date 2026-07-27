@@ -74,6 +74,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.2 ---\n"
+			"* Fitur Baru: Mode Asisten Produktivitas (Pomodoro Timer) Eksperimental. Gunakan pintasan NVDA + / lalu 3 untuk mengatur waktu fokus dan istirahat Anda.\n"
+			"* Perbaikan Pembaruan Tersembunyi: Memaksa Auto-Updater untuk menarik perbaikan 403 WAF dari versi 1.7.1 yang sebelumnya terlewatkan.\n\n"
 			"--- Versi 1.7.1 ---\n"
 			"* Fitur Share Dinamis: Tombol bagikan Add-on (NVDA + / lalu G) kini otomatis dan dinamis menyalin tautan dari versi terbaru yang terpasang di komputer Anda.\n"
 			"* Perbaikan Auto Update: Memperbaiki installer latar belakang yang terkadang membuat NVDA Portable hang/stuck di dialog instalasi.\n"

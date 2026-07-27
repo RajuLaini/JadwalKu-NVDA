@@ -109,6 +109,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.tts = TTSManager(self.config, self.audio)
 		self.audio.tts_manager = self.tts
 		self.scheduler = Scheduler(self.config, self.audio, self.tts)
+		
+		from . import pomodoro
+		self.pomodoro_manager = pomodoro.PomodoroManager(self.audio, self)
+		
 		self.scheduler.start()
 		
 		try:
@@ -141,6 +145,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:l": "openLayout",
 			"kb:enter": "openLayout",
 			"kb:1": "openQuickTimer",
+			"kb:3": "openPomodoroTimer",
 			"kb:2": "openOneTimeAlarm",
 			"kb:w": "announceTime",
 			"kb:r": "openFeedback",
@@ -333,6 +338,19 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(msg)
 		dlg.Destroy()
 
+	def show_pomodoro_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		gui.mainFrame.prePopup()
+		try:
+			from . import pomodoro
+			dlg = pomodoro.PomodoroTimerDialog(gui.mainFrame, self.pomodoro_manager)
+			dlg.ShowModal()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
 	def show_quick_timer_dialog(self):
 		if not self.check_dialog_open():
 			return
@@ -447,7 +465,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, M Mesin TTS Mandiri, V Riwayat, atau B Bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, 3 Pomodoro Timer, W Waktu, K Kalender, D Jam Dunia, M Mesin TTS Mandiri, V Riwayat, atau B Bantuan.")
 		self.switch = True
 
 	def script_openLayout(self, gesture):
@@ -455,6 +473,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def script_openQuickTimer(self, gesture):
 		wx.CallAfter(self.show_quick_timer_dialog)
+
+	def script_openPomodoroTimer(self, gesture):
+		wx.CallAfter(self.show_pomodoro_dialog)
 
 	def script_openOneTimeAlarm(self, gesture):
 		wx.CallAfter(self.show_one_time_alarm_dialog)
@@ -565,6 +586,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		else:
 			msg = self.format_full_year_countdown(now, time_settings)
 		
+		if hasattr(self, "pomodoro_manager") and self.pomodoro_manager.is_active:
+			msg += " " + self.pomodoro_manager.get_status_str()
+		
 		ui.message(msg)
 
 	def script_announceTime(self, gesture):
@@ -576,7 +600,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		status = "aktif" if cfg.get("enabled", False) else "nonaktif"
 		interval = cfg.get("interval", 60)
 		status_msg = f"Pengingat waktu berkala saat ini {status} (tiap {interval} menit)."
-		full_msg = f"{time_str}. {status_msg}"
+		
+		pomodoro_msg = ""
+		if hasattr(self, "pomodoro_manager") and self.pomodoro_manager.is_active:
+			pomodoro_msg = " " + self.pomodoro_manager.get_status_str()
+			
+		full_msg = f"{time_str}. {status_msg}{pomodoro_msg}"
 		
 		active_vp = cfg.get("active_voice_pack", "")
 		mode = cfg.get("mode", "both")
