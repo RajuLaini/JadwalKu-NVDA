@@ -74,6 +74,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.3 (Hotfix Kritis) ---\n"
+			"* Perbaikan Store: Memperbaiki masalah fatal di mana fungsi Hapus dengan Kata Sandi Master salah membaca ID pengguna, sehingga malah menghapus paket milik admin sendiri.\n"
+			"* Perbaikan Auto-Update: Memperbaiki pesan error *Unknown command line parameters* saat membuka dialog pembaruan karena kesalahan *parsing* file `.nvda-addon` ke sistem NVDA.\n\n"
 			"--- Versi 1.7.2 ---\n"
 			"* Fitur Baru: Mode Asisten Produktivitas (Pomodoro Timer) Eksperimental. Gunakan pintasan NVDA + / lalu 3 untuk mengatur waktu fokus dan istirahat Anda.\n"
 			"* Perbaikan Pembaruan Tersembunyi: Memaksa Auto-Updater untuk menarik perbaikan 403 WAF dari versi 1.7.1 yang sebelumnya terlewatkan.\n\n"

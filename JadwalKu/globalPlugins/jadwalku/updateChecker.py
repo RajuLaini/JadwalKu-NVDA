@@ -180,14 +180,11 @@ class UpdateChecker:
 			wx.CallAfter(ui.message, "Unduhan selesai! Menampilkan dialog pemasangan add-on NVDA...")
 			
 			def launch_installer():
-				import sys
-				import subprocess
+				import os
 				try:
-					executable = sys.executable if getattr(sys, 'frozen', False) else sys.argv[0]
-					subprocess.Popen([executable, temp_file])
-				except Exception as popen_e:
-					logHandler.log.warning(f"JadwalKu: subprocess.Popen gagal ({popen_e}), mencoba os.startfile...")
 					os.startfile(temp_file)
+				except Exception as popen_e:
+					logHandler.log.warning(f"JadwalKu: os.startfile gagal ({popen_e})")
 					
 			wx.CallAfter(launch_installer)
 		except Exception as e:

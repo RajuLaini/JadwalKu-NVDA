@@ -1,6 +1,6 @@
 {
-    "version": "1.7.2",
-    "changelog": "- Fitur Baru: Mode Asisten Produktivitas (Pomodoro Timer) Eksperimental. Gunakan pintasan NVDA + / lalu 3 untuk mengatur waktu fokus dan istirahat Anda.\n- Perbaikan Pembaruan Tersembunyi: Memaksa Auto-Updater untuk menarik perbaikan 403 WAF dari versi 1.7.1 yang sebelumnya terlewatkan.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.2.nvda-addon",
-    "url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/v1.7.2/JadwalKu-v1.7.2.nvda-addon"
+    "version": "1.7.3",
+    "changelog": "- Perbaikan Store: Memperbaiki masalah fatal Hapus dengan Sandi Master salah membaca ID pengguna.\n- Perbaikan Auto-Update: Memperbaiki pesan error Unknown command line parameters saat membuka installer NVDA Add-on.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.3.nvda-addon",
+    "url": "https://github.com/RajuLaini/JadwalKu-NVDA/releases/download/v1.7.3/JadwalKu-v1.7.3.nvda-addon"
 }

@@ -256,9 +256,16 @@ class VoicePackStoreDialog(wx.Dialog):
 		threading.Thread(target=worker).start()
 
 	def onDelete(self, event):
-		dlg = wx.TextEntryDialog(self, "Peringatan: Paket Anda di Store akan dihapus selamanya.\nMasukkan Kata Sandi yang Anda gunakan saat mengunggah:", "Konfirmasi Hapus Paket")
+		sel = self.list_ctrl.GetFirstSelected()
+		if sel < 0 or sel >= len(self.packs_data):
+			return
+		
+		target_pack = self.packs_data[sel]
+		target_hw_id = target_pack.get('hardwareId')
+		
+		dlg = wx.TextEntryDialog(self, f"Peringatan: Paket {target_pack.get('filename')} akan dihapus selamanya.\nMasukkan Kata Sandi yang Anda gunakan saat mengunggah:", "Konfirmasi Hapus Paket")
 		if dlg.ShowModal() == wx.ID_OK:
-			password = dlg.txt_pwd = dlg.GetValue()
+			password = dlg.GetValue()
 			if not password:
 				dlg.Destroy()
 				return
@@ -267,7 +274,7 @@ class VoicePackStoreDialog(wx.Dialog):
 			
 			def worker():
 				try:
-					req = urllib.request.Request(f"{API_URL}/delete", headers={'X-Hardware-ID': self.hardware_id, 'X-Password': password, 'User-Agent': 'JadwalKu-NVDA'}, method='DELETE')
+					req = urllib.request.Request(f"{API_URL}/delete", headers={'X-Hardware-ID': target_hw_id, 'X-Password': password, 'User-Agent': 'JadwalKu-NVDA'}, method='DELETE')
 					with urllib.request.urlopen(req, timeout=15) as resp:
 						resp_data = json.loads(resp.read().decode('utf-8'))
 						if resp_data.get('success'):
