@@ -171,13 +171,20 @@ class UpdateChecker:
 				else:
 					raise e_pub
 			
-			temp_dir = tempfile.gettempdir()
+			temp_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+			if not os.path.isdir(temp_dir):
+				temp_dir = tempfile.gettempdir()
+			
 			temp_file = os.path.join(temp_dir, "JadwalKu-update.nvda-addon")
 			with open(temp_file, "wb") as f:
 				f.write(data)
 			
+			import zipfile
+			if not zipfile.is_zipfile(temp_file):
+				raise ValueError("File yang diunduh rusak atau diblokir oleh jaringan (Bukan file ZIP yang valid).")
+			
 			logHandler.log.info(f"JadwalKu: Pembaruan berhasil diunduh ke {temp_file}")
-			wx.CallAfter(ui.message, "Unduhan selesai! Menampilkan dialog pemasangan add-on NVDA...")
+			wx.CallAfter(ui.message, "Unduhan selesai! Membuka installer dari folder Downloads...")
 			
 			def launch_installer():
 				import os
