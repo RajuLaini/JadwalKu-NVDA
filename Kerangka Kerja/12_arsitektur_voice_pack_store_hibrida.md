@@ -33,10 +33,12 @@ Berfungsi sebagai **Gudang File Tak Berbatas (Storage)**.
 - NVDA Add-on akan mengunduh paket suara orang lain menggunakan tautan *Direct Download* murni dari Hugging Face yang stabil dan memiliki *bandwidth* tanpa batas (berbeda dengan GitHub yang rawan *rate limit* untuk unduhan berulang).
 
 ## Alur Data
-1. **Upload:** NVDA Add-on -> `POST /upload` (Cloudflare Worker) -> Verifikasi KV -> Upload ke Hugging Face Hub API -> Catat sukses di KV -> Kirim respons sukses ke NVDA.
+1. **Upload:** NVDA Add-on -> `POST /upload` (Cloudflare Worker) -> Verifikasi KV -> Upload ke Hugging Face LFS API -> Catat sukses di KV -> Kirim respons sukses ke NVDA.
 2. **List:** NVDA Add-on -> `GET /list` (Cloudflare Worker) -> Minta `/tree` dari Hugging Face API -> Filter khusus file `.jvp` -> Kembalikan format JSON ringkas ke NVDA.
+3. **Delete (Patch 1.7.1):** NVDA Add-on -> `DELETE /delete` (Cloudflare Worker) dengan header `User-Agent: JadwalKu-NVDA` (wajib untuk lolos dari filter WAF Cloudflare 1010) -> Verifikasi KV & Sandi -> Hapus dari Hugging Face via Commit API (`deletedFile`) -> Hapus dari KV -> Kirim respons sukses ke NVDA.
 
 ## Kredensial dan Keamanan
 Semua kredensial disembunyikan menggunakan Cloudflare Secrets.
 - `HF_TOKEN`: Token rahasia *Hugging Face* dengan izin *Write*. Tidak pernah diekspos ke publik.
 - Worker diprogram untuk secara ketat membersihkan (*sanitize*) nama file dengan fungsi Regex untuk mencegah *Path Traversal Attack* atau karakter aneh yang dapat merusak repositori. File dinamakan dengan gabungan hash HardwareID pendek dan nama paket bersih.
+- **Master Password Darurat:** Diatur menggunakan Cloudflare Secret (`MASTER_PASSWORD`) untuk memberikan hak istimewa (*override*) bagi Admin agar dapat menghapus paket suara pengguna yang terkunci akibat lupa sandi, langsung melalui antarmuka NVDA. Tidak di-*hardcode* di dalam skrip demi keamanan.

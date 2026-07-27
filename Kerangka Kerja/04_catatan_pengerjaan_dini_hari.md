@@ -77,4 +77,13 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 - **Kolom Input Waktu Selesai Interval (`cb_interval_end`)**: Pada formulir tambah/edit jadwal (`AddEditScheduleDialog`), kini disediakan Combo Box untuk memilih Jam Selesai Perulangan (`Jam 00:00` sampai `Jam 23:00`).
 - **Dukungan Interval Lintas Malam (*Overnight Shift*)**: Mesin penjadwal (`scheduler.py` & `__init__.py`) secara pintar mendeteksi apakah perulangan berada dalam hari yang sama (`start_hour <= interval_end_hour`) atau melintasi tengah malam (`start_hour > interval_end_hour`, misal dari jam `20:00` sampai jam `04:00` pagi), sehingga pengingat berkala minum air atau jam kerja dapat beroperasi secara persis sesuai jam shift pengguna tanpa berdering saat shift sudah berakhir.
 
+### 15. Peluncuran Fitur Voice Pack Store (`v1.7.0`)
+- **Backend Hibrida**: Mengatasi masalah limitasi CPU dari *Cloudflare Workers* (Error 1102) dengan memindahkan fungsi *upload* dan *storage* langsung ke layanan Hugging Face LFS menggunakan *LFS Batch Protocol* secara manual.
+- **Bug Anonim**: Memperbaiki format *metadata* di backend yang sebelumnya gagal menautkan nama pengunggah paket suara, sehingga seluruh paket terlihat sebagai milik 'Anonim'.
 
+### 16. Perbaikan Stabilitas Store Lanjutan (`v1.7.1`)
+- **Installer Latar Belakang (*Background Installer*)**: Mengubah metode antrean `wx.CallAfter` pada pembaharuan add-on `updateChecker.py` untuk mengatasi masalah jendela NVDA yang membeku (*stuck/hang*) selama instalasi pembaruan.
+- **Fitur Tautan Berbagi Dinamis**: Pada fitur 'Bagikan', tautan kini mengambil versi termutakhir dan arsitektur pengalihan (*redirect*) yang cerdas menuju rilis `main` GitHub.
+- **Bypass Blokir WAF Cloudflare 1010**: Menemukan *bug* besar di mana pengguna mendapat laporan `Koneksi ditolak (HTTP 403)` saat hendak menghapus paket suara mereka sendiri. Investigasi agen menyimpulkan peladen WAF (*Web Application Firewall*) Cloudflare memblokir permintaan `DELETE` yang dikirim dari klien karena lupa disisipkan penanda `User-Agent`. Agen lalu menambalnya dengan `User-Agent: JadwalKu-NVDA` dan menambahkan fungsionalitas sandi darurat (*Master Password*) khusus admin menggunakan Cloudflare Secrets (`MASTER_PASSWORD`) untuk mengatasi kasus pengguna yang benar-benar lupa sandi tanpa mengekspos kata sandi admin ke repositori publik.
+
+-- *Semua rintangan berhasil dilampaui, Senin Pagi, 27 Juli 2026.*

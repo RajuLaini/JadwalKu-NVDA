@@ -267,20 +267,19 @@ class VoicePackStoreDialog(wx.Dialog):
 			
 			def worker():
 				try:
-					req = urllib.request.Request(f"{API_URL}/delete", headers={'X-Hardware-ID': self.hardware_id, 'X-Password': password}, method='DELETE')
+					req = urllib.request.Request(f"{API_URL}/delete", headers={'X-Hardware-ID': self.hardware_id, 'X-Password': password, 'User-Agent': 'JadwalKu-NVDA'}, method='DELETE')
 					with urllib.request.urlopen(req, timeout=15) as resp:
 						resp_data = json.loads(resp.read().decode('utf-8'))
 						if resp_data.get('success'):
 							wx.CallAfter(wx.MessageBox, "Paket berhasil dihapus dari Store!", "Sukses", wx.OK | wx.ICON_INFORMATION, self)
 							wx.CallAfter(self.refreshList)
-						else:
-							wx.CallAfter(wx.MessageBox, f"Gagal menghapus: {resp_data.get('message')}", "Error", wx.OK | wx.ICON_ERROR, self)
 				except urllib.error.HTTPError as e:
 					try:
 						resp_data = json.loads(e.read().decode('utf-8'))
-						wx.CallAfter(wx.MessageBox, f"Gagal menghapus: {resp_data.get('message')}", "Error", wx.OK | wx.ICON_ERROR, self)
+						err_msg = resp_data.get('error', resp_data.get('message', 'Unknown Error'))
+						wx.CallAfter(wx.MessageBox, f"Gagal menghapus: {err_msg}", "Error", wx.OK | wx.ICON_ERROR, self)
 					except:
-						wx.CallAfter(wx.MessageBox, f"Koneksi ditolak (HTTP {e.code})", "Error", wx.OK | wx.ICON_ERROR, self)
+						wx.CallAfter(wx.MessageBox, f"Koneksi ditolak (HTTP {getattr(e, 'code', 'Unknown')})", "Error", wx.OK | wx.ICON_ERROR, self)
 				except Exception as e:
 					wx.CallAfter(wx.MessageBox, f"Error: {str(e)}", "Error", wx.OK | wx.ICON_ERROR, self)
 			

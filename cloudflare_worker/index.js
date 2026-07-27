@@ -23,6 +23,8 @@ export default {
         
         if (url.pathname === '/upload' && request.method === 'POST') {
             return await handleUpload(request, env);
+        } else if (url.pathname === '/delete' && request.method === 'DELETE') {
+            return await handleDelete(request, env);
         } else if (url.pathname === '/list' && request.method === 'GET') {
             return await handleList(request, env);
         } else if (url.pathname.startsWith('/download/') && request.method === 'GET') {
@@ -172,6 +174,63 @@ async function handleUpload(request, env) {
 
         return jsonResponse({success: true, message: 'Paket Suara berhasil diunggah!'});
 
+    } catch (e) {
+        return jsonResponse({error: e.message}, 500);
+    }
+}
+
+async function handleDelete(request, env) {
+    try {
+        const hwId = request.headers.get('X-Hardware-ID');
+        const passwordHash = request.headers.get('X-Password');
+
+        if (!hwId || !passwordHash) {
+            return jsonResponse({error: 'Parameter tidak lengkap.'}, 400);
+        }
+
+        const existingDataStr = await env.VP_STORE_DB.get(hwId);
+        if (!existingDataStr) {
+            return jsonResponse({error: 'Paket tidak ditemukan di database.'}, 404);
+        }
+
+        const existingData = JSON.parse(existingDataStr);
+        // Allow a master override for the admin via Environment Secret
+        if (existingData.password !== passwordHash && passwordHash !== env.MASTER_PASSWORD) {
+            return jsonResponse({error: 'Kata sandi salah!'}, 403);
+        }
+
+        const filename = existingData.filename;
+
+        if (filename) {
+            // Delete from HF via Commit API
+            const commitOps = [];
+            commitOps.push(JSON.stringify({
+                key: "header",
+                value: { summary: `Delete VP by ${existingData.uploader || 'User'}` }
+            }));
+            commitOps.push(JSON.stringify({
+                key: "deletedFile",
+                value: { path: filename }
+            }));
+
+            const ndjsonBody = commitOps.join('\n');
+            const commitUrl = `https://huggingface.co/api/datasets/${HF_REPO}/commit/main`;
+            
+            // Fire and forget HF deletion, don't strictly fail if it's already gone
+            await fetch(commitUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${env.HF_TOKEN}`,
+                    'Content-Type': 'application/x-ndjson'
+                },
+                body: ndjsonBody
+            }).catch(e => console.error("HF Delete error:", e));
+        }
+
+        // Delete from KV Store
+        await env.VP_STORE_DB.delete(hwId);
+
+        return jsonResponse({success: true, message: 'Paket berhasil dihapus secara permanen.'});
     } catch (e) {
         return jsonResponse({error: e.message}, 500);
     }
