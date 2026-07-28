@@ -29,3 +29,7 @@ Untuk mencegah kesalahan serupa, setiap agen **WAJIB** mematuhi tata urutan komp
    Lakukan `git commit` dan `git push origin main`.
 
 Hanya dengan menyertakan *file bundle* instalernya (file berakhiran `.nvda-addon`) ke repositori awan, pembaruan Over-The-Air dapat tiba dengan selamat di komputer seluruh pengguna.
+
+
+## Catatan Versi 1.7.5: Mencegah Korupsi NVDA Lokal
+Installer uild_and_install.py tidak lagi menyalin secara paksa ke direktori instalasi NVDA (%appdata%\nvda\addons\JadwalKu) saat pembuatan Addon karena akan memicu PermissionError jika NVDA sedang berjalan. Hanya .nvda-addon yang dibuat.

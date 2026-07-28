@@ -100,3 +100,7 @@ Project_Jadwalku/
 - Meninggalkan `mciSendString` yang tidak mendukung pemilihan `device_index` mikrofon secara langsung di era Windows modern.
 - Menerapkan modul buatan sendiri `NativeAudioIO` di `voicePackManager.py` yang membungkus fungsi C dari `winmm.dll` seperti `waveInOpen`, `waveInStart`, `waveInAddBuffer`, `waveOutOpen`, dan `waveOutWrite`.
 - Keuntungan utama: Bisa beroperasi murni dengan `ctypes` bawaan Python, tidak bergantung pada library pihak ketiga, dan sepenuhnya mendukung `device_index` untuk multi-mikrofon (seperti headset USB, F999X, Virtual Audio Cable).
+
+
+### statusChecker.py
+Modul ini memusatkan pengecekan status dari semua pewaktu aktif (Pomodoro, Timer Rutin, dan Alarm Sekali Pakai) dan mengembalikan string array untuk dibacakan oleh NVDA melalui shortcut NVDA + Shift + /.

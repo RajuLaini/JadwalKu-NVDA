@@ -61,11 +61,43 @@ class Scheduler:
 			ui.message(f"Timer {duration} {unit} dimulai. Akan berbunyi pada {trigger_time.strftime('%H:%M:%S')}.")
 		return item
 
+	def pause_quick_timer(self, index):
+		if 0 <= index < len(self.quick_timers):
+			item = self.quick_timers[index]
+			if item.get("state") in ("running", "prep"):
+				now = datetime.datetime.now()
+				if item.get("state") == "prep":
+					diff = (item["prep_trigger_time"] - now).total_seconds()
+				else:
+					diff = (item["trigger_time"] - now).total_seconds()
+				item["paused_remaining_seconds"] = diff
+				item["state"] = "paused"
+				ui.message(f"Timer {item['duration']} {item['unit']} dijeda sementara.")
+
+	def resume_quick_timer(self, index):
+		if 0 <= index < len(self.quick_timers):
+			item = self.quick_timers[index]
+			if item.get("state") == "paused":
+				now = datetime.datetime.now()
+				if "paused_remaining_seconds" in item:
+					# Restore as running
+					item["state"] = "running"
+					item["trigger_time"] = now + datetime.timedelta(seconds=item["paused_remaining_seconds"])
+				ui.message(f"Timer {item['duration']} {item['unit']} dilanjutkan.")
+
+	def stop_quick_timer(self, index):
+		if 0 <= index < len(self.quick_timers):
+			item = self.quick_timers.pop(index)
+			ui.message(f"Timer {item['duration']} {item['unit']} dibatalkan.")
+
 	def check_quick_timers(self, now):
 		if not self.quick_timers:
 			return
 		remaining = []
 		for item in self.quick_timers:
+			if item.get("state") == "paused":
+				remaining.append(item)
+				continue
 			if item.get("state", "running") == "prep":
 				diff_prep = (item["prep_trigger_time"] - now).total_seconds()
 				if diff_prep <= 0:
@@ -132,11 +164,37 @@ class Scheduler:
 		ui.message(f"Alarm sekali pakai dipasang untuk pukul {item['time_str']} ({target.strftime('%d-%m-%Y')}).")
 		return item
 
+	def pause_one_time_alarm(self, index):
+		if 0 <= index < len(self.one_time_alarms):
+			item = self.one_time_alarms[index]
+			if item.get("state") != "paused":
+				item["state"] = "paused"
+				ui.message(f"Alarm pukul {item['time_str']} dinonaktifkan sementara.")
+
+	def resume_one_time_alarm(self, index):
+		if 0 <= index < len(self.one_time_alarms):
+			item = self.one_time_alarms[index]
+			if item.get("state") == "paused":
+				item["state"] = "active"
+				now = datetime.datetime.now()
+				# If the time has passed while it was paused, shift to tomorrow
+				if item["trigger_time"] <= now:
+					item["trigger_time"] += datetime.timedelta(days=1)
+				ui.message(f"Alarm pukul {item['time_str']} diaktifkan kembali.")
+
+	def stop_one_time_alarm(self, index):
+		if 0 <= index < len(self.one_time_alarms):
+			item = self.one_time_alarms.pop(index)
+			ui.message(f"Alarm pukul {item['time_str']} dibatalkan sepenuhnya.")
+
 	def check_one_time_alarms(self, now):
 		if not self.one_time_alarms:
 			return
 		remaining = []
 		for item in self.one_time_alarms:
+			if item.get("state") == "paused":
+				remaining.append(item)
+				continue
 			if now >= item["trigger_time"]:
 				title = "Alarm Sekali Pakai JadwalKu!"
 				msg = f"Waktu alarm pukul {item['time_str']} telah tiba."

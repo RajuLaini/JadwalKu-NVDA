@@ -12,8 +12,9 @@ from .configManager import ConfigManager
 from .audioManager import AudioManager
 from .ttsManager import TTSManager
 from .scheduler import Scheduler
-from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog, TTSManagerDialog, FeedbackDialog
+from .guiDialogs import JadwalKuDialog, TimeReminderDialog, HelpDialog, ChangelogDialog, AudioManagerDialog, QuickTimerDialog, OneTimeAlarmDialog, CalendarDialog, WorldClockDialog, TTSManagerDialog, FeedbackDialog, ActiveTimerManagerDialog, ActiveAlarmManagerDialog
 from .updateChecker import UpdateChecker
+from .statusChecker import get_active_status
 
 _plugin_instance = None
 
@@ -96,6 +97,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	scriptCategory = "JadwalKu"
 	__gestures = {
 		"kb:NVDA+/": "activateCommandLayer",
+		"kb:NVDA+shift+/": "checkDynamicStatus",
 		"kb:NVDA+F12": "reportTimeDate"
 	}
 
@@ -461,6 +463,35 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		description="Mengaktifkan mode perintah JadwalKu (Tekan P Pengaturan, T TTS, 1 Quick Timer, 2 Alarm, W Waktu, K Kalender, D Jam Dunia, J Agenda, V Riwayat, Z Snooze, Spasi Stop)",
 		gesture="kb:NVDA+/"
 	)
+
+	def show_active_timer_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		import gui
+		gui.mainFrame.prePopup()
+		try:
+			dlg = ActiveTimerManagerDialog(gui.mainFrame, self.scheduler)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+	def show_active_alarm_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		import gui
+		gui.mainFrame.prePopup()
+		try:
+			dlg = ActiveAlarmManagerDialog(gui.mainFrame, self.scheduler)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
 	def script_activateCommandLayer(self, gesture):
 		if not self.check_dialog_open():
 			return
@@ -472,13 +503,19 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		wx.CallAfter(self.show_main_dialog)
 
 	def script_openQuickTimer(self, gesture):
-		wx.CallAfter(self.show_quick_timer_dialog)
+		if getattr(self.scheduler, "quick_timers", []):
+			wx.CallAfter(self.show_active_timer_dialog)
+		else:
+			wx.CallAfter(self.show_quick_timer_dialog)
 
 	def script_openPomodoroTimer(self, gesture):
 		wx.CallAfter(self.show_pomodoro_dialog)
 
 	def script_openOneTimeAlarm(self, gesture):
-		wx.CallAfter(self.show_one_time_alarm_dialog)
+		if getattr(self.scheduler, "one_time_alarms", []):
+			wx.CallAfter(self.show_active_alarm_dialog)
+		else:
+			wx.CallAfter(self.show_one_time_alarm_dialog)
 
 	def script_openCalendar(self, gesture):
 		wx.CallAfter(self.show_calendar_dialog)
@@ -775,6 +812,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.updater.check_update_manual()
 		else:
 			ui.message("Fitur pemeriksa pembaruan tidak aktif.")
+
+	def script_checkDynamicStatus(self, gesture):
+		statuses = get_active_status(self.scheduler, self.pomodoro_manager)
+		if not statuses:
+			ui.message("Tidak ada yang aktif.")
+		else:
+			for stat in statuses:
+				ui.message(stat)
 
 	def script_showChangelog(self, gesture):
 		ui.message("JadwalKu Versi 1.6.2. Membuka riwayat pembaruan (Changelog)...")

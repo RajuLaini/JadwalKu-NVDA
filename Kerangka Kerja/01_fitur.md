@@ -153,3 +153,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Aman Bagi Hardisk (RAM-Based)**: Sistem pendengaran mikrofon hanya menggunakan buffer di memori RAM tanpa menyimpan data ke disk, sehingga tidak memperpendek umur SSD/Hardisk, sekalipun dibiarkan memantau seharian.
 - **Penguat Mikrofon (Mic Boost) hingga 1200%**: JadwalKu memproses bit PCM audio secara mandiri sehingga perintah Anda tetap terdengar dari kejauhan meskipun sensitivitas bawaan mikrofon Windows Anda sangat rendah.
 - **Dukungan Mute NVDA**: Saat modul Voice Pack atau SAPI 5 sedang membacakan waktu, suara bacaan layar standar NVDA bisa dikonfigurasi untuk diam sesaat (Mute NVDA Fallback) agar suara tidak saling bertabrakan.
+
+
+## Arsitektur Jeda/Lanjutkan (Versi 1.7.5)
+Pada versi 1.7.5, Timer dan Alarm kini mendukung operasi Jeda (Pause) dan Lanjutkan (Resume). Status pewaktu yang dijeda dicatat di scheduler.py dan pewaktu tersebut dilewati (di-skip) saat pengecekan detak (tick) oleh metode check_quick_timers atau check_one_time_alarms. Saat dilanjutkan, sisa waktunya akan dikembalikan secara dinamis atau diundur keesokan harinya jika jam telah lewat.

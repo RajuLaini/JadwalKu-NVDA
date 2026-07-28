@@ -74,6 +74,15 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.6 ---\n"
+			"* Fitur Baru: Menambahkan shortcut Status Dinamis (NVDA + Shift + /) untuk membacakan seluruh status pewaktu (Timer Rutin, Alarm, Pomodoro) secara bersamaan.\n"
+			"* Fitur Baru: Antarmuka dinamis pada pembuatan Timer Rutin (NVDA + / lalu 1) dan Alarm (NVDA + / lalu 2). Jika Anda memiliki jadwal aktif, layar **Manajer Pewaktu Aktif** akan muncul, memungkinkan Anda untuk melakukan Jeda (Pause), Lanjutkan (Resume), atau Berhenti sepenuhnya pada tiap-tiap jadwal.\n"
+			"* Perbaikan Pintasan: Memperbaiki tombol B (Bantuan) pada mode lapisan perintah (NVDA + / lalu B) yang sebelumnya tidak merespons.\n"
+			"* Perbaikan Pomodoro: Memperbaiki masalah hitungan mundur (timer) yang bisa menjadi negatif dan memastikan Pomodoro berhenti otomatis setelah siklus terakhir (Istirahat Panjang) selesai.\n"
+			"* Perbaikan Internal: Mengoptimalkan antrean Timer pada Pomodoro dan merapikan skrip build (updater) agar tidak terkunci (PermissionError) saat instalasi lokal.\n\n"
+			"--- Versi 1.7.4 (Update Installer) ---\n"
+			"* Perbaikan Auto-Update: Mengubah folder penyimpanan instalasi agar tidak diblokir oleh Windows dan mencegah file zip tidak lengkap.\n"
+			"* Perbaikan Manifest: Memperbaiki kesalahan 'Duplicate keyword name' pada manifest.ini yang sebelumnya membatalkan instalasi.\n\n"
 			"--- Versi 1.7.3 (Hotfix Kritis) ---\n"
 			"* Perbaikan Store: Memperbaiki masalah fatal di mana fungsi Hapus dengan Kata Sandi Master salah membaca ID pengguna, sehingga malah menghapus paket milik admin sendiri.\n"
 			"* Perbaikan Auto-Update: Memperbaiki pesan error *Unknown command line parameters* saat membuka dialog pembaruan karena kesalahan *parsing* file `.nvda-addon` ke sistem NVDA.\n\n"
@@ -2988,3 +2997,167 @@ class VoiceStudioDialog(wx.Dialog):
 		except Exception as e:
 			import ui
 			ui.message(f"Gagal mengekspor: {str(e)}")
+
+
+class ActiveTimerManagerDialog(wx.Dialog):
+	def __init__(self, parent, scheduler):
+		super().__init__(parent, title="Manajer Timer Aktif")
+		self.scheduler = scheduler
+		
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		lbl = wx.StaticText(self, label="Pilih timer yang sedang berjalan:")
+		mainSizer.Add(lbl, 0, wx.ALL, 5)
+		
+		self.timerList = wx.ListBox(self, choices=self.get_timer_choices())
+		self.timerList.SetSelection(0)
+		mainSizer.Add(self.timerList, 1, wx.ALL | wx.EXPAND, 5)
+		
+		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+		
+		self.pauseBtn = wx.Button(self, label="&Jeda / Lanjutkan")
+		self.pauseBtn.Bind(wx.EVT_BUTTON, self.onPauseResume)
+		btnSizer.Add(self.pauseBtn, 0, wx.ALL, 5)
+		
+		self.stopBtn = wx.Button(self, label="&Berhenti")
+		self.stopBtn.Bind(wx.EVT_BUTTON, self.onStop)
+		btnSizer.Add(self.stopBtn, 0, wx.ALL, 5)
+		
+		self.newBtn = wx.Button(self, label="Buat Timer &Baru")
+		self.newBtn.Bind(wx.EVT_BUTTON, self.onNew)
+		btnSizer.Add(self.newBtn, 0, wx.ALL, 5)
+		
+		self.closeBtn = wx.Button(self, id=wx.ID_CANCEL, label="Tutu&p")
+		btnSizer.Add(self.closeBtn, 0, wx.ALL, 5)
+		
+		mainSizer.Add(btnSizer, 0, wx.ALIGN_RIGHT)
+		
+		self.SetSizerAndFit(mainSizer)
+		self.CenterOnScreen()
+
+	def get_timer_choices(self):
+		import datetime
+		now = datetime.datetime.now()
+		choices = []
+		for idx, t in enumerate(self.scheduler.quick_timers):
+			state = t.get("state", "running")
+			status = ""
+			if state == "paused":
+				status = " [DIJEDA]"
+			elif state == "prep":
+				status = " [Persiapan]"
+			choices.append(f"{idx + 1}. Timer {t['duration']} {t['unit']}{status}")
+		return choices
+
+	def refresh_list(self):
+		sel = self.timerList.GetSelection()
+		self.timerList.Set(self.get_timer_choices())
+		if sel != wx.NOT_FOUND and sel < self.timerList.GetCount():
+			self.timerList.SetSelection(sel)
+		elif self.timerList.GetCount() > 0:
+			self.timerList.SetSelection(0)
+		else:
+			import ui
+			ui.message("Semua timer telah dihentikan.")
+			self.Destroy()
+
+	def onPauseResume(self, event):
+		sel = self.timerList.GetSelection()
+		if sel != wx.NOT_FOUND:
+			t = self.scheduler.quick_timers[sel]
+			if t.get("state") == "paused":
+				self.scheduler.resume_quick_timer(sel)
+			else:
+				self.scheduler.pause_quick_timer(sel)
+			self.refresh_list()
+
+	def onStop(self, event):
+		sel = self.timerList.GetSelection()
+		if sel != wx.NOT_FOUND:
+			self.scheduler.stop_quick_timer(sel)
+			self.refresh_list()
+
+	def onNew(self, event):
+		self.Destroy()
+		import wx
+		dlg = QuickTimerDialog(None, self.scheduler)
+		dlg.Show()
+
+
+class ActiveAlarmManagerDialog(wx.Dialog):
+	def __init__(self, parent, scheduler):
+		super().__init__(parent, title="Manajer Alarm Aktif")
+		self.scheduler = scheduler
+		
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+		
+		lbl = wx.StaticText(self, label="Pilih alarm yang sedang berjalan:")
+		mainSizer.Add(lbl, 0, wx.ALL, 5)
+		
+		self.alarmList = wx.ListBox(self, choices=self.get_alarm_choices())
+		self.alarmList.SetSelection(0)
+		mainSizer.Add(self.alarmList, 1, wx.ALL | wx.EXPAND, 5)
+		
+		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+		
+		self.pauseBtn = wx.Button(self, label="&Jeda / Lanjutkan")
+		self.pauseBtn.Bind(wx.EVT_BUTTON, self.onPauseResume)
+		btnSizer.Add(self.pauseBtn, 0, wx.ALL, 5)
+		
+		self.stopBtn = wx.Button(self, label="&Berhenti")
+		self.stopBtn.Bind(wx.EVT_BUTTON, self.onStop)
+		btnSizer.Add(self.stopBtn, 0, wx.ALL, 5)
+		
+		self.newBtn = wx.Button(self, label="Buat Alarm &Baru")
+		self.newBtn.Bind(wx.EVT_BUTTON, self.onNew)
+		btnSizer.Add(self.newBtn, 0, wx.ALL, 5)
+		
+		self.closeBtn = wx.Button(self, id=wx.ID_CANCEL, label="Tutu&p")
+		btnSizer.Add(self.closeBtn, 0, wx.ALL, 5)
+		
+		mainSizer.Add(btnSizer, 0, wx.ALIGN_RIGHT)
+		
+		self.SetSizerAndFit(mainSizer)
+		self.CenterOnScreen()
+
+	def get_alarm_choices(self):
+		choices = []
+		for idx, t in enumerate(self.scheduler.one_time_alarms):
+			state = t.get("state", "active")
+			status = " [DIJEDA]" if state == "paused" else ""
+			choices.append(f"{idx + 1}. Alarm {t['time_str']}{status}")
+		return choices
+
+	def refresh_list(self):
+		sel = self.alarmList.GetSelection()
+		self.alarmList.Set(self.get_alarm_choices())
+		if sel != wx.NOT_FOUND and sel < self.alarmList.GetCount():
+			self.alarmList.SetSelection(sel)
+		elif self.alarmList.GetCount() > 0:
+			self.alarmList.SetSelection(0)
+		else:
+			import ui
+			ui.message("Semua alarm telah dihentikan.")
+			self.Destroy()
+
+	def onPauseResume(self, event):
+		sel = self.alarmList.GetSelection()
+		if sel != wx.NOT_FOUND:
+			t = self.scheduler.one_time_alarms[sel]
+			if t.get("state") == "paused":
+				self.scheduler.resume_one_time_alarm(sel)
+			else:
+				self.scheduler.pause_one_time_alarm(sel)
+			self.refresh_list()
+
+	def onStop(self, event):
+		sel = self.alarmList.GetSelection()
+		if sel != wx.NOT_FOUND:
+			self.scheduler.stop_one_time_alarm(sel)
+			self.refresh_list()
+
+	def onNew(self, event):
+		self.Destroy()
+		import wx
+		dlg = OneTimeAlarmDialog(None, self.scheduler)
+		dlg.Show()
