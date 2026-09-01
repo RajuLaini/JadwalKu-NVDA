@@ -97,7 +97,30 @@ class ChangelogDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		changelog_text = (
-			"JadwalKu - Riwayat Pembaruan (Changelog)\n"
+			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.2]\n"
+			"- Perbaikan bug fatal pada menu bantuan di mana opsi '1' (Teks Panduan) gagal terbuka (Circular Import diselesaikan).\n"
+			"- Menonaktifkan sementara opsi '2' (Simulasi Interaktif) ke mode Maintenance (Tahap Pengembangan).\n\n"
+			"[Versi 1.7.6.1]\n"
+			"- Penambahan Fitur Jam Lonceng Klasik (Grandfather Clock)! Nikmati sensasi jam kuno di rumah Anda dengan dentangan lonceng pada setiap pergantian jam dan opsi suara jarum detik di latar belakang. Dapat diatur hingga volume 1200% dan mengikuti perangkat audio favorit Anda (Akses via Pengaturan Agenda).\n"
+			"- REVOLUSI BARU: JadwalKu kini menjadi Pelacak Kebiasaan (Habit Tracker)! Tekan NVDA + / lalu J untuk membuka panel daftar jadwal hari ini. Anda bisa menandai suatu jadwal 'Sudah Selesai', 'Lewati', atau 'Tunda (Snooze)'.\n"
+			"- SISTEM LENCANA (GAMIFIKASI): JadwalKu kini akan mencatat runtutan hari (streak) kebiasaan Anda secara spesifik untuk setiap jadwal! Capai Lencana Perunggu (7 Hari), Perak (21 Hari), Emas (66 Hari) hingga Legenda (365 Hari).\n"
+			"- ETALASE LENCANA: Tekan NVDA + / lalu L untuk membuka Etalase Lencana dan membaca riwayat/nostalgia panjang pencapaian ketekunan Anda.\n"
+			"- Saat membuat atau mengedit jadwal, kini tersedia kotak centang baru: 'Jadikan ini sebagai Pelacak Kebiasaan'.\n"
+			"- Fitur Snooze (Tunda) Cerdas: Jadwal berulang (interval) yang ditunda akan secara otomatis menyesuaikan dan menggeser sisa jadwal interval hari tersebut, agar ritme jaraknya (misal: tiap 2 jam) tetap konsisten.\n\n"
+			"[Versi 1.7.6]\n"
+			"- Fitur Baru: Menambahkan shortcut Status Dinamis (NVDA + Shift + /) untuk membacakan seluruh status pewaktu (Timer Rutin, Alarm, Pomodoro) secara bersamaan.\n"
+			"- Fitur Baru: Antarmuka dinamis pada pembuatan Timer Rutin (NVDA + / lalu 1) dan Alarm (NVDA + / lalu 2). Jika Anda memiliki jadwal aktif, layar Manajer Pewaktu Aktif akan muncul, memungkinkan Anda untuk melakukan Jeda (Pause), Lanjutkan (Resume), atau Berhenti sepenuhnya pada tiap-tiap jadwal.\n"
+			"- Perbaikan Pintasan: Memperbaiki tombol B (Bantuan) pada mode lapisan perintah (NVDA + / lalu B) yang sebelumnya tidak merespons.\n"
+			"- Perbaikan Pomodoro: Memperbaiki masalah hitungan mundur (timer) yang bisa menjadi negatif dan memastikan Pomodoro berhenti otomatis setelah siklus terakhir (Istirahat Panjang) selesai.\n"
+			"- Modul Simulasi Masterclass Diperluas: Latihan Jendela Utama (Tahap 1) dan Tahap Lanjutan (Tahap 2) telah direvitalisasi dan diperluas secara komprehensif.\n\n"
+			"[Versi 1.7.4 & 1.7.3]\n"
+			"- Perbaikan Auto-Update: Mengubah folder penyimpanan instalasi agar tidak diblokir oleh Windows dan mencegah file zip tidak lengkap.\n"
+			"- Perbaikan Store: Memperbaiki masalah fatal di mana fungsi Hapus dengan Kata Sandi Master salah membaca ID pengguna.\n"
+			"- Perbaikan Manifest: Memperbaiki kesalahan 'Duplicate keyword name' pada manifest.ini yang sebelumnya membatalkan instalasi.\n\n"
+			"[Versi 1.7.2]\n"
+			"- Pembaruan minor pada arsitektur update.\n"
+		)\n"
 			"==================================================\n\n"
 			
 			"Versi 1.7.6.2\n"
@@ -3747,3 +3770,32 @@ class LoncengDialog(wx.Dialog):
 		import ui
 		ui.message("Pengaturan Lonceng disimpan.")
 		self.EndModal(wx.ID_OK)
+
+
+class TutorialEntryDialog(wx.Dialog):
+	def __init__(self, parent):
+		super().__init__(parent, title="Pusat Bantuan & Tutorial JadwalKu", size=(400, 200), style=wx.DEFAULT_DIALOG_STYLE)
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Bagaimana Anda ingin mempelajari JadwalKu?")
+		sizer.Add(info_label, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 15)
+		
+		btn_help = wx.Button(self, label="&1. Buka Panduan Teks Biasa")
+		btn_help.Bind(wx.EVT_BUTTON, self.onTextHelp)
+		sizer.Add(btn_help, 0, wx.EXPAND | wx.ALL, 10)
+		
+		btn_sim = wx.Button(self, label="&2. Mulai Tutorial Simulasi Interaktif (Ditutup Sementara)")
+		btn_sim.Bind(wx.EVT_BUTTON, self.onSimulation)
+		sizer.Add(btn_sim, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+		
+		btn_cancel = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		sizer.Add(btn_cancel, 0, wx.ALIGN_RIGHT | wx.ALL, 10)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		
+	def onTextHelp(self, evt):
+		self.EndModal(wx.ID_NO)
+		
+	def onSimulation(self, evt):
+		self.EndModal(wx.ID_YES)

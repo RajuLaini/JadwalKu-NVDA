@@ -28,4 +28,11 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
 - **Wajib Membaca Kerangka Kerja**: Baca referensi desain di folder `Kerangka Kerja/` untuk memastikan perubahan yang dilakukan tidak melenceng dari arsitektur asli yang telah diusahakan. Jangan memodifikasi secara membabi buta tanpa melihat konteks ketersediaan data.
 
 ## 6. Hati-Hati terhadap Pembaruan String (Gunakan Replace Secara Akurat)
-- **Hindari Skrip Pengganti Teks yang Mentah (Naive String Replace)**: Saat Anda diminta memperbarui riwayat versi/Changelog (misalnya pada variabel `changelog_text` di `guiDialogs.py`), JANGAN menggunakan perintah `replace()` string secara mentah (seperti skrip `bump_version.py`) karena dapat menyebabkan penggandaan awal *string* tak terduga (misalnya kurung buka ganda `changelog_text = (`) jika sebagian teks sebelumnya masih ada. **SELALU gunakan perangkat khusus modifikasi file `replace_file_content`** bawaan sistem agen yang menjamin penggantian kode dengan keakuratan tinggi dan memeriksa rentang baris secara tepat, guna menghindari *SyntaxError*.
+- **Hindari Skrip Pengganti Teks yang Mentah (Naive String Replace)**: Saat Anda diminta memperbarui riwayat versi/Changelog (misalnya pada variabel `changelog_text` di `guiDialogs.py`), JANGAN menggunakan perintah `replace()` string secara mentah (seperti skrip `bump_version.py`) karena dapat menyebabkan penggandaan awal *string* tak terduga (misalnya kurung buka ganda `changelog_text = (`) jika sebagian teks sebelumnya masih ada. **SELALU gunakan perangkat khusus modifikasi file `replace_file_content`** bawaan sistem agen yang menjamin penggantian kode dengan keakuratan tinggi dan memeriksa rentang baris secara tepat, guna menghindari `SyntaxError`.
+
+## 7. Kewajiban Pembaruan Dokumentasi Bantuan & Panduan
+- **Wajib Sinkronisasi `doc/` dan `help_text`**: Setiap kali agen melakukan penambahan *shortcut* baru di `__gestures` atau fungsi baru di Mode Lapisan Perintah (`NVDA + /`), agen **WAJIB MUTLAK** untuk:
+  1. Memperbarui panduan HTML bahasa Indonesia di `JadwalKu/doc/id/readme.html` dan `JadwalKu/doc/readme.html`.
+  2. Memperbarui terjemahan HTML bahasa Inggris di `JadwalKu/doc/en/readme.html`.
+  3. Memperbarui variabel string `help_text` di kelas `HelpDialog` (`guiDialogs.py`) yang muncul saat pengguna menekan tombol bantuan `B`.
+- Dokumentasi bantuan tidak boleh tertinggal satu versi pun dari kode aslinya.

@@ -302,8 +302,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.is_dialog_open = True
 		gui.mainFrame.prePopup()
 		try:
-			from .simulation import start_tutorial
-			start_tutorial(gui.mainFrame)
+			from .guiDialogs import TutorialEntryDialog, HelpDialog
+			dlg = TutorialEntryDialog(gui.mainFrame)
+			res = dlg.ShowModal()
+			dlg.Destroy()
+			
+			if res == wx.ID_YES:
+				ui.message("Fitur Simulasi saat ini ditutup sementara karena masih dalam tahap pengembangan. (Versi 1.7.6.2)")
+			elif res == wx.ID_NO:
+				help_dlg = HelpDialog(gui.mainFrame)
+				help_dlg.ShowModal()
+				help_dlg.Destroy()
 		except Exception as e:
 			import traceback
 			with open(r"C:\Users\Raju Laini\Documents\Project_Jadwalku\error_log.txt", "w") as f:

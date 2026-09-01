@@ -27,5 +27,8 @@ if os.path.exists(NVDA_ADDON_DIR):
 	print(f"Menghapus add-on lama di: {NVDA_ADDON_DIR}")
 	shutil.rmtree(NVDA_ADDON_DIR, ignore_errors=True)
 print(f"Menyalin file baru ke: {NVDA_ADDON_DIR}")
-shutil.copytree(BASE_DIR, NVDA_ADDON_DIR)
+try:
+	shutil.copytree(BASE_DIR, NVDA_ADDON_DIR, dirs_exist_ok=True)
+except Exception as e:
+	print(f"Peringatan saat menyalin file: {e}")
 print("Berhasil! Silakan RESTART NVDA Anda untuk melihat perubahan.")

@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "C:\Users\Raju Laini\AppData\Roaming\nvda\addons\JadwalKu\globalPlugins\jadwalku\__init__.py", line 295, in show_help_dialog
+    from .simulation import start_tutorial
+ImportError: cannot import name 'start_tutorial' from 'globalPlugins.jadwalku.simulation' (C:\Users\Raju Laini\AppData\Roaming\nvda\addons\JadwalKu\globalPlugins\jadwalku\simulation.py)
