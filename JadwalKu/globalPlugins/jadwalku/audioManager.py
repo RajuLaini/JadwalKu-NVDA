@@ -602,3 +602,59 @@ class AudioManager:
 			else:
 				self.play_sound(audio_file)
 
+
+	def _mci_cmd(self, cmd):
+		import ctypes
+		ctypes.windll.winmm.mciSendStringW(cmd, None, 0, None)
+
+	def play_tick(self, volume):
+		import os
+		tick_path = os.path.join(os.path.dirname(__file__), "sounds", "WaitingClock", "WatingClock.wav")
+		if not os.path.exists(tick_path):
+			return
+		
+		dev_id = self.get_output_device_id()
+		self._play_wav_winmm(tick_path, dev_id, allow_overlap=True, volume_override=volume)
+
+	def play_lonceng_sequence(self, volume, hour, test_mode=False):
+		import threading
+		def lonceng_thread():
+			import os
+			import time
+			
+			base_dir = os.path.join(os.path.dirname(__file__), "sounds", "Lonceng")
+			mulai_path = os.path.join(base_dir, "mulaiLonceng.wav")
+			ketuk_path = os.path.join(base_dir, "ketukanLonceng.wav")
+			
+			if not os.path.exists(mulai_path) or not os.path.exists(ketuk_path):
+				import logHandler
+				logHandler.log.warning("JadwalKu: File lonceng tidak ditemukan!")
+				return
+				
+			dev_id = self.get_output_device_id()
+			
+			self._is_playing = True
+			self._play_wav_winmm(mulai_path, dev_id, allow_overlap=True, volume_override=volume)
+			
+			# Selalu tunggu 16 detik sesuai durasi mulaiLonceng, bisa dicancel
+			elapsed = 0.0
+			while elapsed < 16.0:
+				if not self._is_playing: return
+				time.sleep(0.1)
+				elapsed += 0.1
+			
+			strike_count = hour % 12
+			if strike_count == 0:
+				strike_count = 12
+				
+			for i in range(strike_count):
+				if not self._is_playing: return
+				self._play_wav_winmm(ketuk_path, dev_id, allow_overlap=True, volume_override=volume)
+				# Jeda 0.5 detik antar ketukan, bisa dicancel
+				elapsed2 = 0.0
+				while elapsed2 < 0.5:
+					if not self._is_playing: return
+					time.sleep(0.1)
+					elapsed2 += 0.1
+				
+		threading.Thread(target=lonceng_thread, daemon=True).start()

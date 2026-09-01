@@ -6,14 +6,14 @@ Secara struktural, add-on `JadwalKu` mengikuti standar pengembangan add-on NVDA 
 Project_Jadwalku/
 ├── build_and_install.py        # Script otomatis pembuat paket .nvda-addon dan pemasang langsung
 ├── version.json                # Template spesifikasi info pembaruan untuk server/cloud
-├── JadwalKu-v1.6.2.nvda-addon  # Binary/zip siap pakai dan siap dibagikan
+├── JadwalKu-v1.7.6.1.nvda-addon  # Binary/zip siap pakai dan siap dibagikan
 ├── Kerangka Kerja/             # Dokumentasi arsitektur, fitur, dan catatan pengerjaan
 │   ├── 01_fitur.md
 │   ├── 02_konsep.md
 │   ├── 03_arsitektur_teknis.md
 │   ├── 04_catatan_pengerjaan_dini_hari.md
 │   ├── 05_rencana_pengembangan_selanjutnya.md
-│   ├── 06_catatan_audio_device_routing.md
+│   ├── 16_catatan_lonceng_dan_habit_tracker.md
 │   ├── 07_catatan_mesin_tts_mandiri.md
 │   ├── 08_catatan_fitur_bagikan_direct_link.md
 │   ├── 09_catatan_fitur_laporan_telegram_proxy.md

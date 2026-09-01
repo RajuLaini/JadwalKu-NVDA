@@ -16,45 +16,47 @@ class HelpDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		help_text = (
-			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU ===\n\n"
-			"1. DAFTAR SHORTCUT UTAMA:\n"
-			"- NVDA + / : Masuk ke Mode Perintah JadwalKu.\n\n"
+			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU (Versi 1.7.6.2) ===\n\n"
+			"1. DAFTAR SHORTCUT GLOBAL UTAMA:\n"
+			"- NVDA + / : Masuk ke Mode Lapisan Perintah (Command Layer) JadwalKu.\n"
+			"- NVDA + Shift + / : Membacakan Status Dinamis dari seluruh pewaktu yang sedang aktif.\n"
+			"- NVDA + F12 (1, 2, 3, kali) : Membacakan Jam dan Tanggal serta perhitungan mundur ke akhir tahun saat ini.\n\n"
 			"2. DAFTAR PERINTAH DALAM MODE JADWALKU (Setelah menekan NVDA + /):\n"
-			"- L atau Enter : Buka Dialog Utama Manajemen Jadwal.\n"
-			"- 1 : Buka Dialog Pasang Timer Mundur Cepat (Quick Timer dengan detak jam acak di 10 detik terakhir).\n"
-			"- 2 : Buka Dialog Pasang Alarm Sekali Pakai (One-Time Alarm).\n"
-			"- W atau T : Bacakan jam saat ini dan status pengingat waktu berkala (Time Reminder).\n"
-			"- K : Buka Kalender Bulanan & Daftar Tanggal Merah Indonesia.\n"
-			"- R : Buka Dialog Kirim Laporan, Kritik, Saran & Bug Fix (Terhubung ke Telegram Bot Aileen).\n"
-			"- D : Buka Jam Dunia & Kalkulator Konversi Waktu.\n"
-			"- J : Bacakan jadwal agenda terdekat berikutnya hari ini beserta sisa waktunya.\n"
+			"- O atau Enter atau P : Buka Dialog Utama Manajemen Jadwal.\n"
+			"- J : Buka Pelacak Kebiasaan (Habit Tracker) untuk menandai jadwal.\n"
+			"- L : Buka Papan Skor & Lencana Ketekunan (Badge Showcase).\n"
+			"- 1 : Buka Manajer Timer Rutin (Buat, Jeda, Lanjutkan, atau Hentikan Timer).\n"
+			"- 2 : Buka Manajer Alarm Sekali Pakai (Buat, Jeda, Lanjutkan, atau Hentikan Alarm).\n"
+			"- 3 : Buka Pengaturan Pomodoro Timer (Fokus, Istirahat Pendek, Istirahat Panjang).\n"
+			"- W : Bacakan jam saat ini dan status pengingat waktu berkala (Time Reminder).\n"
+			"- K : Buka Kalender Bulanan & Daftar Hari Libur Nasional (Tanggal Merah).\n"
+			"- D : Buka Jam Dunia & Kalkulator Konversi Zona Waktu.\n"
 			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
-			"- A : Check / Uncheck cepat status Aktifkan Pengingat Waktu Berkala.\n"
-			"- S : Buka Pengaturan Audio Manager (Speaker & Suara).\n"
-			"- M atau P : Buka Pengaturan Mesin TTS Mandiri SAPI 5 untuk notifikasi latar belakang.\n"
+			"- A : Check / Uncheck (Nyalakan/Matikan) Pengingat Waktu Berkala secara cepat.\n"
+			"- S : Buka Pengaturan Audio Manager (Memilih Speaker & Volume Independen, serta Lonceng Klasik).\n"
+			"- T : Buka Pengaturan Mesin TTS Mandiri SAPI 5 untuk notifikasi latar belakang.\n"
+			"- R : Buka Dialog Kirim Laporan, Kritik, Saran & Bug Fix (Terhubung ke Telegram Bot).\n"
 			"- G : Bagikan Add-on (Salin tautan unduhan langsung / direct download ke clipboard).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
-			"- V : Bacakan versi terkini JadwalKu dan buka dialog catatan riwayat pembaruan (Changelog Read-Only).\n"
+			"- V : Buka dialog catatan riwayat pembaruan (Changelog Read-Only).\n"
 			"- Z : Tunda (Snooze) alarm yang sedang berbunyi selama 10 menit ke depan.\n"
+			"- M : Aktifkan pemantauan Microphone (Untuk perintah suara).\n"
 			"- Spasi : Hentikan suara notifikasi/chime atau matikan alarm weker yang sedang berdering.\n"
 			"- B atau F1 : Buka dialog panduan bantuan ini (Mode Read-Only bisa dinavigasi panah).\n"
-			"- Escape : Keluar dari mode perintah JadwalKu.\n\n"
-			"3. TIPS FITUR ALARM WEKER & NAVIGASI DI DIALOG UTAMA:\n"
-			"- Saat menambah atau mengedit agenda, Anda dapat memilih Mode Pemberitahuan: 'Pemberitahuan Singkat (Chime)' atau 'Alarm Jam Weker'. Jika Anda memilih Alarm Jam Weker, suara akan berdering terus-menerus tanpa henti sampai Anda mematikannya (Spasi) atau menundanya (Z / Alt+T).\n"
-			"- Anda juga dapat mengatur pengingat berulang pada agenda (misalnya: tiap 1 jam sekali atau tiap 2 jam sekali untuk pengingat minum/istirahat).\n"
-			"- Di dalam daftar agenda (ListBox), Anda dapat menekan tombol Spasi untuk dengan cepat mengaktifkan (Check) atau menonaktifkan (Uncheck) agenda yang dipilih.\n"
-			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah atau mengedit agenda untuk mendengarkan sampel suara chime/alarm yang Anda pilih.\n"
-			"- Gunakan tombol 'Cek Pembaruan...' untuk memeriksa versi terbaru add-on dari server GitHub secara langsung tanpa perlu membuka browser.\n"
-			"- Gunakan tombol 'Bagikan Add-on (Copy Link)...' atau shortcut NVDA + / lalu G untuk menyalin tautan unduhan langsung agar teman Anda dapat mengunduh JadwalKu dengan mudah tanpa browser.\n"
-			"- Gunakan tombol 'Kirim Laporan & Saran...' atau shortcut NVDA + / lalu K (atau R) untuk mengirimkan ide baru atau melaporkan bug langsung ke Telegram pengembang.\n"
+			"- Escape : Keluar/Batal dari mode perintah JadwalKu.\n\n"
+			"3. TIPS FITUR TAMBAHAN:\n"
+			"- JadwalKu kini memiliki Pelacak Kebiasaan (J) yang memberikan Lencana Ketekunan (L) untuk setiap konsistensi Anda.\n"
+			"- Anda bisa menyalakan Lonceng Jam Klasik (Grandfather Clock) melalui pengaturan Audio Manager (S).\n"
+			"- Saat menambah atau mengedit agenda, Anda dapat memilih 'Alarm Jam Weker', suara akan berdering terus-menerus tanpa henti sampai Anda mematikannya (Spasi) atau menundanya (Z).\n"
+			"- Gunakan tombol 'Tes Suara' (Alt + T) saat menambah/mengedit agenda untuk mendengarkan sampel suara.\n"
 		)
 		
 		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
 		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
 		
 		btnSizer = wx.StdDialogButtonSizer()
-		self.btnClose = wx.Button(self, wx.ID_CLOSE, label="&Tutup")
-		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CLOSE))
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CANCEL))
 		btnSizer.AddButton(self.btnClose)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
@@ -63,6 +65,28 @@ class HelpDialog(wx.Dialog):
 		self.Centre()
 		self.textCtrl.SetFocus()
 
+
+class ContextualHelpDialog(wx.Dialog):
+	def __init__(self, parent, title, help_text):
+		super().__init__(parent, title=title, size=(580, 460), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Gunakan Panah Atas/Bawah untuk membaca per baris, atau Panah Kiri/Kanan untuk mengeja teks:")
+		sizer.Add(info_label, 0, wx.ALL, 8)
+		
+		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
+		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CANCEL))
+		btnSizer.AddButton(self.btnClose)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.EXPAND | wx.ALL, 8)
+		
+		self.SetSizer(sizer)
+		self.Layout()
+		self.textCtrl.SetFocus()
 
 class ChangelogDialog(wx.Dialog):
 	def __init__(self, parent):
@@ -73,7 +97,42 @@ class ChangelogDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		changelog_text = (
+			"JadwalKu - Riwayat Pembaruan (Changelog)\n"
+			"==================================================\n\n"
+			
+			"Versi 1.7.6.2\n"
+			"--------------------------------------------------\n"
+			"- Penambahan Fitur Jam Lonceng Klasik (Grandfather Clock)! Nikmati sensasi jam kuno di rumah Anda dengan dentangan lonceng pada setiap pergantian jam dan opsi suara jarum detik di latar belakang. Dapat diatur hingga volume 1200% dan mengikuti perangkat audio favorit Anda (Akses via Pengaturan Agenda).\n"
+			"- REVOLUSI BARU: JadwalKu kini menjadi Pelacak Kebiasaan (Habit Tracker)! Tekan NVDA + / lalu J untuk membuka panel daftar jadwal hari ini. Anda bisa menandai suatu jadwal 'Sudah Selesai', 'Lewati', atau 'Tunda (Snooze)'.\n"
+			"- SISTEM LENCANA (GAMIFIKASI): JadwalKu kini akan mencatat runtutan hari (streak) kebiasaan Anda secara spesifik untuk setiap jadwal! Capai Lencana Perunggu (7 Hari), Perak (21 Hari), Emas (66 Hari) hingga Legenda (365 Hari).\n"
+			"- ETALASE LENCANA: Tekan NVDA + / lalu L untuk membuka Etalase Lencana dan membaca riwayat/nostalgia panjang pencapaian ketekunan Anda.\n"
+			"- Saat membuat atau mengedit jadwal, kini tersedia kotak centang baru: 'Jadikan ini sebagai Pelacak Kebiasaan'.\n"
+			"- Fitur Snooze (Tunda) Cerdas: Jadwal berulang (interval) yang ditunda akan secara otomatis menyesuaikan dan menggeser sisa jadwal interval hari tersebut, agar ritme jaraknya (misal: tiap 2 jam) tetap konsisten.\n"
+			"- Modul Simulasi Masterclass Diperluas: Latihan Jendela Utama (Tahap 1) kini menyajikan seluruh kontrol pada Pengaturan Pengingat Waktu Berkala (termasuk Jam Mulai, Jam Selesai, dan Gaya Pengucapan) serta seluruh kontrol pada Audio Manager (termasuk Reset Volume, Tes File Suara) tanpa terlewati satupun.\n"
+			"- Latihan Jendela Utama (Tahap 1) juga kini mencakup penelusuran Tab 2 dan Tab 3 secara sempurna, meliputi konfigurasi kalender, konversi jam dunia, dan manajemen Voice Pack.\n"
+			"- Memperbaiki masalah crash (tertutup tiba-tiba) pada simulasi saat sistem belum memasang modul Voice Command lalu pengguna masuk ke Tab 4.\n"
+			"- Tahap Lanjutan Simulasi (Tahap 2) telah direvitalisasi dan diperluas secara komprehensif, mencakup:\n"
+			"  * Simulasi Quick Timer\n"
+			"  * Simulasi Alarm Sekali Pakai (One-Time Alarm)\n"
+			"  * Simulasi Pomodoro Timer\n"
+			"  * Simulasi Kalender\n"
+			"  * Simulasi Jam Dunia (World Clock)\n"
+			"- Mengatasi masalah stabilitas (crash) pada kelas pemandu simulasi saat memuat ulang modul.\n\n"
+			
+			"Versi 1.7.6\n"
+			"--------------------------------------------------\n"
+			"- Memperbaiki Bug (crash / AttributeError) saat membuka Timer Pomodoro yang diakibatkan oleh absennya fungsi tombol Bantuan.\n"
+			"- Menggabungkan dan merombak sistem latihan Simulasi (Masterclass): Setelah simulasi penghapusan jadwal (Tab 1), latihan kini tidak lagi berhenti dan menyuruh Anda menutup dialog, melainkan terus berlanjut tanpa henti menyusuri sisa elemen Tab 1 (Check Status, dll) hingga Tab 2, Tab 3, dan Tab 4 dalam satu sesi mulus yang komprehensif.\n"
+			"- Menyempurnakan penyimpanan Progres Simulasi (Resume): Sekarang progres latihan simulasi disimpan hingga ke tingkat presisi 'langkah (step)' secara otomatis setiap kali Anda menutup dialog di tengah-tengah latihan (Esc/Batal). Saat Anda kembali, latihan akan langsung melanjutkan dari kotak/tombol persis tempat Anda berhenti sebelumnya.\n\n"
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"--- Versi 1.7.6.2 ---\n"
+			"* Fitur Baru: Bantuan Dinamis (Contextual Help). Kini Anda dapat menekan Alt+B di setiap menu pengaturan (Alarm, Timer, JadwalKu Store, Kalender, Audio Manager, dll) untuk memunculkan teks panduan interaktif yang spesifik sesuai dengan fitur/tab yang sedang Anda buka.\n"
+			"* Fitur Baru: Tutorial Simulasi Interaktif (Guided Tour). Tersedia panduan langsung langkah-demi-langkah (step-by-step) lengkap dengan asisten suara otomatis (setiap 5 detik) yang melacak aksi Anda, memberikan arahan, dan menuntun Anda sampai mahir menggunakan JadwalKu. Modul ini terisolasi total dari pengaturan asli Anda.\n"
+			"* Peningkatan: Penambahan tombol Tutup (Escape) pada seluruh dialog Bantuan Kontekstual dan Bantuan Utama untuk memudahkan navigasi.\n"
+			"* Perbaikan: Modifikasi teks bantuan Manajer Audio (memperbaiki format karakter \n yang tidak terbaca dengan baik).\n"
+			"* Perbaikan: Menyuntikkan fungsionalitas Bantuan Kontekstual yang hilang pada tab Voice Pack dan Voice Command.\n"
+			"* Perbaikan: Mencegah error tertutupnya jendela simulasi (terpental) saat modul Voice Command belum diinisialisasi.\n"
+			"\n"
 			"--- Versi 1.7.6 ---\n"
 			"* Fitur Baru: Menambahkan shortcut Status Dinamis (NVDA + Shift + /) untuk membacakan seluruh status pewaktu (Timer Rutin, Alarm, Pomodoro) secara bersamaan.\n"
 			"* Fitur Baru: Antarmuka dinamis pada pembuatan Timer Rutin (NVDA + / lalu 1) dan Alarm (NVDA + / lalu 2). Jika Anda memiliki jadwal aktif, layar **Manajer Pewaktu Aktif** akan muncul, memungkinkan Anda untuk melakukan Jeda (Pause), Lanjutkan (Resume), atau Berhenti sepenuhnya pada tiap-tiap jadwal.\n"
@@ -203,8 +262,8 @@ class ChangelogDialog(wx.Dialog):
 		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
 		
 		btnSizer = wx.StdDialogButtonSizer()
-		self.btnClose = wx.Button(self, wx.ID_CLOSE, label="&Tutup")
-		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CLOSE))
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		self.btnClose.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CANCEL))
 		btnSizer.AddButton(self.btnClose)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
@@ -444,8 +503,11 @@ class AudioManagerDialog(wx.Dialog):
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
 		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btnSizer.AddButton(self.btnOk)
 		btnSizer.AddButton(self.btnCancel)
+		btnSizer.AddButton(self.btnHelp)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
 		
@@ -453,6 +515,12 @@ class AudioManagerDialog(wx.Dialog):
 		self.Centre()
 		self.cb_device.SetFocus()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN AUDIO MANAGER:\n\n- Audio Manager memungkinkan JadwalKu memutar suara alarm/chime melalui perangkat output/speaker yang BEDA dari suara Screen Reader (NVDA).\n- Anda bisa mengatur volume suara JadwalKu secara independen agar lebih keras dari suara NVDA.\n- Centang opsi Auto-Resume jika Anda ingin audio lain otomatis menyala kembali setelah alarm berbunyi."
+		dlg = ContextualHelpDialog(self, "Bantuan: Audio Manager", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onVolumeScroll(self, event):
 		val = self.slider_volume.GetValue()
@@ -744,6 +812,10 @@ class AgendaDialog(wx.Dialog):
 		self.chk_speech.SetValue(self.schedule_data.get("speech_enabled", True))
 		sizer.Add(self.chk_speech, 0, wx.ALL, 8)
 		
+		self.chk_habit = wx.CheckBox(self, label="&Jadikan ini sebagai Pelacak Kebiasaan (Habit Tracker)")
+		self.chk_habit.SetValue(self.schedule_data.get("is_habit", True))
+		sizer.Add(self.chk_habit, 0, wx.ALL, 8)
+		
 		self.chk_active = wx.CheckBox(self, label="Status &Jadwal Aktif (Check)")
 		self.chk_active.SetValue(self.schedule_data.get("active", True))
 		sizer.Add(self.chk_active, 0, wx.ALL, 8)
@@ -784,6 +856,10 @@ class AgendaDialog(wx.Dialog):
 		interval_val = self.interval_values[interval_idx] if 0 <= interval_idx < len(self.interval_values) else 0
 		end_idx = self.cb_interval_end.GetSelection()
 		interval_end_val = end_idx if 0 <= end_idx <= 23 else 23
+		alarm_modes = [
+			"Pemberitahuan Singkat (Sekali Bunyi / Chime)",
+			"Alarm Jam Weker (Berdering Berulang + Fitur Tunda / Snooze)"
+		]
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
@@ -794,12 +870,13 @@ class AgendaDialog(wx.Dialog):
 			"minute": int(self.cb_minute.GetValue()),
 			"interval_hour": interval_val,
 			"interval_end_hour": interval_end_val,
-			"audio_file": audio_file,
 			"audio_enabled": audio_enabled,
-			"is_alarm": is_alarm_sel,
-			"alarm_mode": self.cb_alarm_mode.GetValue(),
+			"audio_file": audio_file,
 			"speech_enabled": self.chk_speech.GetValue(),
 			"active": self.chk_active.GetValue(),
+			"is_alarm": is_alarm_sel,
+			"alarm_mode": alarm_modes[1] if is_alarm_sel else alarm_modes[0],
+			"is_habit": self.chk_habit.GetValue(),
 			"last_triggered_date": self.schedule_data.get("last_triggered_date", "")
 		}
 
@@ -899,14 +976,23 @@ class QuickTimerDialog(wx.Dialog):
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Mulai Timer")
 		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btnSizer.AddButton(self.btnOk)
 		btnSizer.AddButton(self.btnCancel)
+		btnSizer.AddButton(self.btnHelp)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
 		
 		self.SetSizer(sizer)
 		self.Centre()
 		self.txt_duration.SetFocus()
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN QUICK TIMER:\n\n- Quick Timer adalah cara tercepat untuk memasang hitung mundur (contoh: 10 menit).\n- Anda dapat Menjeda (Pause) dan Melanjutkan (Resume) timer kapan saja.\n- Pada 10 detik terakhir, JadwalKu akan memutar suara detak jam berdebar (ticking)."
+		dlg = ContextualHelpDialog(self, "Bantuan: Quick Timer", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onTestSound(self, event):
 		if not self.audio_manager:
@@ -1043,14 +1129,23 @@ class OneTimeAlarmDialog(wx.Dialog):
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Pasang Alarm")
 		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btnSizer.AddButton(self.btnOk)
 		btnSizer.AddButton(self.btnCancel)
+		btnSizer.AddButton(self.btnHelp)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
 		
 		self.SetSizer(sizer)
 		self.Centre()
 		self.cb_hour.SetFocus()
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN ALARM SEKALI PAKAI:\n\n- Fitur ini berguna untuk menyetel weker (alarm berdering terus-menerus) pada jam dan menit tertentu hari ini.\n- Anda dapat Menjeda (Pause) alarm sebelum waktunya tiba.\n- Jika alarm sedang berdering, tekan Spasi untuk mematikan atau Z untuk menunda (Snooze 10 menit)."
+		dlg = ContextualHelpDialog(self, "Bantuan: Alarm Sekali Pakai", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onTestSound(self, event):
 		if not self.audio_manager:
@@ -1148,14 +1243,23 @@ class TTSManagerDialog(wx.Dialog):
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
 		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btnSizer.AddButton(self.btnOk)
 		btnSizer.AddButton(self.btnCancel)
+		btnSizer.AddButton(self.btnHelp)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
 		
 		self.SetSizer(sizer)
 		self.Centre()
 		self.chk_enabled.SetFocus()
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN MESIN TTS MANDIRI:\n\n- JadwalKu dapat membacakan notifikasi suara latar belakang menggunakan SAPI5 (suara bawaan Windows) alih-alih suara synthesizer NVDA.\n- Ini memungkinkan suara NVDA dan suara JadwalKu menjadi berbeda.\n- Anda dapat mengatur kecepatan (Rate) dan volume khusus untuk TTS JadwalKu."
+		dlg = ContextualHelpDialog(self, "Bantuan: TTS Manager", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onTest(self, event):
 		if not self.tts_manager:
@@ -1291,8 +1395,11 @@ class TimeReminderDialog(wx.Dialog):
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
 		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btnSizer.AddButton(self.btnOk)
 		btnSizer.AddButton(self.btnCancel)
+		btnSizer.AddButton(self.btnHelp)
 		btnSizer.Realize()
 		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
 		
@@ -1310,6 +1417,12 @@ class TimeReminderDialog(wx.Dialog):
 			dlg.Destroy()
 		else:
 			ui.message("Fitur TTS Mandiri tidak tersedia.")
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN PENGINGAT WAKTU BERKALA:\n\n- Fitur ini membuat JadwalKu berbunyi (chime) secara otomatis setiap jam.\n- Anda bisa memilih untuk tidak membunyikan pengingat pada jam istirahat (misal: 23:00 - 05:00) agar tidur Anda tidak terganggu.\n- Anda juga bisa memilih suara bel kustom (chime) dan memutuskan apakah JadwalKu harus membacakan waktu secara lisan."
+		dlg = ContextualHelpDialog(self, "Bantuan: Pengingat Waktu Berkala", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def get_result(self):
 		idx_int = self.cb_interval.GetSelection()
@@ -1374,6 +1487,10 @@ class JadwalKuDialog(wx.Dialog):
 		self.btnTimeRemind.Bind(wx.EVT_BUTTON, self.onTimeReminder)
 		btnSizer2.Add(self.btnTimeRemind, 0, wx.ALL, 4)
 		
+		self.btnLonceng = wx.Button(self.panel_tab1, label="&Pengingat Lonceng (Grandfather Clock)...")
+		self.btnLonceng.Bind(wx.EVT_BUTTON, self.onLonceng)
+		btnSizer2.Add(self.btnLonceng, 0, wx.ALL, 4)
+		
 		self.btnAudio = wx.Button(self.panel_tab1, label="Pengaturan &Audio Manager (Speaker)...")
 		self.btnAudio.Bind(wx.EVT_BUTTON, self.onAudioManager)
 		btnSizer2.Add(self.btnAudio, 0, wx.ALL, 4)
@@ -1388,6 +1505,7 @@ class JadwalKuDialog(wx.Dialog):
 			btnSizer2.Add(self.btnCheckUp, 0, wx.ALL, 4)
 		
 		sizer_tab1.Add(btnSizer2, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+		
 		self.panel_tab1.SetSizer(sizer_tab1)
 		
 		# ==================== TAB 2: PENGATURAN WAKTU & KALENDER JADWALKU ====================
@@ -1649,12 +1767,35 @@ class JadwalKuDialog(wx.Dialog):
 		bottom_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup Dialog")
 		bottom_btn_sizer.Add(self.btnClose, 0, wx.ALL, 6)
+		
+		self.btnContextHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnContextHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
+		bottom_btn_sizer.Add(self.btnContextHelp, 0, wx.ALL, 6)
 		main_sizer.Add(bottom_btn_sizer, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
 		
 		self.SetSizer(main_sizer)
 		self.Centre()
 		self.refreshList()
 		self.listBox.SetFocus()
+
+	def onContextualHelp(self, evt):
+		tab = self.notebook.GetSelection()
+		if tab == 0:
+			title = "Bantuan: Manajemen Agenda & Jadwal"
+			text = "TAB MANAJEMEN AGENDA:\n\n- Gunakan panah atas/bawah untuk menelusuri daftar agenda.\n- Tekan SPASI pada agenda yang disorot untuk mengaktifkan (centang) atau menonaktifkannya.\n- Tekan tombol 'Tambah Jadwal Baru' untuk membuat alarm weker atau chime (pemberitahuan singkat) pada jam tertentu.\n- Tombol 'Pengaturan Pengingat Waktu Berkala' berguna untuk menyalakan bunyi lonceng setiap pergantian jam layaknya jam dinding."
+		elif tab == 1:
+			title = "Bantuan: Pengaturan Waktu & Kalender"
+			text = "TAB PENGATURAN WAKTU:\n\n- Format Waktu: Anda dapat memilih membaca jam dalam format 12 jam (AM/PM) atau 24 jam.\n- Format Tanggal: Tersedia berbagai susunan pengucapan tanggal (contoh: 17 Agustus 1945).\n- Gaya Pengucapan: Menentukan seberapa ringkas NVDA membacakan waktu.\n- Tombol Kalender: Menampilkan kalender bulan ini beserta daftar Tanggal Merah (Libur Nasional) di Indonesia."
+		elif tab == 2:
+			title = "Bantuan: Voice Pack & Studio Suara"
+			text = "TAB VOICE PACK & STUDIO SUARA:\n\n- Voice Pack adalah paket suara rekaman asli manusia (atau AI) yang menggantikan suara mesin TTS saat membacakan jam (Misal: 'Jam setengah sembilan lewat lima menit').\n- Anda bisa merekam paket suara Anda sendiri melalui 'Studio Rekaman Suara JadwalKu' lalu membagikannya (.jvp).\n- Jika ada Voice Pack yang aktif, sistem secara otomatis akan menggunakan rekaman tersebut daripada suara SAPI5/NVDA."
+		else:
+			title = "Bantuan: Perintah Suara (Voice Command)"
+			text = "TAB PERINTAH SUARA:\n\n- Jika Anda mencentang 'Aktifkan Pemantauan Mikrofon', Anda dapat bertanya 'Jam berapa sekarang?' secara lisan (menggunakan mikrofon).\n- Fitur ini berjalan 100% offline (menggunakan model Vosk) sehingga tidak butuh internet.\n- Anda dapat menyesuaikan Sensitivitas Mikrofon (Boost) jika suara Anda kurang terdengar."
+		
+		dlg = ContextualHelpDialog(self, title, text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def refreshList(self, select_index=0):
 		self.listBox.Clear()
@@ -1859,6 +2000,11 @@ class JadwalKuDialog(wx.Dialog):
 		finally:
 			gui.mainFrame.postPopup()
 
+	def onLonceng(self, event):
+		dlg = LoncengDialog(self, self.config, self.audio)
+		dlg.ShowModal()
+		dlg.Destroy()
+		
 	def onCheckUpdate(self, event):
 		if self.updater:
 			ui.message("Memeriksa pembaruan ke server...")
@@ -2133,12 +2279,21 @@ class CalendarDialog(wx.Dialog):
 		btnSizer2 = wx.BoxSizer(wx.HORIZONTAL)
 		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
 		btnSizer2.Add(self.btnClose, 0, wx.ALL, 6)
+		self.btnHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
+		btnSizer2.Add(self.btnHelp, 0, wx.ALL, 6)
 		sizer.Add(btnSizer2, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
 		
 		self.SetSizer(sizer)
 		self.Centre()
 		self.refreshMonthCalendar()
 		self.listBox.SetFocus()
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN KALENDER & TANGGAL MERAH:\n\n- Kalender ini sudah terintegrasi dengan daftar libur nasional / tanggal merah Indonesia.\n- Tanggal merah akan ditandai dengan tulisan '(Libur)' saat Anda menggunakan panah atas/bawah.\n- Anda juga bisa mengecek sisa waktu mundur ke akhir tahun dengan tombol Cek Akhir Tahun."
+		dlg = ContextualHelpDialog(self, "Bantuan: Kalender JadwalKu", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onMonthYearChanged(self, event):
 		self.refreshMonthCalendar()
@@ -2332,6 +2487,10 @@ class WorldClockDialog(wx.Dialog):
 		bottom_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup Dialog")
 		bottom_btn_sizer.Add(self.btnClose, 0, wx.ALL, 6)
+		
+		self.btnContextHelp = wx.Button(self, label="&Bantuan... (Alt+B)")
+		self.btnContextHelp.Bind(wx.EVT_BUTTON, self.onContextualHelp)
+		bottom_btn_sizer.Add(self.btnContextHelp, 0, wx.ALL, 6)
 		main_sizer.Add(bottom_btn_sizer, 0, wx.ALIGN_RIGHT | wx.RIGHT | wx.BOTTOM, 6)
 		
 		self.SetSizer(main_sizer)
@@ -2339,6 +2498,16 @@ class WorldClockDialog(wx.Dialog):
 		self.refreshClocksList()
 		self.onCalculateConversion(None, speak=False)
 		self.listBox_clocks.SetFocus()
+
+	def onContextualHelp(self, evt):
+		tab = self.notebook.GetSelection()
+		if tab == 0:
+			text = "BANTUAN JAM DUNIA:\n\n- Menampilkan waktu saat ini di berbagai negara.\n- Anda dapat mengetik di kotak pencarian untuk memfilter negara."
+		else:
+			text = "BANTUAN KONVERSI WAKTU:\n\n- Memungkinkan Anda menghitung selisih waktu antara dua negara."
+		dlg = ContextualHelpDialog(self, "Bantuan: Jam Dunia & Konversi", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def onFilterChanged(self, event):
 		self.refreshClocksList()
@@ -2483,6 +2652,12 @@ class VoicePackManagementDialog(wx.Dialog):
 		self.SetSizer(sizer)
 		self.refresh_list()
 		self.lst_packs.SetFocus()
+
+	def onContextualHelp(self, evt):
+		text = "BANTUAN TOKO VOICE PACK:\n\n- Di sini Anda dapat memanajemen paket suara (Voice Pack).\n- JadwalKu dapat menggunakan rekaman suara asli manusia sebagai notifikasi jam."
+		dlg = ContextualHelpDialog(self, "Bantuan: JadwalKu Store", text)
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def refresh_list(self):
 		self.lst_packs.DeleteAllItems()
@@ -2866,6 +3041,12 @@ class VoiceStudioDialog(wx.Dialog):
 		self.updateStudioUI()
 		self.btn_record.SetFocus()
 
+	def onContextualHelp(self, evt):
+		text = "BANTUAN STUDIO REKAMAN:\n\n- Anda akan dipandu untuk merekam 70 kata pendek yang dibutuhkan oleh JadwalKu untuk membentuk kalimat pembacaan jam.\n- Pastikan mikrofon berfungsi. Gunakan tombol Rekam/Stop (Spasi) untuk merekam."
+		dlg = ContextualHelpDialog(self, "Bantuan: Studio Rekaman Suara", text)
+		dlg.ShowModal()
+		dlg.Destroy()
+
 	def updateStudioUI(self):
 		import os
 		
@@ -3002,7 +3183,6 @@ class VoiceStudioDialog(wx.Dialog):
 class ActiveTimerManagerDialog(wx.Dialog):
 	def __init__(self, parent, scheduler):
 		super().__init__(parent, title="Manajer Timer Aktif")
-		self.scheduler = scheduler
 		
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -3087,7 +3267,6 @@ class ActiveTimerManagerDialog(wx.Dialog):
 class ActiveAlarmManagerDialog(wx.Dialog):
 	def __init__(self, parent, scheduler):
 		super().__init__(parent, title="Manajer Alarm Aktif")
-		self.scheduler = scheduler
 		
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -3161,3 +3340,410 @@ class ActiveAlarmManagerDialog(wx.Dialog):
 		import wx
 		dlg = OneTimeAlarmDialog(None, self.scheduler)
 		dlg.Show()
+
+class HabitTrackerDialog(wx.Dialog):
+	def __init__(self, parent, scheduler, habit_manager):
+		super().__init__(parent, title="Pelacak Kebiasaan & Status Jadwal (Habit Tracker)", size=(600, 450), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.habit_manager = habit_manager
+		self.habit_manager.check_and_reset_streaks()
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_label = wx.StaticText(self, label="Pilih jadwal aktif hari ini, lalu tekan Enter atau Spasi untuk mengambil tindakan (Selesai/Belum/Tunda):")
+		sizer.Add(info_label, 0, wx.ALL, 10)
+		
+		self.lb_habits = wx.ListBox(self, style=wx.LB_SINGLE)
+		self.lb_habits.Bind(wx.EVT_KEY_DOWN, self.onKeyDown)
+		
+		self.active_schedules = self._get_active_schedules_today()
+		self._populate_list()
+		
+		sizer.Add(self.lb_habits, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		btnSizer.AddButton(self.btnClose)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.lb_habits.SetFocus()
+
+	def _get_active_schedules_today(self):
+		if not self.scheduler or not self.scheduler.config:
+			return []
+			
+		schedules = self.scheduler.config.get_schedules()
+		active_today = []
+		
+		import datetime
+		now = datetime.datetime.now()
+		day_map = {0: "Senin", 1: "Selasa", 2: "Rabu", 3: "Kamis", 4: "Jumat", 5: "Sabtu", 6: "Minggu"}
+		current_day_str = day_map[now.weekday()]
+		is_weekend = now.weekday() >= 5
+		
+		for s in schedules:
+			if not s.get("active", False):
+				continue
+			if not s.get("is_habit", True):
+				continue
+				
+			freq = s.get("frequency", "Setiap Hari")
+			is_active = False
+			
+			if freq == "Setiap Hari":
+				is_active = True
+			elif freq == "Hari Kerja (Senin - Jumat)" and not is_weekend:
+				is_active = True
+			elif freq == "Akhir Pekan (Sabtu - Minggu)" and is_weekend:
+				is_active = True
+			elif freq == current_day_str:
+				is_active = True
+			elif freq.startswith("Sesuaikan Hari"):
+				if current_day_str in s.get("custom_days", []):
+					is_active = True
+			elif freq == "Sekali Waktu (Tanggal Spesifik)":
+				if s.get("date") == now.strftime("%Y-%m-%d"):
+					is_active = True
+					
+			if is_active:
+				active_today.append(s)
+				
+		return active_today
+
+	def _get_arrived_count(self, s):
+		interval = s.get("interval_hour", 0)
+		import datetime
+		now = datetime.datetime.now()
+		
+		if interval == 0:
+			sched_h = s.get("hour", 0)
+			sched_m = s.get("minute", 0)
+			if now.hour > sched_h or (now.hour == sched_h and now.minute >= sched_m):
+				return 1
+			return 0
+			
+		start_h = s.get("hour", 0)
+		start_m = s.get("minute", 0)
+		end_h = s.get("interval_end_hour", 23)
+		
+		if now.hour < start_h or (now.hour == start_h and now.minute < start_m):
+			return 0
+			
+		elapsed_hours = now.hour - start_h
+		if elapsed_hours < 0:
+			elapsed_hours += 24
+			
+		arrived = (elapsed_hours // interval) + 1
+		
+		target = self._get_target_count(s)
+		if arrived > target:
+			arrived = target
+			
+		return arrived
+
+	def _get_target_count(self, s):
+		interval = s.get("interval_hour", 0)
+		if interval == 0:
+			return 1
+		start_hour = s.get("hour", 0)
+		end_hour = s.get("interval_end_hour", 23)
+		
+		# e.g. start 08, end 23, interval 2 -> (23 - 8) / 2 = 7 + 1 = 8
+		if start_hour <= end_hour:
+			return ((end_hour - start_hour) // interval) + 1
+		return 1
+
+	def _populate_list(self):
+		self.lb_habits.Clear()
+		for s in self.active_schedules:
+			s_id = s.get("id")
+			name = s.get("name", "Jadwal")
+			target = self._get_target_count(s)
+			completed = self.habit_manager.get_daily_count(s_id)
+			
+			pct = 0
+			if target > 0:
+				pct = int((completed / target) * 100)
+				if pct > 100: pct = 100
+				
+			desc = f"{name} - {completed} dari {target} ({pct}%) terselesaikan."
+			self.lb_habits.Append(desc, s)
+
+	def onKeyDown(self, event):
+		keycode = event.GetKeyCode()
+		if keycode in [wx.WXK_SPACE, wx.WXK_RETURN]:
+			self.showContextMenu()
+		else:
+			event.Skip()
+			
+	def showContextMenu(self):
+		sel = self.lb_habits.GetSelection()
+		if sel == wx.NOT_FOUND:
+			return
+			
+		sched = self.lb_habits.GetClientData(sel)
+		
+		menu = wx.Menu()
+		item_done = menu.Append(wx.ID_ANY, "1. Sudah Selesai")
+		item_skip = menu.Append(wx.ID_ANY, "2. Belum / Lewati")
+		item_snooze = menu.Append(wx.ID_ANY, "3. Tunda (Snooze)...")
+		
+		self.Bind(wx.EVT_MENU, lambda e: self.onMarkDone(sched, sel), item_done)
+		self.Bind(wx.EVT_MENU, lambda e: self.onMarkSkip(sched, sel), item_skip)
+		self.Bind(wx.EVT_MENU, lambda e: self.onSnooze(sched, sel), item_snooze)
+		
+		self.PopupMenu(menu)
+		menu.Destroy()
+
+	def onMarkDone(self, sched, index):
+		s_id = sched["id"]
+		target = self._get_target_count(sched)
+		completed = self.habit_manager.get_daily_count(s_id)
+		arrived = self._get_arrived_count(sched)
+		
+		if completed >= target:
+			import ui
+			ui.message("Jadwal ini sudah mencapai target maksimal untuk hari ini!")
+			return
+			
+		if completed >= arrived:
+			import ui
+			ui.message("Belum tiba waktunya untuk rutinitas berikutnya. Harap bersabar!")
+			return
+
+		new_badge = self.habit_manager.record_completion(sched["id"], sched["name"])
+		
+		if new_badge:
+			# Play level up sound dynamically!
+			import ui
+			import globalVars
+			try:
+				import winsound
+				sounds_dir = os.path.join(os.path.dirname(__file__), "sounds")
+				chime_path = os.path.join(sounds_dir, "chime.wav")
+				if os.path.exists(chime_path):
+					winsound.PlaySound(chime_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+			except: pass
+			
+			msg = f"LUAR BIASA! Anda baru saja membuka {new_badge} untuk kebiasaan {sched['name']}!"
+			if hasattr(ui, 'message'):
+				ui.message(msg)
+			
+		self._populate_list()
+		self.lb_habits.SetSelection(index)
+
+	def onMarkSkip(self, sched, index):
+		import ui
+		if hasattr(ui, 'message'):
+			ui.message(f"Jadwal {sched['name']} ditandai belum.")
+		# For interval schedules, we just skip. We don't record a completion.
+		pass
+
+	def onSnooze(self, sched, index):
+		dlg = wx.TextEntryDialog(self, "Masukkan waktu tunda (contoh: +15m, +1j, atau 14:30):", "Tunda Jadwal")
+		if dlg.ShowModal() == wx.ID_OK:
+			val = dlg.GetValue().strip().lower()
+			if val:
+				import datetime
+				now = datetime.datetime.now()
+				new_time = None
+				
+				if val.startswith("+"):
+					import re
+					match = re.search(r'\+?(\d+)\s*(m|j|h|menit|jam)', val)
+					if match:
+						amount = int(match.group(1))
+						unit = match.group(2)
+						if unit in ['m', 'menit']:
+							new_time = now + datetime.timedelta(minutes=amount)
+						elif unit in ['j', 'h', 'jam']:
+							new_time = now + datetime.timedelta(hours=amount)
+							
+				if not new_time:
+					# Try parse HH:MM
+					try:
+						parts = val.split(":")
+						if len(parts) >= 2:
+							h = int(parts[0])
+							m = int(parts[1])
+							new_time = now.replace(hour=h, minute=m, second=0)
+							if new_time < now:
+								new_time += datetime.timedelta(days=1)
+					except: pass
+					
+				if new_time:
+					# Tell scheduler to inject a snooze
+					if self.scheduler:
+						self.scheduler.snooze_schedule(sched["id"], new_time)
+						import ui
+						ui.message(f"Jadwal ditunda hingga {new_time.strftime('%H:%M')}.")
+				else:
+					import ui
+					ui.message("Format waktu tidak dikenali.")
+		dlg.Destroy()
+
+class BadgeShowcaseDialog(wx.Dialog):
+	def __init__(self, parent, habit_manager):
+		super().__init__(parent, title="Pencapaian & Lencana Ketekunan", size=(700, 500), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.habit_manager = habit_manager
+		self.habit_manager.check_and_reset_streaks()
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		sizer.Add(wx.StaticText(self, label="Gunakan panah Atas/Bawah untuk memilih jadwal. Tekan Tab untuk membaca riwayat lencana lengkap."), 0, wx.ALL, 10)
+		
+		split_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		
+		self.lb_badges = wx.ListBox(self, style=wx.LB_SINGLE)
+		self.lb_badges.Bind(wx.EVT_LISTBOX, self.onSelectionChanged)
+		
+		self.txt_history = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+		
+		split_sizer.Add(self.lb_badges, 1, wx.EXPAND | wx.ALL, 5)
+		split_sizer.Add(self.txt_history, 2, wx.EXPAND | wx.ALL, 5)
+		
+		sizer.Add(split_sizer, 1, wx.EXPAND | wx.ALL, 5)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		btnSizer.AddButton(self.btnClose)
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		
+		self._populate_list()
+
+	def _populate_list(self):
+		self.lb_badges.Clear()
+		habits = self.habit_manager.get_all_habits_summary()
+		
+		if not habits:
+			self.lb_badges.Append("Belum ada data kebiasaan.")
+			self.txt_history.SetValue("Belum ada riwayat lencana yang dapat ditampilkan.")
+			return
+			
+		for h in habits:
+			self.lb_badges.Append(f"{h['name']} - {h['highest_badge']}", h['id'])
+			
+		self.lb_badges.SetSelection(0)
+		self.onSelectionChanged(None)
+		self.lb_badges.SetFocus()
+
+	def onSelectionChanged(self, event):
+		sel = self.lb_badges.GetSelection()
+		if sel != wx.NOT_FOUND:
+			s_id = self.lb_badges.GetClientData(sel)
+			if s_id:
+				text = self.habit_manager.get_badge_history_text(s_id)
+				self.txt_history.SetValue(text)
+
+
+class LoncengDialog(wx.Dialog):
+	def __init__(self, parent, config, audio_manager):
+		super().__init__(parent, title="Pengaturan Lonceng Jam Klasik (Grandfather Clock)", size=(500, 400))
+		self.config = config
+		self.audio_manager = audio_manager
+		self.settings = self.config.data.get("lonceng_settings", {
+			"enabled": False, "volume": 80, "start_hour": 6, "end_hour": 22,
+			"ticking_enabled": False, "ticking_volume": 40
+		})
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		self.chk_enabled = wx.CheckBox(self, label="&Aktifkan Pengingat Lonceng Klasik")
+		self.chk_enabled.SetValue(self.settings.get("enabled", False))
+		sizer.Add(self.chk_enabled, 0, wx.ALL, 5)
+		
+		sizer.Add(wx.StaticText(self, label="&Volume Lonceng Utama:"), 0, wx.ALL, 5)
+		self.slider_vol = wx.Slider(self, value=self.settings.get("volume", 80), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		sizer.Add(self.slider_vol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		hour_choices = [f"{h:02d}:00" for h in range(24)]
+		
+		hb_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		hb_sizer.Add(wx.StaticText(self, label="Jam &Mulai:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		self.cb_start = wx.ComboBox(self, choices=hour_choices, style=wx.CB_READONLY)
+		self.cb_start.SetSelection(self.settings.get("start_hour", 6))
+		hb_sizer.Add(self.cb_start, 1, wx.ALL, 5)
+		
+		hb_sizer.Add(wx.StaticText(self, label="Jam &Selesai (Tenang):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		self.cb_end = wx.ComboBox(self, choices=hour_choices, style=wx.CB_READONLY)
+		self.cb_end.SetSelection(self.settings.get("end_hour", 22))
+		hb_sizer.Add(self.cb_end, 1, wx.ALL, 5)
+		sizer.Add(hb_sizer, 0, wx.EXPAND)
+		
+		sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.ALL, 10)
+		
+		self.chk_tick = wx.CheckBox(self, label="Aktifkan &Suara Detik Jam (Ticking) di Latar Belakang")
+		self.chk_tick.SetValue(self.settings.get("ticking_enabled", False))
+		sizer.Add(self.chk_tick, 0, wx.ALL, 5)
+		
+		sizer.Add(wx.StaticText(self, label="Volume Suara &Detik:"), 0, wx.ALL, 5)
+		self.slider_tick_vol = wx.Slider(self, value=self.settings.get("ticking_volume", 40), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		sizer.Add(self.slider_tick_vol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+		
+		self.btnTest = wx.Button(self, label="&Tes Lonceng Saat Ini")
+		self.btnTest.Bind(wx.EVT_BUTTON, self.onTest)
+		sizer.Add(self.btnTest, 0, wx.ALL, 10)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		self.btnOk = wx.Button(self, wx.ID_OK, label="&Simpan")
+		self.btnCancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
+		btnSizer.AddButton(self.btnOk)
+		btnSizer.AddButton(self.btnCancel)
+		btnSizer.Realize()
+		self.btnOk.Bind(wx.EVT_BUTTON, self.onSave)
+		
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 15)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+
+	def onTest(self, evt):
+		import datetime
+		
+		if self.btnTest.GetLabel() == "&Tes Lonceng Saat Ini":
+			now = datetime.datetime.now()
+			vol = self.slider_vol.GetValue()
+			if self.audio_manager:
+				self.audio_manager.play_lonceng_sequence(vol, now.hour, test_mode=True)
+				import ui
+				ui.message("Menguji lonceng...")
+			self.btnTest.SetLabel("&Hentikan Tes Lonceng")
+			
+			# Latar belakang untuk reset nama tombol
+			import threading, time, wx
+			def monitor_thread():
+				time.sleep(2.0)
+				while getattr(self.audio_manager, "_is_playing", False):
+					time.sleep(0.5)
+				try:
+					wx.CallAfter(self.btnTest.SetLabel, "&Tes Lonceng Saat Ini")
+				except Exception:
+					pass
+			threading.Thread(target=monitor_thread, daemon=True).start()
+		else:
+			if self.audio_manager:
+				self.audio_manager.stop_sound(stop_alarm=False)
+				import ui
+				ui.message("Tes lonceng dihentikan.")
+			self.btnTest.SetLabel("&Tes Lonceng Saat Ini")
+
+	def onSave(self, evt):
+		new_settings = {
+			"enabled": self.chk_enabled.GetValue(),
+			"volume": self.slider_vol.GetValue(),
+			"start_hour": self.cb_start.GetSelection(),
+			"end_hour": self.cb_end.GetSelection(),
+			"ticking_enabled": self.chk_tick.GetValue(),
+			"ticking_volume": self.slider_tick_vol.GetValue()
+		}
+		self.config.data["lonceng_settings"] = new_settings
+		self.config.save_data()
+		import ui
+		ui.message("Pengaturan Lonceng disimpan.")
+		self.EndModal(wx.ID_OK)

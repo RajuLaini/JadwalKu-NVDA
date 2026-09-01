@@ -16,6 +16,8 @@ class Scheduler:
 		self.last_check_minute = -1
 		self.quick_timers = []
 		self.one_time_alarms = []
+		self.daily_overrides = {}
+		self.last_day = datetime.datetime.now().day
 
 	def start(self):
 		self.timer.Start(1000)
@@ -206,6 +208,13 @@ class Scheduler:
 	def on_tick(self, event):
 		try:
 			now = datetime.datetime.now()
+			
+			# Ticking logic
+			l_set = self.config.data.get("lonceng_settings", {})
+			if l_set.get("ticking_enabled", False):
+				if self.audio and hasattr(self.audio, "play_tick"):
+					self.audio.play_tick(l_set.get("ticking_volume", 40))
+					
 			self.check_quick_timers(now)
 			self.check_one_time_alarms(now)
 			if hasattr(self.audio, "check_snoozed_alarms"):
@@ -216,9 +225,19 @@ class Scheduler:
 				return
 			self.last_check_minute = now.minute
 
+			# Hourly Lonceng check
+			if now.minute == 0:
+				if l_set.get("enabled", False):
+					st = l_set.get("start_hour", 6)
+					ed = l_set.get("end_hour", 22)
+					if st <= now.hour <= ed or (st > ed and (now.hour >= st or now.hour <= ed)):
+						if self.audio and hasattr(self.audio, "play_lonceng_sequence"):
+							self.audio.play_lonceng_sequence(l_set.get("volume", 80), now.hour)
+
 			self.check_time_reminder(now)
 			self.check_schedules(now)
 		except Exception as e:
+			import logHandler
 			logHandler.log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
 
 	def check_time_reminder(self, now):
@@ -397,6 +416,10 @@ class Scheduler:
 		except Exception as e:
 			logHandler.log.error(f"JadwalKu: Error saat cek time reminder: {e}")
 
+
+	def snooze_schedule(self, sched_id, new_time):
+		self.daily_overrides[sched_id] = {"hour": new_time.hour, "minute": new_time.minute}
+
 	def check_schedules(self, now):
 		try:
 			schedules = self.config.get_schedules()
@@ -404,32 +427,42 @@ class Scheduler:
 			weekday = now.weekday() # 0 = Senin, ..., 6 = Minggu
 			days_map = {0: "Senin", 1: "Selasa", 2: "Rabu", 3: "Kamis", 4: "Jumat", 5: "Sabtu", 6: "Minggu"}
 
+			if now.day != self.last_day:
+				self.daily_overrides.clear()
+				self.last_day = now.day
+
 			for agenda in schedules:
 				if not agenda.get("active", False):
 					continue
+					
+				sched_id = agenda.get("id")
+				eff_start_hour = int(agenda.get("hour", -1))
+				eff_minute = int(agenda.get("minute", -1))
+				if sched_id in self.daily_overrides:
+					eff_start_hour = self.daily_overrides[sched_id]["hour"]
+					eff_minute = self.daily_overrides[sched_id]["minute"]
 
-				if int(agenda.get("minute", -1)) != now.minute:
+				if eff_minute != now.minute:
 					continue
 
-				start_hour = int(agenda.get("hour", -1))
 				interval_hour = int(agenda.get("interval_hour", 0))
 				interval_end_hour = int(agenda.get("interval_end_hour", 23))
 
 				if interval_hour > 0:
-					if start_hour <= interval_end_hour:
-						if now.hour < start_hour or now.hour > interval_end_hour or (now.hour - start_hour) % interval_hour != 0:
+					if eff_start_hour <= interval_end_hour:
+						if now.hour < eff_start_hour or now.hour > interval_end_hour or (now.hour - eff_start_hour) % interval_hour != 0:
 							continue
-					else:  # Lintas malam / overnight (misal start_hour=20, interval_end_hour=04)
-						if now.hour >= start_hour:
-							if (now.hour - start_hour) % interval_hour != 0:
+					else:  # Lintas malam / overnight
+						if now.hour >= eff_start_hour:
+							if (now.hour - eff_start_hour) % interval_hour != 0:
 								continue
 						elif now.hour <= interval_end_hour:
-							if ((now.hour + 24) - start_hour) % interval_hour != 0:
+							if ((now.hour + 24) - eff_start_hour) % interval_hour != 0:
 								continue
 						else:
 							continue
 				else:
-					if start_hour != now.hour:
+					if eff_start_hour != now.hour:
 						continue
 
 				freq = agenda.get("frequency", "Setiap Hari")

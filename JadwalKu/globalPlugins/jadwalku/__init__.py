@@ -7,6 +7,7 @@ import logHandler
 import datetime
 import scriptHandler
 import api
+import os
 
 from .configManager import ConfigManager
 from .audioManager import AudioManager
@@ -111,6 +112,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.tts = TTSManager(self.config, self.audio)
 		self.audio.tts_manager = self.tts
 		self.scheduler = Scheduler(self.config, self.audio, self.tts)
+		try:
+			from globalPlugins.jadwalku.habitManager import HabitManager
+			from globalPlugins.jadwalku.configManager import CONFIG_DIR
+			self.habit_manager = HabitManager(CONFIG_DIR)
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"JadwalKu: Gagal memuat HabitManager: {e}")
+			self.habit_manager = None
 		
 		from . import pomodoro
 		self.pomodoro_manager = pomodoro.PomodoroManager(self.audio, self)
@@ -144,7 +153,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.switch = False
 		
 		self.commandLayerGestures = {
-			"kb:l": "openLayout",
+			"kb:o": "openLayout",
 			"kb:enter": "openLayout",
 			"kb:1": "openQuickTimer",
 			"kb:3": "openPomodoroTimer",
@@ -153,7 +162,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:r": "openFeedback",
 			"kb:k": "openCalendar",
 			"kb:d": "openWorldClock",
-			"kb:j": "nextAgenda",
+			"kb:j": "openHabitTracker",
+			"kb:l": "openBadgeShowcase",
 			"kb:h": "todayAgenda",
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
@@ -292,9 +302,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.is_dialog_open = True
 		gui.mainFrame.prePopup()
 		try:
-			dlg = HelpDialog(gui.mainFrame)
-			dlg.ShowModal()
-			dlg.Destroy()
+			from .simulation import start_tutorial
+			start_tutorial(gui.mainFrame)
+		except Exception as e:
+			import traceback
+			with open(r"C:\Users\Raju Laini\Documents\Project_Jadwalku\error_log.txt", "w") as f:
+				f.write(traceback.format_exc())
+			ui.message("Terjadi kesalahan saat membuka bantuan.")
 		finally:
 			self.is_dialog_open = False
 			gui.mainFrame.postPopup()
@@ -496,8 +510,53 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.check_dialog_open():
 			return
 		self.audio.play_sound("on.wav")
-		ui.message("Masuk ke mode JadwalKu. Tekan L untuk Layout, 1 Quick Timer, 2 Alarm, 3 Pomodoro Timer, W Waktu, K Kalender, D Jam Dunia, M Mesin TTS Mandiri, V Riwayat, atau B Bantuan.")
+		ui.message("Masuk ke mode JadwalKu. Tekan O (atau Enter) untuk Layout, J untuk Pelacak Kebiasaan, L untuk Lencana Ketekunan, 1 Quick Timer, 2 Alarm, 3 Pomodoro Timer, W Waktu, K Kalender, D Jam Dunia, M Microphone, V Riwayat, r untuk laporan, atau B Bantuan.")
 		self.switch = True
+
+	
+	def script_openHabitTracker(self, gesture):
+		if not self.habit_manager:
+			ui.message("Sistem Pelacak Kebiasaan gagal dimuat.")
+			return
+		wx.CallAfter(self.show_habit_tracker_dialog)
+
+	def show_habit_tracker_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		import gui
+		gui.mainFrame.prePopup()
+		try:
+			from .guiDialogs import HabitTrackerDialog
+			dlg = HabitTrackerDialog(gui.mainFrame, self.scheduler, self.habit_manager)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.switch = False
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
+
+	def script_openBadgeShowcase(self, gesture):
+		if not self.habit_manager:
+			ui.message("Sistem Pelacak Kebiasaan gagal dimuat.")
+			return
+		wx.CallAfter(self.show_badge_showcase_dialog)
+
+	def show_badge_showcase_dialog(self):
+		if not self.check_dialog_open():
+			return
+		self.is_dialog_open = True
+		import gui
+		gui.mainFrame.prePopup()
+		try:
+			from .guiDialogs import BadgeShowcaseDialog
+			dlg = BadgeShowcaseDialog(gui.mainFrame, self.habit_manager)
+			dlg.ShowModal()
+			dlg.Destroy()
+		finally:
+			self.switch = False
+			self.is_dialog_open = False
+			gui.mainFrame.postPopup()
 
 	def script_openLayout(self, gesture):
 		wx.CallAfter(self.show_main_dialog)

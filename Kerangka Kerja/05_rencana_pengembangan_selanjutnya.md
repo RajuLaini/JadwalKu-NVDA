@@ -37,3 +37,26 @@ Dokumen ini berisi daftar ide dan konsep fitur yang dapat kita kembangkan di ses
 - **Status**: Telah berhasil diterapkan di versi 1.6.2! Pengguna dapat menekan shortcut `NVDA + /` lalu `R` (maupun dari tombol `Kirim Laporan & Saran` di panel pengaturan NVDA) untuk memilih kategori (`Minta Fitur Baru`, `Laporkan Kesalahan`, `Kritik Saran`). Sistem secara otomatis mengekstrak log diagnostik terbaru dari NVDA dan menampilkannya secara transparan yang bisa diedit. Pengiriman dilakukan secara aman melalui Web API Proxy PHP (`jadwalku_telegram_proxy.php`) ke Bot Telegram Aileen, dilengkapi pembatasan kuota 1 laporan/hari per user dan fitur fallback salin otomatis ke clipboard jika offline/gagal.
 
 
+## 11. Manajemen Kebiasaan (Habit Tracker)
+- **Fitur**: Mencatat dan memantau target kebiasaan harian pengguna (misal: minum air, membaca buku).
+- **Konsep**: JadwalKu mencatat 'streak' (hari sukses beruntun) dan memberikan sedikit notifikasi motivasi.
+
+## 12. Pengingat & Pemantau Kesehatan (Health & Wellness Reminders)
+- **Fitur**: Pengingat khusus kesehatan dan ergonomi.
+- **Konsep**: Pengingat "20-20-20 Rule" untuk mata, atau pengingat stretching bagi pekerja kantoran secara berkala.
+
+## 13. Integrasi Suara Interaktif Lanjutan (Advanced Voice Command)
+- **Fitur**: Pengguna dapat memberikan instruksi lisan secara langsung.
+- **Konsep**: Eksekusi perintah seperti "Setel alarm jam 5 sore" atau "Berapa sisa waktu Pomodoro saya?" menggunakan mikrofon, tanpa perlu navigasi dialog GUI.
+
+## 14. Kalkulator Waktu & Penjadwalan Mundur (Time & Date Calculator)
+- **Fitur**: Perhitungan jarak waktu dan tanggal.
+- **Konsep**: Menghitung tanggal 45 hari dari sekarang, atau menghitung sisa hari menuju event tertentu (ulang tahun, Idul Fitri), mempermudah tunanetra berhitung kalender.
+
+## 15. JadwalKu Mini-Notes (Tempelan Catatan Singkat Audio)
+- **Fitur**: Catatan singkat instan.
+- **Konsep**: Clipboard internal layaknya *Sticky Notes* untuk mencatat teks pendek (nomor resi, alamat) yang dapat dibacakan secara instan dengan satu shortcut.
+
+## 16. Mode Tutorial & Simulasi Interaktif JadwalKu (The Simulation Mode)
+- **Fitur**: Tutorial langkah-demi-langkah (step-by-step) ala permainan interaktif.
+- **Konsep**: Ketika pengguna menekan \NVDA + / lalu B\, muncul pilihan untuk membuka Bantuan Standar atau "Tutorial Simulasi". Mode simulasi ini akan memandu pengguna baru untuk berlatih menggunakan JadwalKu (misalnya mencoba membuat alarm, menghidupkan timer) dalam lingkungan *sandbox* nyata tapi terisolasi sehingga tidak "meninggalkan jejak" atau mengganggu jadwal asli mereka. Dilengkapi dengan Progress Tracker (0% - 100%) untuk mengukur tingkat pemahaman pengguna.

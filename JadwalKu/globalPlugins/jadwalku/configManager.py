@@ -27,6 +27,14 @@ DEFAULT_DATA = {
 		"end_hour": 24,         # 23:59 (Sepanjang Hari / 24 Jam)
 		"last_triggered_minute": "" # Caching agar tidak bunyi 2x di menit yang sama
 	},
+	"lonceng_settings": {
+		"enabled": False,
+		"volume": 80,
+		"start_hour": 6,
+		"end_hour": 22,
+		"ticking_enabled": False,
+		"ticking_volume": 40
+	},
 	"schedules": [
 		{
 			"id": str(uuid.uuid4()),
@@ -82,6 +90,11 @@ DEFAULT_DATA = {
 	"feedback_config": {
 		"last_report_date": "",
 		"proxy_url": "https://butterflywings.my.id/api/jadwalku/proxy"
+	},
+	"simulation_progress": {
+		"stage": 1,
+		"step": 0,
+		"completed": False
 	}
 }
 
@@ -229,12 +242,23 @@ class ConfigManager:
 		self.save_data()
 
 	def get_feedback_config(self):
-		return self.data.get("feedback_config", DEFAULT_DATA["feedback_config"].copy())
+		return self.data.get("feedback_config", DEFAULT_DATA["feedback_config"])
 
-	def update_feedback_config(self, updated_dict):
+	def update_feedback_config(self, config_dict):
 		if "feedback_config" not in self.data:
 			self.data["feedback_config"] = DEFAULT_DATA["feedback_config"].copy()
-		self.data["feedback_config"].update(updated_dict)
+		self.data["feedback_config"].update(config_dict)
+		self.save_data()
+
+	def get_simulation_progress(self):
+		return self.data.get("simulation_progress", DEFAULT_DATA["simulation_progress"])
+		
+	def set_simulation_progress(self, stage, step, completed=False):
+		if "simulation_progress" not in self.data:
+			self.data["simulation_progress"] = DEFAULT_DATA["simulation_progress"].copy()
+		self.data["simulation_progress"]["stage"] = stage
+		self.data["simulation_progress"]["step"] = step
+		self.data["simulation_progress"]["completed"] = completed
 		self.save_data()
 
 	def get_last_report_date(self):

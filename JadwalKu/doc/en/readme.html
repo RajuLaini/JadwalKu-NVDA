@@ -1,36 +1,52 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Panduan Penggunaan Add-on JadwalKu</title>
+<title>JadwalKu Add-on User Guide</title>
 </head>
 <body>
-<h1>Add-on JadwalKu untuk NVDA (Versi 1.0.0)</h1>
-<p><b>JadwalKu</b> adalah add-on manajemen waktu, pengingat agenda rutin (harian/mingguan), dan pengingat waktu berkala (hourly / interval chime) yang 100% ramah aksesibilitas screen reader.</p>
+<h1>JadwalKu Add-on for NVDA (Version 1.7.6.1)</h1>
+<p><b>JadwalKu</b> is an advanced time management, agenda reminder, focus timer (Pomodoro), and periodic interval chime add-on that is 100% screen reader accessible and highly dynamic.</p>
 
-<h2>Daftar Shortcut Utama</h2>
+<h2>Global Shortcuts (Main Shortcuts)</h2>
 <ul>
-  <li><b>NVDA + Shift + J</b>: Langsung membuka Dialog Utama Manajemen Jadwal & Pengaturan.</li>
-  <li><b>NVDA + /</b>: Masuk ke Mode Perintah JadwalKu. Dalam mode ini, Anda dapat menekan tombol berikut:
-    <ul>
-      <li><b>L / Enter</b>: Buka Dialog Utama Manajemen Jadwal.</li>
-      <li><b>W / T</b>: Bacakan jam saat ini dan status pengingat waktu berkala.</li>
-      <li><b>J</b>: Bacakan jadwal terdekat yang akan datang hari ini.</li>
-      <li><b>H</b>: Bacakan daftar seluruh agenda aktif hari ini.</li>
-      <li><b>A</b>: Check / Uncheck (Aktifkan / Nonaktifkan) pengingat waktu berkala secara cepat.</li>
-      <li><b>Spasi</b>: Hentikan suara notifikasi/chime yang sedang berbunyi.</li>
-      <li><b>B / F1</b>: Buka dialog Bantuan Read-Only yang dapat dibaca per baris dengan panah atas/bawah dan dieja dengan panah kiri/kanan.</li>
-      <li><b>Escape</b>: Keluar dari mode JadwalKu.</li>
-    </ul>
-  </li>
+  <li><b>NVDA + /</b>: Enter the <b>JadwalKu Command Layer</b>. <i>(See the key list below for advanced commands).</i></li>
+  <li><b>NVDA + Shift + /</b>: Read <b>Dynamic Status</b>. NVDA will instantly iterate and read the remaining time of all currently active Timers, Alarms, and Pomodoro sessions simultaneously.</li>
+  <li><b>NVDA + F12 (1, 2, 3, times)</b>: Announce the current time, date, and countdown to the end of the current year.</li>
 </ul>
 
-<h2>Fitur & Kemampuan</h2>
+<h2>Command Layer Mode (After Pressing NVDA + /)</h2>
+<p>After pressing <b>NVDA + /</b>, release the keys, then press one of the following keys to execute specific functions:</p>
 <ul>
-  <li><b>Antarmuka Combo Box & Checkbox</b>: Seluruh pengaturan dibuat menggunakan Combo Box (Dropdown) dan Checkbox yang sangat mudah dinavigasi dengan panah dan Spasi di NVDA tanpa perlu mengetik format waktu manual.</li>
-  <li><b>Tombol Tes Suara (Alt + T)</b>: Di dalam formulir tambah/edit agenda, Anda dapat langsung mencoba mendengarkan sampel suara chime/alarm sebelum menyimpan.</li>
-  <li><b>Dialog Bantuan Read-Only</b>: Dilengkapi kotak teks multiline read-only yang nyaman dinavigasi menggunakan tombol panah layar NVDA.</li>
-  <li><b>Pembaruan Otomatis Tanpa Browser</b>: Pengecekan versi latar belakang yang mengunduh dan memunculkan dialog pemasangan langsung dari dalam NVDA.</li>
+  <li><b>L</b> or <b>Enter</b> or <b>P</b>: Open the Main Schedule Management & Settings Dialog.</li>
+  <li><b>1</b>: Open <b>Quick Timer Manager</b>. You can create a new timer, or Pause, Resume, and Stop if any timer is currently running.</li>
+  <li><b>2</b>: Open <b>One-Time Alarm Manager</b> with Pause/Resume capabilities.</li>
+  <li><b>3</b>: Open <b>Pomodoro Timer</b> (Focus, Short Break, Long Break, and Auto-Stop settings).</li>
+  <li><b>W</b>: Announce the current time along with the periodic Time Reminder status.</li>
+  <li><b>K</b>: Open <b>Calendar & National Holidays List</b> (Indonesian Red Dates).</li>
+  <li><b>D</b>: Open <b>World Clock & Timezone Converter Calculator</b>.</li>
+  <li><b>J</b>: Announce the <b>next closest upcoming agenda</b> for today along with its remaining time.</li>
+  <li><b>H</b>: Announce <b>all active agendas</b> for today.</li>
+  <li><b>A</b>: Toggle (Check/Uncheck) the periodic Time Reminder instantly.</li>
+  <li><b>S</b>: Open <b>Audio Manager</b> to select sound output devices (Speakers) and adjust independent volume.</li>
+  <li><b>T</b>: Open <b>Independent TTS Manager (SAPI5)</b> to configure background voice notifications.</li>
+  <li><b>R</b>: Open the Bug Report/Feedback form (Directly connected to a Telegram Bot).</li>
+  <li><b>G</b>: Share Add-on (Copy the direct download link to clipboard).</li>
+  <li><b>U</b>: Check for JadwalKu Updates manually (Auto-Updater).</li>
+  <li><b>V</b>: View Update History (Changelog).</li>
+  <li><b>Z</b>: <b>Snooze</b> (Snooze currently ringing alarm/timer).</li>
+  <li><b>M</b>: Enable Microphone monitoring (For voice commands).</li>
+  <li><b>Space</b>: <b>Stop</b> (Stop the currently ringing notification/chime sound).</li>
+  <li><b>B</b> or <b>F1</b>: Open the Help dialog (In-app comprehensive guide).</li>
+  <li><b>Escape</b>: Cancel/Exit the JadwalKu Command Layer mode.</li>
+</ul>
+
+<h2>Key Features & Capabilities</h2>
+<ul>
+  <li><b>Combo Box & Checkbox Interface</b>: All settings are extremely screen reader friendly without the need to manually type time formats. Simply use the up/down arrows.</li>
+  <li><b>Sound Test Button (Alt + T)</b>: Inside the add agenda form, you can instantly test and listen to chime/alarm sound samples before saving.</li>
+  <li><b>Background Auto-Updater</b>: JadwalKu is capable of checking for the latest version and downloading installation packages automatically and securely, without having to open an external browser.</li>
+  <li><b>Energy & Focus Management</b>: Equipped with a Pomodoro timer and the ability to Pause any active timers so your schedule becomes much more flexible.</li>
 </ul>
 </body>
 </html>

@@ -1,8 +1,10 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.6.7
+# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.1
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
-## 1. Manajemen Agenda Rutin (Harian / Mingguan)
+## 1. Manajemen Agenda Rutin & Pelacak Kebiasaan (Habit Tracker)
+- **Pelacak Kebiasaan (Habit Tracker)**: JadwalKu bukan lagi sekadar alarm. Ia melacak rutinitas Anda dan memberikan Lencana Ketekunan ("Sangat Baik", "Luar Biasa", dsb.) untuk setiap rutinitas yang diselesaikan secara konsisten. Akses Daftar Kebiasaan dengan `NVDA + /` lalu `J`. Lencana akan tersimpan selamanya di data konfigurasi NVDA (`habit_stats.json`).
+- **Papan Skor Lencana**: Akses dengan menekan `NVDA + /` lalu `L` untuk membuka Badge Showcase dan melihat deretan Lencana Ketekunan yang berhasil diraih.
 - **Daftar Agenda Aktif**: Menampilkan semua jadwal dalam `ListBox` yang mudah dinavigasi menggunakan panah atas/bawah.
 - **Input Berbasis Combo Box**: Saat menambah atau mengedit jadwal, pengguna tidak perlu mengetik format waktu manual. Cukup pilih **Jam (00 - 23)**, **Menit (00 - 59)**, dan **Frekuensi (Setiap Hari / Hari tertentu)** melalui dropdown/combo box.
 - **Pengingat Berulang dengan Pembatas Jam Selesai (*Interval & End Hour*)**: Opsi 'Ulangi Setiap (Interval Jam Sekali)' untuk mengatur pengingat berkala dalam hari tersebut (misal setiap 1, 2, 3 jam sekali untuk minum atau istirahat kerja), dilengkapi kolom **Waktu Selesai Interval (Jam Selesai Perulangan)** sehingga pengingat berhenti otomatis setelah jam yang ditentukan baik di hari yang sama maupun lintas malam (*overnight shift*).
@@ -10,15 +12,11 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **Tombol Tes Suara (`Alt + T`)**: Di dalam formulir tambah/edit agenda (`AgendaDialog`), pengguna dapat menekan tombol `[ &Tes Suara ]` untuk langsung mendengarkan sampel suara dari opsi yang dipilih di Combo Box sebelum menyimpan.
 - **Status Check/Uncheck Cepat**: Pengguna dapat mengaktifkan atau menonaktifkan suatu agenda dengan cepat melalui tombol `[ Check / Uncheck Status ]` atau langsung menekan Spasi di daftar agenda.
 
-## 2. Pengingat Waktu Berkala (*Time Reminder / Hourly Chime*)
-- **Interval Waktu Fleksibel**: Dapat diatur untuk mengingatkan setiap **5 menit**, **10 menit**, **15 menit**, **30 menit**, hingga **1 jam sekali (Setiap Jam)**.
-- **Mode Notifikasi Pilihan**:
-  - *Bicara Waktu via NVDA & Putar Chime* (Mode Lengkap)
-  - *Hanya Bicara Waktu* (Tanpa Chime)
-  - *Hanya Putar Chime* (Tanpa Bicara)
-- **Format & Gaya Pengucapan Waktu Pengingat (*Time Reminder Format & Speech Style*)**: Pengguna dapat memilih format jam (24 Jam, 12 Jam AM/PM, atau mengikuti pengaturan NVDA+F12) serta memilih gaya kalimat yang dibacakan saat pengingat berbunyi (misal: "Sekarang jam 09:00 tepat", "Mengikuti gaya & format pengucapan NVDA+F12", "09:00 waktu sekarang", "Hanya 09:00", atau "Waktu sekarang pukul 09:00").
-- **Rentang Jam Aktif Akurat Menit (*Quiet Hours*)**: Pengguna dapat mengatur Jam Mulai (misal jam `06:00`) dan Jam Selesai (misal jam `23:00`). Pengecekan dilakukan secara akurat hingga tingkat menit, sehingga jika Jam Selesai diatur ke `23:00`, pengingat terakhir berbunyi tepat pukul `23:00` dan diam setelahnya (`23:30` tidak berbunyi). Tersedia juga opsi khusus `23:59 (Sepanjang Hari / 24 Jam)` jika ingin pengingat aktif non-stop sepanjang hari.
-- **JadwalKu Voice Pack Studio (Pengingat Tanpa TTS)**: Sebuah fasilitas mandiri bawaan yang memandu pengguna merekam 70 kata waktu menggunakan mikrofon mereka secara langsung. Rekaman akan otomatis dipotong jeda heningnya (*auto-trim*) dan dikompres menjadi file `.jvp` (*JadwalKu Voice Pack*). Paket ini kemudian dapat dibagikan atau digunakan sebagai pengganti suara TTS robotik untuk melaporkan waktu dengan suara manusia asli yang mengalir natural secara beruntun (*Concatenative Synthesis*).
+## 2. Jam Lonceng Klasik (Grandfather Clock)
+- **Pengingat Pergantian Jam Klasik**: JadwalKu menghadirkan nuansa jam kuno di rumah Anda. Pada pergantian jam, JadwalKu akan memutar melodi Westminster Prelude selama 16 detik, disusul dentangan palu gong mekanik (*strikes*) berdurasi 500ms sesuai jumlah jam (misal 3 kali pukulan untuk jam 3).
+- **Latar Belakang Detak Jam (*Ticking*)**: Anda dapat menyalakan opsi putaran audio detik (*ticking*) di latar belakang yang berbunyi sangat otentik tanpa membebani sistem.
+- **Peningkatan Volume Maksimal (1200%)**: Output lonceng dan detak dapat dikencangkan hingga 1200% berkat modul pendorong PCM murni.
+- **Rute Output Cerdas**: Sepenuhnya di-route melalui modul `_play_wav_winmm` dari JadwalKu, artinya dentangan ini akan persis keluar dari Speaker / Headphone pilihan Anda!
 
 ## 3. Shortcut & Mode Perintah (*Command Layer*) Bergaya IslamicPedia
 - **`NVDA + /`**: Pintu gerbang tunggal untuk masuk ke **Mode Perintah JadwalKu** (ditandai suara nada naik dan ucapan NVDA). Dalam mode ini:

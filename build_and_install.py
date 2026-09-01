@@ -3,7 +3,7 @@ import shutil
 import zipfile
 
 ADDON_NAME = "JadwalKu"
-ADDON_VERSION = "1.7.6"
+ADDON_VERSION = "1.7.6.2"
 BASE_DIR = os.path.join(os.path.dirname(__file__), ADDON_NAME)
 ADDON_PATH = os.path.join(os.path.dirname(__file__), f"{ADDON_NAME}-v{ADDON_VERSION}.nvda-addon")
 NVDA_ADDON_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "nvda", "addons", ADDON_NAME)
@@ -21,4 +21,11 @@ with zipfile.ZipFile(ADDON_PATH, 'w', zipfile.ZIP_DEFLATED) as zf:
 			zf.write(file_path, arcname)
 
 print(f"Berhasil membuat paket add-on: {ADDON_PATH}")
-print("Silakan buka file .nvda-addon tersebut dan tekan Enter untuk menginstal di NVDA.")
+
+# 2. Instalasi Otomatis ke AppData NVDA
+if os.path.exists(NVDA_ADDON_DIR):
+	print(f"Menghapus add-on lama di: {NVDA_ADDON_DIR}")
+	shutil.rmtree(NVDA_ADDON_DIR, ignore_errors=True)
+print(f"Menyalin file baru ke: {NVDA_ADDON_DIR}")
+shutil.copytree(BASE_DIR, NVDA_ADDON_DIR)
+print("Berhasil! Silakan RESTART NVDA Anda untuk melihat perubahan.")

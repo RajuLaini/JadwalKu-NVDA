@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import wx
 import ui
+from .guiDialogs import ContextualHelpDialog
 import gui
 import time
 import datetime
@@ -25,6 +26,7 @@ class PomodoroManager:
 		self.timer.Bind(wx.EVT_TIMER, self.on_tick)
 
 	def start(self, work_min, short_break_min, long_break_min, cycles):
+		self.stop(manual=False) # Ensure any previous timer is fully stopped
 		self.work_seconds = work_min * 60
 		self.short_break_seconds = short_break_min * 60
 		self.long_break_seconds = long_break_min * 60
@@ -50,26 +52,40 @@ class PomodoroManager:
 		self.remaining_seconds -= 1
 		
 		if self.remaining_seconds <= 0:
-			self.transition_state()
+			self.remaining_seconds = 0
+			# Call transition via wx.CallAfter to prevent blocking the timer thread
+			# in case audio playback or speech message takes time.
+			wx.CallAfter(self.transition_state)
 			
 	def play_alarm(self):
 		if self.audio:
 			if hasattr(self.audio, "play_sound"):
-				self.audio.play_sound("chime.wav")
+				try:
+					self.audio.play_sound("chime.wav", allow_overlap=True)
+				except Exception as e:
+					import logHandler
+					logHandler.log.error(f"JadwalKu Pomodoro: Error playing alarm {e}")
 
 	def transition_state(self):
+		if not self.is_active:
+			return
+			
 		self.play_alarm()
 		if self.state == "Fokus":
 			if self.current_cycle >= self.cycles and self.cycles > 0:
 				self.state = "Istirahat Panjang"
 				self.remaining_seconds = self.long_break_seconds
 				ui.message(f"Waktu fokus habis! Sekarang waktunya Istirahat Panjang selama {self.long_break_seconds // 60} menit.")
-				self.current_cycle = 0 # Reset cycle
 			else:
 				self.state = "Istirahat Pendek"
 				self.remaining_seconds = self.short_break_seconds
 				ui.message(f"Waktu fokus habis! Sekarang waktunya Istirahat Pendek selama {self.short_break_seconds // 60} menit.")
 		elif self.state in ("Istirahat Pendek", "Istirahat Panjang"):
+			if self.state == "Istirahat Panjang" and self.cycles > 0:
+				self.stop(manual=False)
+				ui.message("Siklus Pomodoro telah selesai sepenuhnya. Selamat beristirahat!")
+				return
+				
 			self.current_cycle += 1
 			self.state = "Fokus"
 			self.remaining_seconds = self.work_seconds
@@ -136,7 +152,10 @@ class PomodoroTimerDialog(wx.Dialog):
 			btn_sizer.AddButton(btn_start)
 		
 		btn_cancel = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
+		btn_help = wx.Button(self, label="&Bantuan... (Alt+B)")
+		btn_help.Bind(wx.EVT_BUTTON, self.onContextualHelp)
 		btn_sizer.AddButton(btn_cancel)
+		btn_sizer.AddButton(btn_help)
 		btn_sizer.Realize()
 		
 		sizer.Add(btn_sizer, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
@@ -146,6 +165,16 @@ class PomodoroTimerDialog(wx.Dialog):
 			self.txt_work.SetFocus()
 		else:
 			btn_cancel.SetFocus()
+
+	def onContextualHelp(self, event):
+		try:
+			from .guiDialogs import HelpDialog
+			dlg = HelpDialog(self.GetParent())
+			dlg.ShowModal()
+			dlg.Destroy()
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"Error opening help from pomodoro: {e}")
 
 	def onStart(self, event):
 		try:
