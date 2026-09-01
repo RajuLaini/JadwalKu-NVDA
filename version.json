@@ -1,5 +1,5 @@
 {
     "version": "1.7.6.2",
-    "changelog": "Pembaruan v1.7.6.2:\n- Perbaikan bug tombol bantuan (Opsi 1).\n- Menonaktifkan sementara simulasi interaktif (Opsi 2) untuk pengembangan.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.6.1.nvda-addon"
+    "changelog": "Pembaruan v1.7.6.2:\n- Perbaikan bug tombol bantuan (Opsi 1).\n- Menonaktifkan sementara simulasi interaktif (Opsi 2) untuk pengembangan.\n- Perbaikan installer dan crash audio saat update.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.6.2.nvda-addon"
 }
