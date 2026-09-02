@@ -101,7 +101,9 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"[Versi 1.7.6.4]\n"
+			"[Versi 1.7.6.4.1]\\n"
+			"- Perbaikan Interaksi (Bugfix): Memperbaiki tombol Spasi dan Enter yang sebelumnya tidak merespon saat ditekan pada daftar Pelacak Kebiasaan (NVDA + / lalu J). Kini konteks menu pemilihan status (Selesai/Belum/Tunda) akan muncul dengan mulus. Menu ini juga mendukung klik kanan, klik ganda, dan tombol Aplikasi (Context Menu).\\n\\n"
+			"[Versi 1.7.6.4]\\n"
 			"- Aksesibilitas Total: Menambal kelemahan antarmuka wxPython dengan membuang gaya visual slider (wx.SL_LABELS) yang merusak pohon hirarki MSAA Windows, serta menyematkan fitur .SetName() dan ToolTip otomatis pada 64 elemen kontrol (Slider, Kotak Teks, Kotak Kombo, dan List) di seluruh antarmuka JadwalKu. Kini saat bernavigasi menggunakan tombol Tab, NVDA akan membacakan nama fungsi elemen secara langsung tanpa memerlukan Object Navigation!\n"
 			"- Ketangguhan Pelacak Kebiasaan (Habit Rollover): Merombak logika jadwal \"Sekali Waktu (Tanggal Spesifik)\". Kini jika jadwal tersebut diaktifkan sebagai Pelacak Kebiasaan (Habit Tracker) dan Anda mengabaikannya (tidak menekan tombol Belum/Tunda), jadwal tersebut tidak akan hangus! Ia akan terus mengulang dan menagih Anda di hari-hari berikutnya pada jam yang sama.\n"
 			"- Teror Auto-Snooze: Selain itu, jadwal kebiasaan harian (tanpa interval) yang diabaikan kini akan otomatis menunda dirinya sendiri (Auto-Snooze) setiap 1 jam secara agresif, sampai Anda benar-benar mengeksekusi tombol \"Sudah Selesai\" via NVDA + / lalu J.\n"
@@ -3350,7 +3352,9 @@ class HabitTrackerDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 10)
 		
 		self.lb_habits = wx.ListBox(self, style=wx.LB_SINGLE)
-		self.lb_habits.Bind(wx.EVT_KEY_DOWN, self.onKeyDown)
+		self.lb_habits.Bind(wx.EVT_CHAR_HOOK, self.onKeyDown)
+		self.lb_habits.Bind(wx.EVT_CONTEXT_MENU, lambda e: self.showContextMenu())
+		self.lb_habits.Bind(wx.EVT_LISTBOX_DCLICK, lambda e: self.showContextMenu())
 		
 		self.active_schedules = self._get_active_schedules_today()
 		self._populate_list()
@@ -3470,7 +3474,7 @@ class HabitTrackerDialog(wx.Dialog):
 
 	def onKeyDown(self, event):
 		keycode = event.GetKeyCode()
-		if keycode in [wx.WXK_SPACE, wx.WXK_RETURN]:
+		if keycode in [wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
 			self.showContextMenu()
 		else:
 			event.Skip()
