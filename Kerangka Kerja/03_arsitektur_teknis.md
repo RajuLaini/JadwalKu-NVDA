@@ -110,3 +110,8 @@ Mulai JadwalKu v1.7.6.3, JadwalKu menggunakan objek log mandiri berbasis logging
 - **Isolasi Log**: propagate = False digunakan untuk mencegah NVDA Log Viewer tercemar oleh detak aktivitas background JadwalKu.
 - **Pembersihan Otomatis**: Handler dibuka dalam mode w (Write), sehingga file log ini tidak akan mengalami *Disk Bloat* karena akan secara otomatis mereset teks lama setiap kali NVDA (dan JadwalKu) dimulai ulang.
 - **Aksesibilitas**: Pengguna dapat membaca file log ini melalui perintah lapisan NVDA + / lalu menekan huruf I.
+
+## 7. Optimasi C-Level & Memory Caching (Sejak 1.7.6.4)
+Sistem audio JadwalKu sangat dioptimasi pada versi 1.7.6.4.
+- **AudioOp (C-Level)**: Untuk menyesuaikan volume frame PCM 16-bit, JadwalKu menggunakan udioop.mul yang mengalkulasi jutaan frame di tingkat bahasa C hanya dalam waktu < 0.001 detik tanpa menyandera GIL Python.
+- **RAM Caching**: Data file .wav beserta hasil kalkulasi volume di-*cache* (disimpan di RAM) ke dalam self._audio_cache pada putaran pertama. Putaran ke-2 hingga ke-12 (misal pada rentetan ketukan lonceng jam 12) akan menembakkan raw frame langsung dari RAM, menyelamatkan hardisk dari I/O masif berulang dan menjaga stabilitas NVDA.

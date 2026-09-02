@@ -95,6 +95,7 @@ class AudioManager:
 		self.is_alarm_ringing = False
 		self.active_alarm_info = None
 		self.snoozed_alarms = []
+		self._audio_cache = {}
 
 	def has_active_playback(self):
 		with self._lock:
@@ -181,6 +182,18 @@ class AudioManager:
 	def _boost_pcm_16bit(self, frames, factor):
 		if factor == 1.0 or not frames:
 			return frames
+		
+		# Optimasi C-Level (Bebas GIL Bottleneck) menggunakan audioop
+		try:
+			import audioop
+			return audioop.mul(frames, 2, factor)
+		except ImportError:
+			pass
+		except Exception as e:
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu: audioop gagal: {e}")
+			
+		# Fallback lambat jika audioop tidak tersedia (misal di Python masa depan)
 		try:
 			import array
 			arr = array.array('h')
@@ -197,49 +210,65 @@ class AudioManager:
 					arr[i] = val
 			return arr.tobytes()
 		except Exception as e:
+			from .logger import jk_log
 			jk_log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
 			return frames
 
 	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False, loop=False, volume_override=None):
 		if not allow_overlap:
 			self.stop_sound(stop_alarm=stop_alarm)
-		
-		try:
-			wf = wave.open(filepath, 'rb')
-			duration_sec = float(wf.getnframes()) / float(wf.getframerate())
-			channels = wf.getnchannels()
-			framerate = wf.getframerate()
-			bitsPerSample = wf.getsampwidth() * 8
-			frames = wf.readframes(wf.getnframes())
-			wf.close()
-		except Exception:
-			duration_sec = 2.5
-			channels = 2
-			framerate = 44100
-			bitsPerSample = 16
-			frames = b""
+			
+		vol = volume_override
+		if vol is None:
+			vol = self.config.get_audio_volume() if hasattr(self, 'config') and self.config else 100
+			
+		cache_key = (filepath, vol)
+		if hasattr(self, '_audio_cache') and cache_key in self._audio_cache:
+			cached_data = self._audio_cache[cache_key]
+			frames = cached_data['frames']
+			wfx = cached_data['wfx']
+			duration_sec = cached_data['duration_sec']
+		else:
+			try:
+				wf = wave.open(filepath, 'rb')
+				duration_sec = float(wf.getnframes()) / float(wf.getframerate())
+				channels = wf.getnchannels()
+				framerate = wf.getframerate()
+				bitsPerSample = wf.getsampwidth() * 8
+				frames = wf.readframes(wf.getnframes())
+				wf.close()
+			except Exception:
+				duration_sec = 2.5
+				channels = 2
+				framerate = 44100
+				bitsPerSample = 16
+				frames = b""
 
-		if not frames:
-			return False
+			if not frames:
+				return False
 
-		wfx = WAVEFORMATEX()
-		wfx.wFormatTag = 1 # WAVE_FORMAT_PCM
-		wfx.nChannels = channels
-		wfx.nSamplesPerSec = framerate
-		wfx.wBitsPerSample = bitsPerSample
-		wfx.nBlockAlign = (channels * bitsPerSample) // 8
-		wfx.nAvgBytesPerSec = framerate * wfx.nBlockAlign
-		wfx.cbSize = 0
+			wfx = WAVEFORMATEX()
+			wfx.wFormatTag = 1 # WAVE_FORMAT_PCM
+			wfx.nChannels = channels
+			wfx.nSamplesPerSec = framerate
+			wfx.wBitsPerSample = bitsPerSample
+			wfx.nBlockAlign = (channels * bitsPerSample) // 8
+			wfx.nAvgBytesPerSec = framerate * wfx.nBlockAlign
+			wfx.cbSize = 0
 
-		try:
-			vol = volume_override
-			if vol is None:
-				vol = self.config.get_audio_volume() if self.config else 100
-			if bitsPerSample == 16 and vol != 100:
-				factor = float(vol) / 100.0
-				frames = self._boost_pcm_16bit(frames, factor)
-		except Exception:
-			pass
+			try:
+				if bitsPerSample == 16 and vol != 100:
+					factor = float(vol) / 100.0
+					frames = self._boost_pcm_16bit(frames, factor)
+			except Exception:
+				pass
+				
+			if hasattr(self, '_audio_cache'):
+				self._audio_cache[cache_key] = {
+					'frames': frames,
+					'wfx': wfx,
+					'duration_sec': duration_sec
+				}
 
 		self._is_playing = True
 		self.last_played_file = filepath
@@ -685,9 +714,9 @@ class AudioManager:
 			self._is_playing = True
 			self._play_wav_winmm(mulai_path, dev_id, allow_overlap=True, volume_override=volume)
 			
-			# Selalu tunggu 16 detik sesuai durasi mulaiLonceng, bisa dicancel
+			# Selalu tunggu 16.5 detik (Sengaja dibuat tumpang tindih agar suaranya menyambung mulus tanpa putus)
 			elapsed = 0.0
-			while elapsed < 16.0:
+			while elapsed < 16.5:
 				if not self._is_playing: return
 				time.sleep(0.1)
 				elapsed += 0.1
@@ -699,9 +728,9 @@ class AudioManager:
 			for i in range(strike_count):
 				if not self._is_playing: return
 				self._play_wav_winmm(ketuk_path, dev_id, allow_overlap=True, volume_override=volume)
-				# Jeda 0.5 detik antar ketukan, bisa dicancel
+				# Jeda alami 1.8 detik antar ketukan (menggantikan jeda lag komputasi yang hilang karena optimasi)
 				elapsed2 = 0.0
-				while elapsed2 < 0.5:
+				while elapsed2 < 1.8:
 					if not self._is_playing: return
 					time.sleep(0.1)
 					elapsed2 += 0.1

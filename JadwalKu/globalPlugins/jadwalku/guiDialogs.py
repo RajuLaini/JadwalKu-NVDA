@@ -76,6 +76,8 @@ class ContextualHelpDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		self.textCtrl = wx.TextCtrl(self, value=help_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
+		self.textCtrl.SetName("Gunakan Panah Atas/Bawah untuk membaca per baris, atau Panah Kiri/Kanan untuk mengeja teks:")
+		self.textCtrl.SetToolTip("Gunakan Panah Atas/Bawah untuk membaca per baris, atau Panah Kiri/Kanan untuk mengeja teks:")
 		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
 		
 		btnSizer = wx.StdDialogButtonSizer()
@@ -99,6 +101,12 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.4]\n"
+			"- Aksesibilitas Total: Menambal kelemahan antarmuka wxPython dengan membuang gaya visual slider (wx.SL_LABELS) yang merusak pohon hirarki MSAA Windows, serta menyematkan fitur .SetName() dan ToolTip otomatis pada 64 elemen kontrol (Slider, Kotak Teks, Kotak Kombo, dan List) di seluruh antarmuka JadwalKu. Kini saat bernavigasi menggunakan tombol Tab, NVDA akan membacakan nama fungsi elemen secara langsung tanpa memerlukan Object Navigation!\n"
+			"- Ketangguhan Pelacak Kebiasaan (Habit Rollover): Merombak logika jadwal \"Sekali Waktu (Tanggal Spesifik)\". Kini jika jadwal tersebut diaktifkan sebagai Pelacak Kebiasaan (Habit Tracker) dan Anda mengabaikannya (tidak menekan tombol Belum/Tunda), jadwal tersebut tidak akan hangus! Ia akan terus mengulang dan menagih Anda di hari-hari berikutnya pada jam yang sama.\n"
+			"- Teror Auto-Snooze: Selain itu, jadwal kebiasaan harian (tanpa interval) yang diabaikan kini akan otomatis menunda dirinya sendiri (Auto-Snooze) setiap 1 jam secara agresif, sampai Anda benar-benar mengeksekusi tombol \"Sudah Selesai\" via NVDA + / lalu J.\n"
+			"- Performa Ekstrem (Audio Engine): Menyelamatkan NVDA dari kelambatan (lag) ketika jam klasik berbunyi panjang dengan menulis ulang kalkulator volume menggunakan library bahasa C (audioop.mul) serta mengadopsi memori tembolok (Memory Caching) untuk menghemat keausan hardisk. Selain itu, menyesuaikan kembali ritme interval ketukan jam (16.5 detik awal dan jeda 1.8 detik) yang sempat terpengaruh optimasi kecepatan komputasi, agar kembali mengayun elegan seperti aslinya.\n\n"
+						"- Pembaruan Antarmuka Updater: Mengganti jendela konfirmasi pembaruan bawaan Windows (MessageBox) dengan jendela dialog khusus JadwalKu. Kini Anda dapat menelusuri dan mengeja catatan pembaruan (Changelog) baris demi baris menggunakan panah atas/bawah sebelum memutuskan untuk mengunduh versi baru.\n\n"
 			"[Versi 1.7.6.3]\n"
 			"- Fitur Baru (Log Terisolasi): Memisahkan seluruh catatan log internal JadwalKu agar tidak lagi menumpuk dan mengotori NVDA Log Viewer. Kini Anda dapat mengakses log khusus JadwalKu secara instan di Notepad dengan menekan shortcut NVDA + / lalu I.\n"
 			"- Fitur Baru (Voice Command): Menambahkan umpan balik suara cerdas! Kini saat Anda bertanya \"What time?\" atau \"Jam berapa?\" ke mikrofon, JadwalKu akan memutar nada dering (WhatTimeRing) sesaat sebelum menjawab jamnya, persis seperti asisten virtual profesional.\n"
@@ -159,6 +167,8 @@ class FeedbackDialog(wx.Dialog):
 		cat_sizer.Add(wx.StaticText(self, label="&Kategori Laporan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		choices = ["Minta Fitur Baru / Ide Pengembangan", "Laporkan Kesalahan / Bug (Error)", "Kritik, Saran & Masukan Umum"]
 		self.cb_category = wx.ComboBox(self, choices=choices, style=wx.CB_READONLY)
+		self.cb_category.SetName("Kategori Laporan:")
+		self.cb_category.SetToolTip("Kategori Laporan:")
 		self.cb_category.SetSelection(0)
 		self.cb_category.Bind(wx.EVT_COMBOBOX, self.onCategoryChange)
 		cat_sizer.Add(self.cb_category, 1, wx.EXPAND | wx.ALL, 4)
@@ -191,18 +201,24 @@ class FeedbackDialog(wx.Dialog):
 		title_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		title_sizer.Add(wx.StaticText(self, label="&Judul Laporan / Permintaan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.txt_title = wx.TextCtrl(self, value="Permintaan Fitur Baru JadwalKu")
+		self.txt_title.SetName("Judul Laporan / Permintaan:")
+		self.txt_title.SetToolTip("Judul Laporan / Permintaan:")
 		title_sizer.Add(self.txt_title, 1, wx.EXPAND | wx.ALL, 4)
 		sizer.Add(title_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 6)
 		
 		# Deskripsi
 		sizer.Add(wx.StaticText(self, label="&Deskripsi Lengkap (Tuliskan detail ide permintaan atau kronologi error di sini):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
 		self.txt_desc = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_RICH2)
+		self.txt_desc.SetName("Deskripsi Lengkap (Tuliskan detail ide permintaan atau kronologi error di sini):")
+		self.txt_desc.SetToolTip("Deskripsi Lengkap (Tuliskan detail ide permintaan atau kronologi error di sini):")
 		sizer.Add(self.txt_desc, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
 		
 		# Log Diagnostik (Transparan dan Bisa Diedit)
 		self.lbl_logs = wx.StaticText(self, label="&Log Deteksi Otomatis NVDA & JadwalKu (Akan dilampirkan transparan, dapat Anda periksa/edit):")
 		sizer.Add(self.lbl_logs, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
 		self.txt_logs = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_RICH2 | wx.HSCROLL)
+		self.txt_logs.SetName("Log Deteksi Otomatis NVDA  JadwalKu (Akan dilampirkan transparan, dapat Anda periksa/edit):")
+		self.txt_logs.SetToolTip("Log Deteksi Otomatis NVDA  JadwalKu (Akan dilampirkan transparan, dapat Anda periksa/edit):")
 		sizer.Add(self.txt_logs, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
 		
 		# Sembunyikan Sub-Kategori & Log secara default (karena defaultnya adalah Permintaan Fitur Baru)
@@ -337,6 +353,8 @@ class AudioManagerDialog(wx.Dialog):
 		device_names = self.audio.get_available_output_devices() if self.audio else ["Default (Microsoft Sound Mapper)"]
 		
 		self.cb_device = wx.ComboBox(self, choices=device_names, style=wx.CB_READONLY)
+		self.cb_device.SetName("Pilih Perangkat Output Audio (Speaker / Kartu Suara):")
+		self.cb_device.SetToolTip("Pilih Perangkat Output Audio (Speaker / Kartu Suara):")
 		cur_dev = self.config.get_audio_device()
 		if cur_dev in device_names:
 			self.cb_device.SetValue(cur_dev)
@@ -535,6 +553,8 @@ class AgendaDialog(wx.Dialog):
 		# 1. Nama Agenda
 		sizer.Add(wx.StaticText(self, label="&Nama Agenda:"), 0, wx.ALL, 5)
 		self.txt_name = wx.TextCtrl(self, value=self.schedule_data.get("name", ""))
+		self.txt_name.SetName("Nama Agenda:")
+		self.txt_name.SetToolTip("Nama Agenda:")
 		sizer.Add(self.txt_name, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		self.custom_days = self.schedule_data.get("custom_days", [])
@@ -548,6 +568,8 @@ class AgendaDialog(wx.Dialog):
 			"Sesuaikan Hari (Pilih Hari Spesifik...)", "Sekali Waktu (Tanggal Spesifik)"
 		]
 		self.cb_freq = wx.ComboBox(self, choices=freq_choices, style=wx.CB_READONLY)
+		self.cb_freq.SetName("Frekuensi / Hari:")
+		self.cb_freq.SetToolTip("Frekuensi / Hari:")
 		current_freq = self.schedule_data.get("frequency", "Setiap Hari")
 		if current_freq in freq_choices or current_freq.startswith("Sesuaikan Hari"):
 			if current_freq.startswith("Sesuaikan Hari"):
@@ -568,6 +590,8 @@ class AgendaDialog(wx.Dialog):
 		# 3. Tanggal Spesifik (jika pilih Sekali Waktu)
 		sizer.Add(wx.StaticText(self, label="&Tanggal Spesifik (Format: YYYY-MM-DD, misal 2026-07-15):"), 0, wx.ALL, 5)
 		self.txt_date = wx.TextCtrl(self, value=self.schedule_data.get("date", datetime.datetime.now().strftime("%Y-%m-%d")))
+		self.txt_date.SetName("Tanggal Spesifik (Format: YYYY-MM-DD, misal 2026-07-15):")
+		self.txt_date.SetToolTip("Tanggal Spesifik (Format: YYYY-MM-DD, misal 2026-07-15):")
 		sizer.Add(self.txt_date, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 4. Waktu (Jam & Menit)
@@ -575,6 +599,8 @@ class AgendaDialog(wx.Dialog):
 		time_sizer.Add(wx.StaticText(self, label="&Jam:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		hours = [f"{i:02d}" for i in range(24)]
 		self.cb_hour = wx.ComboBox(self, choices=hours, style=wx.CB_READONLY)
+		self.cb_hour.SetName("Jam:")
+		self.cb_hour.SetToolTip("Jam:")
 		cur_hour = int(self.schedule_data.get("hour", 12))
 		self.cb_hour.SetValue(f"{cur_hour:02d}")
 		time_sizer.Add(self.cb_hour, 0, wx.ALL, 5)
@@ -582,6 +608,8 @@ class AgendaDialog(wx.Dialog):
 		time_sizer.Add(wx.StaticText(self, label="&Menit:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		minutes = [f"{i:02d}" for i in range(60)]
 		self.cb_minute = wx.ComboBox(self, choices=minutes, style=wx.CB_READONLY)
+		self.cb_minute.SetName("Menit:")
+		self.cb_minute.SetToolTip("Menit:")
 		cur_min = int(self.schedule_data.get("minute", 0))
 		self.cb_minute.SetValue(f"{cur_min:02d}")
 		time_sizer.Add(self.cb_minute, 0, wx.ALL, 5)
@@ -601,6 +629,8 @@ class AgendaDialog(wx.Dialog):
 			"Setiap 12 Jam Sekali (Berulang dalam Hari Itu)"
 		]
 		self.cb_interval = wx.ComboBox(self, choices=interval_choices, style=wx.CB_READONLY)
+		self.cb_interval.SetName("Ulangi Setiap (Interval Jam Sekali):")
+		self.cb_interval.SetToolTip("Ulangi Setiap (Interval Jam Sekali):")
 		cur_int = int(self.schedule_data.get("interval_hour", 0))
 		if cur_int in self.interval_values:
 			self.cb_interval.SetSelection(self.interval_values.index(cur_int))
@@ -612,6 +642,8 @@ class AgendaDialog(wx.Dialog):
 		sizer.Add(wx.StaticText(self, label="&Waktu Selesai Interval (Jam Selesai Perulangan):"), 0, wx.ALL, 5)
 		end_hours = [f"{i:02d} (Jam {i:02d}:00)" for i in range(24)]
 		self.cb_interval_end = wx.ComboBox(self, choices=end_hours, style=wx.CB_READONLY)
+		self.cb_interval_end.SetName("Waktu Selesai Interval (Jam Selesai Perulangan):")
+		self.cb_interval_end.SetToolTip("Waktu Selesai Interval (Jam Selesai Perulangan):")
 		cur_end = int(self.schedule_data.get("interval_end_hour", 23))
 		if 0 <= cur_end <= 23:
 			self.cb_interval_end.SetSelection(cur_end)
@@ -626,6 +658,8 @@ class AgendaDialog(wx.Dialog):
 			"Alarm Jam Weker (Berdering Berulang + Fitur Tunda / Snooze)"
 		]
 		self.cb_alarm_mode = wx.ComboBox(self, choices=alarm_modes, style=wx.CB_READONLY)
+		self.cb_alarm_mode.SetName("Mode Pemberitahuan:")
+		self.cb_alarm_mode.SetToolTip("Mode Pemberitahuan:")
 		if self.schedule_data.get("is_alarm", False) or self.schedule_data.get("alarm_mode") == alarm_modes[1]:
 			self.cb_alarm_mode.SetSelection(1)
 		else:
@@ -796,17 +830,23 @@ class QuickTimerDialog(wx.Dialog):
 		# 1. Input Durasi Angka
 		sizer.Add(wx.StaticText(self, label="&Durasi Waktu Angka:"), 0, wx.ALL, 5)
 		self.txt_duration = wx.TextCtrl(self, value="10")
+		self.txt_duration.SetName("Durasi Waktu Angka:")
+		self.txt_duration.SetToolTip("Durasi Waktu Angka:")
 		sizer.Add(self.txt_duration, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 2. Satuan Waktu (Dropdown: Detik, Menit, Jam)
 		sizer.Add(wx.StaticText(self, label="&Satuan Waktu:"), 0, wx.ALL, 5)
 		self.cb_unit = wx.ComboBox(self, choices=["Menit", "Detik", "Jam"], style=wx.CB_READONLY)
+		self.cb_unit.SetName("Satuan Waktu:")
+		self.cb_unit.SetToolTip("Satuan Waktu:")
 		self.cb_unit.SetSelection(0)  # Default ke Menit
 		sizer.Add(self.cb_unit, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 3. Detik Persiapan Sebelum Mulai (Hitung Mundur Awal)
 		sizer.Add(wx.StaticText(self, label="&Detik Persiapan Sebelum Mulai (0 jika langsung):"), 0, wx.ALL, 5)
 		self.txt_prep_seconds = wx.TextCtrl(self, value="0")
+		self.txt_prep_seconds.SetName("Detik Persiapan Sebelum Mulai (0 jika langsung):")
+		self.txt_prep_seconds.SetToolTip("Detik Persiapan Sebelum Mulai (0 jika langsung):")
 		sizer.Add(self.txt_prep_seconds, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# 4. Suara Audio
@@ -935,6 +975,8 @@ class OneTimeAlarmDialog(wx.Dialog):
 		sizer.Add(wx.StaticText(self, label="&Jam (00 - 23):"), 0, wx.ALL, 5)
 		hours = [f"{h:02d}" for h in range(24)]
 		self.cb_hour = wx.ComboBox(self, choices=hours, style=wx.CB_READONLY)
+		self.cb_hour.SetName("Jam (00 - 23):")
+		self.cb_hour.SetToolTip("Jam (00 - 23):")
 		self.cb_hour.SetValue(f"{now.hour:02d}")
 		sizer.Add(self.cb_hour, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
@@ -942,6 +984,8 @@ class OneTimeAlarmDialog(wx.Dialog):
 		sizer.Add(wx.StaticText(self, label="&Menit (00 - 59):"), 0, wx.ALL, 5)
 		minutes = [f"{m:02d}" for m in range(60)]
 		self.cb_minute = wx.ComboBox(self, choices=minutes, style=wx.CB_READONLY)
+		self.cb_minute.SetName("Menit (00 - 59):")
+		self.cb_minute.SetToolTip("Menit (00 - 59):")
 		self.cb_minute.SetValue(f"{now.minute:02d}")
 		sizer.Add(self.cb_minute, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
@@ -949,6 +993,8 @@ class OneTimeAlarmDialog(wx.Dialog):
 		sizer.Add(wx.StaticText(self, label="&Detik (00 - 59):"), 0, wx.ALL, 5)
 		seconds = [f"{s:02d}" for s in range(60)]
 		self.cb_second = wx.ComboBox(self, choices=seconds, style=wx.CB_READONLY)
+		self.cb_second.SetName("Detik (00 - 59):")
+		self.cb_second.SetToolTip("Detik (00 - 59):")
 		self.cb_second.SetValue("00")
 		sizer.Add(self.cb_second, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
@@ -959,6 +1005,8 @@ class OneTimeAlarmDialog(wx.Dialog):
 			"Pemberitahuan Singkat (Sekali Bunyi / Chime)"
 		]
 		self.cb_alarm_mode = wx.ComboBox(self, choices=alarm_modes, style=wx.CB_READONLY)
+		self.cb_alarm_mode.SetName("Fitur Mode Alarm  Snooze:")
+		self.cb_alarm_mode.SetToolTip("Fitur Mode Alarm  Snooze:")
 		self.cb_alarm_mode.SetSelection(0)
 		sizer.Add(self.cb_alarm_mode, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
@@ -1087,6 +1135,8 @@ class TTSManagerDialog(wx.Dialog):
 			self.voices_list = [{"id": 0, "name": choices[0]}]
 		
 		self.cb_voices = wx.ComboBox(self, choices=choices, style=wx.CB_READONLY)
+		self.cb_voices.SetName("Pilih Suara / Mesin SAPI 5:")
+		self.cb_voices.SetToolTip("Pilih Suara / Mesin SAPI 5:")
 		cur_id = int(self.cfg.get("voice_id", 0))
 		found_idx = 0
 		for idx, v in enumerate(self.voices_list):
@@ -1098,12 +1148,16 @@ class TTSManagerDialog(wx.Dialog):
 		
 		# Slider Rate (Kecepatan)
 		sizer.Add(wx.StaticText(self, label="&Kecepatan Pengucapan (Rate: -10 lambat s/d +10 cepat):"), 0, wx.ALL, 5)
-		self.slider_rate = wx.Slider(self, value=int(self.cfg.get("rate", 0)), minValue=-10, maxValue=10, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.slider_rate = wx.Slider(self, value=int(self.cfg.get("rate", 0)), minValue=-10, maxValue=10, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_rate.SetName("Kecepatan Pengucapan (Rate: -10 lambat s/d +10 cepat):")
+		self.slider_rate.SetToolTip("Kecepatan Pengucapan (Rate: -10 lambat s/d +10 cepat):")
 		sizer.Add(self.slider_rate, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# Slider Volume
 		sizer.Add(wx.StaticText(self, label="&Volume Suara TTS (0% s/d 100%):"), 0, wx.ALL, 5)
-		self.slider_volume = wx.Slider(self, value=int(self.cfg.get("volume", 100)), minValue=0, maxValue=100, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.slider_volume = wx.Slider(self, value=int(self.cfg.get("volume", 100)), minValue=0, maxValue=100, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_volume.SetName("Volume Suara TTS (0% s/d 100%):")
+		self.slider_volume.SetToolTip("Volume Suara TTS (0% s/d 100%):")
 		sizer.Add(self.slider_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		# Tombol Tes Suara
@@ -1180,6 +1234,8 @@ class TimeReminderDialog(wx.Dialog):
 		]
 		self.interval_values = [v for k, v in interval_map]
 		self.cb_interval = wx.ComboBox(self, choices=[k for k, v in interval_map], style=wx.CB_READONLY)
+		self.cb_interval.SetName("Interval Waktu Pengingat:")
+		self.cb_interval.SetToolTip("Interval Waktu Pengingat:")
 		cur_val = int(self.cfg.get("interval", 60))
 		if cur_val in self.interval_values:
 			self.cb_interval.SetSelection(self.interval_values.index(cur_val))
@@ -1196,6 +1252,8 @@ class TimeReminderDialog(wx.Dialog):
 		]
 		self.mode_values = [v for k, v in mode_choices]
 		self.cb_mode = wx.ComboBox(self, choices=[k for k, v in mode_choices], style=wx.CB_READONLY)
+		self.cb_mode.SetName("Mode Notifikasi Waktu:")
+		self.cb_mode.SetToolTip("Mode Notifikasi Waktu:")
 		cur_mode = self.cfg.get("mode", "both")
 		if cur_mode in self.mode_values:
 			self.cb_mode.SetSelection(self.mode_values.index(cur_mode))
@@ -1217,6 +1275,8 @@ class TimeReminderDialog(wx.Dialog):
 		]
 		self.speech_style_values = [v for k, v in speech_style_choices]
 		self.cb_speech_style = wx.ComboBox(self, choices=[k for k, v in speech_style_choices], style=wx.CB_READONLY)
+		self.cb_speech_style.SetName("Gaya Pengucapan Waktu Pengingat:")
+		self.cb_speech_style.SetToolTip("Gaya Pengucapan Waktu Pengingat:")
 		cur_style = self.cfg.get("speech_style", "default")
 		if cur_style in self.speech_style_values:
 			self.cb_speech_style.SetSelection(self.speech_style_values.index(cur_style))
@@ -1233,6 +1293,8 @@ class TimeReminderDialog(wx.Dialog):
 		]
 		self.format_values = [v for k, v in format_choices]
 		self.cb_time_format = wx.ComboBox(self, choices=[k for k, v in format_choices], style=wx.CB_READONLY)
+		self.cb_time_format.SetName("Format Jam Pengingat (12/24 Jam):")
+		self.cb_time_format.SetToolTip("Format Jam Pengingat (12/24 Jam):")
 		cur_fmt = self.cfg.get("time_format", "24")
 		if cur_fmt in self.format_values:
 			self.cb_time_format.SetSelection(self.format_values.index(cur_fmt))
@@ -1247,12 +1309,16 @@ class TimeReminderDialog(wx.Dialog):
 		
 		time_sizer.Add(wx.StaticText(self, label="Jam &Mulai Aktif:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		self.cb_start = wx.ComboBox(self, choices=hours_start, style=wx.CB_READONLY)
+		self.cb_start.SetName("Jam Mulai Aktif:")
+		self.cb_start.SetToolTip("Jam Mulai Aktif:")
 		cur_start = int(self.cfg.get("start_hour", 0))
 		self.cb_start.SetSelection(cur_start if 0 <= cur_start <= 23 else 0)
 		time_sizer.Add(self.cb_start, 0, wx.ALL, 5)
 		
 		time_sizer.Add(wx.StaticText(self, label="Jam &Selesai Aktif:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		self.cb_end = wx.ComboBox(self, choices=hours_end, style=wx.CB_READONLY)
+		self.cb_end.SetName("Jam Selesai Aktif:")
+		self.cb_end.SetToolTip("Jam Selesai Aktif:")
 		cur_end = int(self.cfg.get("end_hour", 24))
 		self.cb_end.SetSelection(cur_end if 0 <= cur_end <= 24 else 24)
 		time_sizer.Add(self.cb_end, 0, wx.ALL, 5)
@@ -1396,6 +1462,8 @@ class JadwalKuDialog(wx.Dialog):
 		fmt_sizer.Add(wx.StaticText(self.panel_tab2, label="&Format Jam:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		fmt_choices = ["24 Jam (00:00 - 23:59)", "12 Jam (01:00 AM - 12:59 PM)"]
 		self.cb_time_format = wx.ComboBox(self.panel_tab2, choices=fmt_choices, style=wx.CB_READONLY)
+		self.cb_time_format.SetName("Format Jam:")
+		self.cb_time_format.SetToolTip("Format Jam:")
 		if time_cfg.get("time_format", "24") == "12":
 			self.cb_time_format.SetSelection(1)
 		else:
@@ -1414,6 +1482,8 @@ class JadwalKuDialog(wx.Dialog):
 			"Jam [Jam] lewat [Menit] menit [Detik] detik (Contoh: Jam 09 lewat 15 menit 30 detik)"
 		]
 		self.cb_time_speech_style = wx.ComboBox(self.panel_tab2, choices=time_style_choices, style=wx.CB_READONLY)
+		self.cb_time_speech_style.SetName("Gaya Pengucapan Waktu (Tekan NVDA+F12 1x atau NVDA+/, W):")
+		self.cb_time_speech_style.SetToolTip("Gaya Pengucapan Waktu (Tekan NVDA+F12 1x atau NVDA+/, W):")
 		style_map = {"default": 0, "only_time": 1, "prefix_pukul": 2, "with_seconds": 3, "full_seconds": 4, "jam_lewat_menit": 5, "jam_lewat_menit_detik": 6}
 		self.cb_time_speech_style.SetSelection(style_map.get(time_cfg.get("time_speech_style", "default"), 0))
 		sizer_tab2.Add(self.cb_time_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
@@ -1432,6 +1502,8 @@ class JadwalKuDialog(wx.Dialog):
 			"Tanggal [Tanggal] [Bulan] [Tahun] hari [Hari]"
 		]
 		self.cb_date_speech_style = wx.ComboBox(self.panel_tab2, choices=date_style_choices, style=wx.CB_READONLY)
+		self.cb_date_speech_style.SetName("Gaya Pengucapan Tanggal (Tekan NVDA+F12 2x):")
+		self.cb_date_speech_style.SetToolTip("Gaya Pengucapan Tanggal (Tekan NVDA+F12 2x):")
 		date_style_map = {"default": 0, "prefix_hari": 1, "numeric": 2, "suffix_hari": 3}
 		self.cb_date_speech_style.SetSelection(date_style_map.get(time_cfg.get("date_speech_style", "default"), 0))
 		sizer_tab2.Add(self.cb_date_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
@@ -1442,6 +1514,8 @@ class JadwalKuDialog(wx.Dialog):
 			"Ringkas: Tanggal, waktu, dan sisa hari akhir tahun (Contoh: 16 Juli 2026 09:15. Akhir tahun kurang 168 hari)"
 		]
 		self.cb_full_speech_style = wx.ComboBox(self.panel_tab2, choices=full_style_choices, style=wx.CB_READONLY)
+		self.cb_full_speech_style.SetName("Gaya Pengucapan Lengkap  Akhir Tahun (Tekan NVDA+F12 3x):")
+		self.cb_full_speech_style.SetToolTip("Gaya Pengucapan Lengkap  Akhir Tahun (Tekan NVDA+F12 3x):")
 		full_style_map = {"default": 0, "short": 1}
 		self.cb_full_speech_style.SetSelection(full_style_map.get(time_cfg.get("full_speech_style", "default"), 0))
 		sizer_tab2.Add(self.cb_full_speech_style, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
@@ -1489,6 +1563,8 @@ class JadwalKuDialog(wx.Dialog):
 		choices = ["(Bawaan SAPI 5 / TTS Standar)"] + [p["name"] for p in self.vp_list]
 		
 		self.cb_active_vp = wx.ComboBox(self.panel_tab3, choices=choices, style=wx.CB_READONLY)
+		self.cb_active_vp.SetName("Paket Suara (Voice Pack) Aktif:")
+		self.cb_active_vp.SetToolTip("Paket Suara (Voice Pack) Aktif:")
 		# Load from config
 		active_vp_file = self.config.get_time_reminder_config().get("active_voice_pack", "")
 		sel_idx = 0
@@ -1506,7 +1582,9 @@ class JadwalKuDialog(wx.Dialog):
 		vp_vol_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		vp_vol_sizer.Add(wx.StaticText(self.panel_tab3, label="Volume Voice Pack Kustom (0 - 1200%):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		vp_vol_val = self.config.get_time_reminder_config().get("voice_pack_volume", 100)
-		self.sld_vp_vol = wx.Slider(self.panel_tab3, value=vp_vol_val, minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.sld_vp_vol = wx.Slider(self.panel_tab3, value=vp_vol_val, minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.sld_vp_vol.SetName("Volume Voice Pack Kustom (0 - 1200%):")
+		self.sld_vp_vol.SetToolTip("Volume Voice Pack Kustom (0 - 1200%):")
 		self.sld_vp_vol.Bind(wx.EVT_SLIDER, self.onVoicePackVolumeChanged)
 		vp_vol_sizer.Add(self.sld_vp_vol, 1, wx.EXPAND | wx.ALL, 5)
 		sizer_tab3.Add(vp_vol_sizer, 0, wx.EXPAND | wx.ALL, 5)
@@ -1552,6 +1630,8 @@ class JadwalKuDialog(wx.Dialog):
 			self.vc_in_devs = self.vc_mgr.get_input_devices()
 			in_dev_names = [d[1] for d in self.vc_in_devs]
 			self.cb_vc_in_dev = wx.ComboBox(self.panel_tab4, choices=in_dev_names, style=wx.CB_READONLY)
+			self.cb_vc_in_dev.SetName("Perangkat Mikrofon (Input):")
+			self.cb_vc_in_dev.SetToolTip("Perangkat Mikrofon (Input):")
 			cur_in_dev = vc_cfg.get("input_device", "Default (Microsoft Sound Mapper)")
 			if cur_in_dev in in_dev_names:
 				self.cb_vc_in_dev.SetSelection(in_dev_names.index(cur_in_dev))
@@ -1564,6 +1644,8 @@ class JadwalKuDialog(wx.Dialog):
 			sizer_tab4.Add(lbl_vc_engine, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
 			engine_choices = ["NVDA Default", "TTS Standar (SAPI 5)", "Voice Pack Kustom"]
 			self.cb_vc_engine = wx.ComboBox(self.panel_tab4, choices=engine_choices, style=wx.CB_READONLY)
+			self.cb_vc_engine.SetName("Mesin Penjawab (Output Engine):")
+			self.cb_vc_engine.SetToolTip("Mesin Penjawab (Output Engine):")
 			cur_engine = vc_cfg.get("tts_engine", "NVDA Default")
 			if cur_engine in engine_choices:
 				self.cb_vc_engine.SetSelection(engine_choices.index(cur_engine))
@@ -1576,6 +1658,8 @@ class JadwalKuDialog(wx.Dialog):
 			sizer_tab4.Add(lbl_vc_out_dev, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
 			out_dev_names = self.audio.get_available_output_devices() if hasattr(self, 'audio') else ["Default (Microsoft Sound Mapper)"]
 			self.cb_vc_out_dev = wx.ComboBox(self.panel_tab4, choices=out_dev_names, style=wx.CB_READONLY)
+			self.cb_vc_out_dev.SetName("Perangkat Speaker (Khusus SAPI 5 / Voice Pack):")
+			self.cb_vc_out_dev.SetToolTip("Perangkat Speaker (Khusus SAPI 5 / Voice Pack):")
 			cur_out_dev = vc_cfg.get("output_device", "Default (Microsoft Sound Mapper)")
 			if cur_out_dev in out_dev_names:
 				self.cb_vc_out_dev.SetSelection(out_dev_names.index(cur_out_dev))
@@ -1589,6 +1673,8 @@ class JadwalKuDialog(wx.Dialog):
 			fmt_choices = [("Format 24 Jam (Contoh: 15:30)", "24"), ("Format 12 Jam AM/PM (Contoh: 3:30 PM)", "12")]
 			self.vc_fmt_values = [v for k, v in fmt_choices]
 			self.cb_vc_format = wx.ComboBox(self.panel_tab4, choices=[k for k,v in fmt_choices], style=wx.CB_READONLY)
+			self.cb_vc_format.SetName("Format Waktu:")
+			self.cb_vc_format.SetToolTip("Format Waktu:")
 			cur_fmt = vc_cfg.get("time_format", "24")
 			if cur_fmt in self.vc_fmt_values:
 				self.cb_vc_format.SetSelection(self.vc_fmt_values.index(cur_fmt))
@@ -1606,6 +1692,8 @@ class JadwalKuDialog(wx.Dialog):
 			lbl_vc_style = wx.StaticText(self.panel_tab4, label="Gaya Pengucapan Jawaban Waktu:")
 			sizer_tab4.Add(lbl_vc_style, 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
 			self.cb_vc_style = wx.ComboBox(self.panel_tab4, choices=[k for k,v in vc_style_choices], style=wx.CB_READONLY)
+			self.cb_vc_style.SetName("Gaya Pengucapan Jawaban Waktu:")
+			self.cb_vc_style.SetToolTip("Gaya Pengucapan Jawaban Waktu:")
 			cur_vc_style = vc_cfg.get("speech_style", "jam_lewat_menit")
 			if cur_vc_style in self.vc_style_values:
 				self.cb_vc_style.SetSelection(self.vc_style_values.index(cur_vc_style))
@@ -1619,12 +1707,16 @@ class JadwalKuDialog(wx.Dialog):
 			
 			# Volume Output
 			sizer_tab4.Add(wx.StaticText(self.panel_tab4, label="&Volume Keluaran Voice Command (10% - 1200%):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
-			self.sld_vc_volume = wx.Slider(self.panel_tab4, value=vc_cfg.get("vc_volume", 100), minValue=10, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+			self.sld_vc_volume = wx.Slider(self.panel_tab4, value=vc_cfg.get("vc_volume", 100), minValue=10, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+			self.sld_vc_volume.SetName("Volume Keluaran Voice Command (10% - 1200%):")
+			self.sld_vc_volume.SetToolTip("Volume Keluaran Voice Command (10% - 1200%):")
 			sizer_tab4.Add(self.sld_vc_volume, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
 			
 			# Mic Boost
 			sizer_tab4.Add(wx.StaticText(self.panel_tab4, label="S&ensitivitas Mikrofon / Boost (100% - 1200%):"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 6)
-			self.sld_mic_boost = wx.Slider(self.panel_tab4, value=vc_cfg.get("mic_boost", 100), minValue=100, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+			self.sld_mic_boost = wx.Slider(self.panel_tab4, value=vc_cfg.get("mic_boost", 100), minValue=100, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+			self.sld_mic_boost.SetName("Sensitivitas Mikrofon / Boost (100% - 1200%):")
+			self.sld_mic_boost.SetToolTip("Sensitivitas Mikrofon / Boost (100% - 1200%):")
 			sizer_tab4.Add(self.sld_mic_boost, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 6)
 			
 			self.btnSaveVC = wx.Button(self.panel_tab4, label="&Simpan Pengaturan Perintah Suara")
@@ -2110,6 +2202,8 @@ class CalendarDialog(wx.Dialog):
 		filter_sizer.Add(wx.StaticText(self, label="&Bulan:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.months_list = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 		self.cb_month = wx.ComboBox(self, choices=self.months_list, style=wx.CB_READONLY)
+		self.cb_month.SetName("Bulan:")
+		self.cb_month.SetToolTip("Bulan:")
 		self.cb_month.SetSelection(self.current_month - 1)
 		self.cb_month.Bind(wx.EVT_COMBOBOX, self.onMonthYearChanged)
 		filter_sizer.Add(self.cb_month, 0, wx.ALL, 4)
@@ -2117,6 +2211,8 @@ class CalendarDialog(wx.Dialog):
 		filter_sizer.Add(wx.StaticText(self, label="&Tahun:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.years_list = [str(y) for y in range(2024, 2036)]
 		self.cb_year = wx.ComboBox(self, choices=self.years_list, style=wx.CB_READONLY)
+		self.cb_year.SetName("Tahun:")
+		self.cb_year.SetToolTip("Tahun:")
 		if str(self.current_year) in self.years_list:
 			self.cb_year.SetSelection(self.years_list.index(str(self.current_year)))
 		else:
@@ -2287,6 +2383,8 @@ class WorldClockDialog(wx.Dialog):
 		filter_sizer.Add(wx.StaticText(self.panel_clocks, label="&Filter Benua / Wilayah:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.regions = ["Semua Negara & Kota", "Asia & Timur Tengah", "Eropa", "Amerika Utara & Selatan", "Australia & Pasifik", "Afrika"]
 		self.cb_region = wx.ComboBox(self.panel_clocks, choices=self.regions, style=wx.CB_READONLY)
+		self.cb_region.SetName("Filter Benua / Wilayah:")
+		self.cb_region.SetToolTip("Filter Benua / Wilayah:")
 		self.cb_region.SetSelection(0)
 		self.cb_region.Bind(wx.EVT_COMBOBOX, self.onFilterChanged)
 		filter_sizer.Add(self.cb_region, 0, wx.ALL, 4)
@@ -2311,6 +2409,8 @@ class WorldClockDialog(wx.Dialog):
 		sizer_v.Add(wx.StaticText(self.panel_conv, label="1. Pilih Negara/Kota &Asal:"), 0, wx.LEFT | wx.TOP, 8)
 		country_names = [item["country"] for item in WORLD_CLOCKS_DATA]
 		self.cb_src_country = wx.ComboBox(self.panel_conv, choices=country_names, style=wx.CB_READONLY)
+		self.cb_src_country.SetName("1. Pilih Negara/Kota Asal:")
+		self.cb_src_country.SetToolTip("1. Pilih Negara/Kota Asal:")
 		# Default Jerman jika ada
 		jerman_idx = next((i for i, c in enumerate(country_names) if "Jerman" in c), 0)
 		self.cb_src_country.SetSelection(jerman_idx)
@@ -2321,12 +2421,16 @@ class WorldClockDialog(wx.Dialog):
 		time_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		time_sizer.Add(wx.StaticText(self.panel_conv, label="&Jam di Negara Asal (00-23):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.cb_src_hour = wx.ComboBox(self.panel_conv, choices=[f"{h:02d}" for h in range(24)], style=wx.CB_READONLY)
+		self.cb_src_hour.SetName("Jam di Negara Asal (00-23):")
+		self.cb_src_hour.SetToolTip("Jam di Negara Asal (00-23):")
 		self.cb_src_hour.SetSelection(20) # Default Jam 20:00 seperti contoh user
 		self.cb_src_hour.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
 		time_sizer.Add(self.cb_src_hour, 0, wx.ALL, 4)
 		
 		time_sizer.Add(wx.StaticText(self.panel_conv, label="&Menit:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 4)
 		self.cb_src_min = wx.ComboBox(self.panel_conv, choices=[f"{m:02d}" for m in range(60)], style=wx.CB_READONLY)
+		self.cb_src_min.SetName("Menit:")
+		self.cb_src_min.SetToolTip("Menit:")
 		self.cb_src_min.SetSelection(0)
 		self.cb_src_min.Bind(wx.EVT_COMBOBOX, self.onCalculateConversion)
 		time_sizer.Add(self.cb_src_min, 0, wx.ALL, 4)
@@ -2335,6 +2439,8 @@ class WorldClockDialog(wx.Dialog):
 		# Negara Tujuan
 		sizer_v.Add(wx.StaticText(self.panel_conv, label="2. Pilih Negara/Kota &Tujuan Konversi:"), 0, wx.LEFT | wx.TOP, 8)
 		self.cb_tgt_country = wx.ComboBox(self.panel_conv, choices=country_names, style=wx.CB_READONLY)
+		self.cb_tgt_country.SetName("2. Pilih Negara/Kota Tujuan Konversi:")
+		self.cb_tgt_country.SetToolTip("2. Pilih Negara/Kota Tujuan Konversi:")
 		# Default Indonesia WIB
 		wib_idx = next((i for i, c in enumerate(country_names) if "WIB" in c), 0)
 		self.cb_tgt_country.SetSelection(wib_idx)
@@ -2347,6 +2453,8 @@ class WorldClockDialog(wx.Dialog):
 		sizer_v.Add(self.btnCalc, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
 		
 		self.txt_result = wx.TextCtrl(self.panel_conv, style=wx.TE_MULTILINE | wx.TE_READONLY)
+		self.txt_result.SetName("2. Pilih Negara/Kota Tujuan Konversi:")
+		self.txt_result.SetToolTip("2. Pilih Negara/Kota Tujuan Konversi:")
 		sizer_v.Add(self.txt_result, 1, wx.EXPAND | wx.ALL, 8)
 		self.panel_conv.SetSizer(sizer_v)
 		
@@ -2497,6 +2605,8 @@ class VoicePackManagementDialog(wx.Dialog):
 		sizer.Add(lbl, 0, wx.ALL, 10)
 		
 		self.lst_packs = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+		self.lst_packs.SetName("Daftar Paket Suara (Voice Packs):")
+		self.lst_packs.SetToolTip("Daftar Paket Suara (Voice Packs):")
 		self.lst_packs.InsertColumn(0, "Nama Paket", width=200)
 		self.lst_packs.InsertColumn(1, "Status", width=120)
 		self.lst_packs.InsertColumn(2, "Privasi", width=100)
@@ -2676,12 +2786,16 @@ class VoiceStudioDialog(wx.Dialog):
 		
 		grid_audio.Add(wx.StaticText(self.pnl_step1, label="Pilih &Mikrofon:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.cbo_mic = wx.Choice(self.pnl_step1, choices=in_names)
+		self.cbo_mic.SetName("Pilih Mikrofon:")
+		self.cbo_mic.SetToolTip("Pilih Mikrofon:")
 		self.cbo_mic.SetSelection(0)
 		self.cbo_mic.Bind(wx.EVT_CHOICE, self.onChangeAudioDevice)
 		grid_audio.Add(self.cbo_mic, 1, wx.EXPAND)
 		
 		grid_audio.Add(wx.StaticText(self.pnl_step1, label="Pilih &Speaker:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.cbo_spk = wx.Choice(self.pnl_step1, choices=out_names)
+		self.cbo_spk.SetName("Pilih Speaker:")
+		self.cbo_spk.SetToolTip("Pilih Speaker:")
 		self.cbo_spk.SetSelection(0)
 		self.cbo_spk.Bind(wx.EVT_CHOICE, self.onChangeAudioDevice)
 		grid_audio.Add(self.cbo_spk, 1, wx.EXPAND)
@@ -2726,18 +2840,26 @@ class VoiceStudioDialog(wx.Dialog):
 		
 		grid.Add(wx.StaticText(self.pnl_step2, label="&Nama Paket Suara:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.txt_pack_name = wx.TextCtrl(self.pnl_step2, value="Suara Kustom")
+		self.txt_pack_name.SetName("Nama Paket Suara:")
+		self.txt_pack_name.SetToolTip("Nama Paket Suara:")
 		grid.Add(self.txt_pack_name, 1, wx.EXPAND)
 		
 		grid.Add(wx.StaticText(self.pnl_step2, label="Nama &Pembuat:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.txt_author = wx.TextCtrl(self.pnl_step2, value="Pengguna JadwalKu")
+		self.txt_author.SetName("Nama Pembuat:")
+		self.txt_author.SetToolTip("Nama Pembuat:")
 		grid.Add(self.txt_author, 1, wx.EXPAND)
 		
 		grid.Add(wx.StaticText(self.pnl_step2, label="&Deskripsi:"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.txt_desc = wx.TextCtrl(self.pnl_step2, value="Paket suara buatanku.")
+		self.txt_desc.SetName("Deskripsi:")
+		self.txt_desc.SetToolTip("Deskripsi:")
 		grid.Add(self.txt_desc, 1, wx.EXPAND)
 		
 		grid.Add(wx.StaticText(self.pnl_step2, label="&Kata Sandi (Opsional):"), 0, wx.ALIGN_CENTER_VERTICAL)
 		self.txt_pwd = wx.TextCtrl(self.pnl_step2, style=wx.TE_PASSWORD)
+		self.txt_pwd.SetName("Kata Sandi (Opsional):")
+		self.txt_pwd.SetToolTip("Kata Sandi (Opsional):")
 		grid.Add(self.txt_pwd, 1, wx.EXPAND)
 		
 		if self.edit_meta:
@@ -2772,6 +2894,8 @@ class VoiceStudioDialog(wx.Dialog):
 		studio_sizer.Add(wx.StaticText(self.pnl_studio, label="Kata/Frasa yang Harus Diucapkan:"), 0, wx.LEFT | wx.TOP, 10)
 		
 		self.txt_word = wx.TextCtrl(self.pnl_studio, style=wx.TE_CENTER)
+		self.txt_word.SetName("Kata/Frasa yang Harus Diucapkan:")
+		self.txt_word.SetToolTip("Kata/Frasa yang Harus Diucapkan:")
 		self.txt_word.Bind(wx.EVT_CHAR, self.onWordChar)
 		font = self.txt_word.GetFont()
 		font.SetPointSize(18)
@@ -3485,6 +3609,8 @@ class BadgeShowcaseDialog(wx.Dialog):
 		self.lb_badges.Bind(wx.EVT_LISTBOX, self.onSelectionChanged)
 		
 		self.txt_history = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+		self.txt_history.SetName("Gunakan panah Atas/Bawah untuk memilih jadwal. Tekan Tab untuk membaca riwayat lencana lengkap.")
+		self.txt_history.SetToolTip("Gunakan panah Atas/Bawah untuk memilih jadwal. Tekan Tab untuk membaca riwayat lencana lengkap.")
 		
 		split_sizer.Add(self.lb_badges, 1, wx.EXPAND | wx.ALL, 5)
 		split_sizer.Add(self.txt_history, 2, wx.EXPAND | wx.ALL, 5)
@@ -3548,7 +3674,9 @@ class LoncengDialog(wx.Dialog):
 		sizer.Add(self.chk_quarter, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
 		
 		sizer.Add(wx.StaticText(self, label="&Volume Lonceng Utama:"), 0, wx.ALL, 5)
-		self.slider_vol = wx.Slider(self, value=self.settings.get("volume", 80), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.slider_vol = wx.Slider(self, value=self.settings.get("volume", 80), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_vol.SetName("Volume Lonceng Utama:")
+		self.slider_vol.SetToolTip("Volume Lonceng Utama:")
 		sizer.Add(self.slider_vol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		hour_choices = [f"{h:02d}:00" for h in range(24)]
@@ -3556,11 +3684,15 @@ class LoncengDialog(wx.Dialog):
 		hb_sizer = wx.BoxSizer(wx.HORIZONTAL)
 		hb_sizer.Add(wx.StaticText(self, label="Jam &Mulai:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		self.cb_start = wx.ComboBox(self, choices=hour_choices, style=wx.CB_READONLY)
+		self.cb_start.SetName("Jam Mulai:")
+		self.cb_start.SetToolTip("Jam Mulai:")
 		self.cb_start.SetSelection(self.settings.get("start_hour", 6))
 		hb_sizer.Add(self.cb_start, 1, wx.ALL, 5)
 		
 		hb_sizer.Add(wx.StaticText(self, label="Jam &Selesai (Tenang):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 		self.cb_end = wx.ComboBox(self, choices=hour_choices, style=wx.CB_READONLY)
+		self.cb_end.SetName("Jam Selesai (Tenang):")
+		self.cb_end.SetToolTip("Jam Selesai (Tenang):")
 		self.cb_end.SetSelection(self.settings.get("end_hour", 22))
 		hb_sizer.Add(self.cb_end, 1, wx.ALL, 5)
 		sizer.Add(hb_sizer, 0, wx.EXPAND)
@@ -3572,7 +3704,9 @@ class LoncengDialog(wx.Dialog):
 		sizer.Add(self.chk_tick, 0, wx.ALL, 5)
 		
 		sizer.Add(wx.StaticText(self, label="Volume Suara &Detik:"), 0, wx.ALL, 5)
-		self.slider_tick_vol = wx.Slider(self, value=self.settings.get("ticking_volume", 40), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
+		self.slider_tick_vol = wx.Slider(self, value=self.settings.get("ticking_volume", 40), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+		self.slider_tick_vol.SetName("Volume Suara Detik:")
+		self.slider_tick_vol.SetToolTip("Volume Suara Detik:")
 		sizer.Add(self.slider_tick_vol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
 		
 		self.btnTest = wx.Button(self, label="&Tes Lonceng Saat Ini")

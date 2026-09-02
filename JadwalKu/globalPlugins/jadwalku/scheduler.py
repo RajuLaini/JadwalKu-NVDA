@@ -487,6 +487,16 @@ class Scheduler:
 					target_date = agenda.get("date", "")
 					if target_date == today_date_str:
 						match = True
+					elif agenda.get("is_habit", True) and target_date < today_date_str:
+						try:
+							from globalPlugins.jadwalku.habitManager import HabitManager
+							from globalPlugins.jadwalku.configManager import CONFIG_DIR
+							hm = HabitManager(CONFIG_DIR)
+							stats = hm.stats.get(agenda["id"], {})
+							if stats.get("total_completed", 0) == 0:
+								match = True
+						except Exception:
+							pass
 
 				trigger_key = f"{today_date_str}_{now.hour:02d}:{now.minute:02d}" if (interval_hour > 0 or sched_id in self.daily_overrides) else today_date_str
 				if match and agenda.get("last_triggered_date") != trigger_key:
@@ -501,6 +511,11 @@ class Scheduler:
 					is_alarm = agenda.get("is_alarm", False)
 
 					self.audio.notify(title, msg, speech_enabled=speech, audio_enabled=audio, audio_file=a_file, is_alarm=is_alarm)
+
+					if agenda.get("is_habit", True) and interval_hour == 0:
+						import datetime
+						new_time = now + datetime.timedelta(hours=1)
+						self.snooze_schedule(agenda["id"], new_time)
 
 		except Exception as e:
 			jk_log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")

@@ -120,6 +120,43 @@ class UpdateChecker:
 		except Exception:
 			return remote_ver != local_ver and remote_ver > local_ver
 
+class UpdatePromptDialog(wx.Dialog):
+	def __init__(self, parent, remote_ver, local_ver, changelog):
+		super().__init__(parent, title="Pembaruan JadwalKu Tersedia", size=(600, 450), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		
+		info_text = f"Tersedia pembaruan baru untuk add-on JadwalKu!\n\nVersi Terbaru: {remote_ver} (Versi saat ini: {local_ver})\n\nApakah Anda ingin mengunduh dan memperbarui sekarang?"
+		self.lbl_info = wx.StaticText(self, label=info_text)
+		sizer.Add(self.lbl_info, 0, wx.ALL, 10)
+		
+		sizer.Add(wx.StaticText(self, label="&Catatan Perubahan (Gunakan Panah Atas/Bawah untuk membaca):"), 0, wx.LEFT | wx.RIGHT, 10)
+		
+		self.txt_changelog = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL, value=changelog)
+		self.txt_changelog.SetName("Catatan Perubahan (Gunakan Panah Atas/Bawah untuk membaca):")
+		sizer.Add(self.txt_changelog, 1, wx.EXPAND | wx.ALL, 10)
+		
+		warn_text = "(Catatan: Jika Anda memilih 'Tidak', pemeriksaan pembaruan otomatis akan dihentikan sementara hingga NVDA dimuat ulang)."
+		self.lbl_warn = wx.StaticText(self, label=warn_text)
+		sizer.Add(self.lbl_warn, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+		
+		btnSizer = wx.StdDialogButtonSizer()
+		
+		self.btnYes = wx.Button(self, wx.ID_YES, label="&Ya, Unduh Sekarang")
+		self.btnYes.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_YES))
+		btnSizer.AddButton(self.btnYes)
+		
+		self.btnNo = wx.Button(self, wx.ID_NO, label="&Tidak, Nanti Saja")
+		self.btnNo.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_NO))
+		btnSizer.AddButton(self.btnNo)
+		
+		btnSizer.Realize()
+		sizer.Add(btnSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 10)
+		
+		self.SetSizer(sizer)
+		self.Centre()
+		self.txt_changelog.SetFocus()
+
 	def _show_update_prompt(self, remote_ver, changelog, download_url, local_ver=None):
 		if local_ver is None:
 			local_ver = get_current_version()
@@ -130,14 +167,9 @@ class UpdateChecker:
 			self.plugin.is_dialog_open = True
 		gui.mainFrame.prePopup()
 		try:
-			prompt_text = (
-				f"Tersedia pembaruan baru untuk add-on JadwalKu!\n\n"
-				f"Versi Terbaru: {remote_ver} (Versi saat ini: {local_ver})\n\n"
-				f"Catatan Perubahan:\n{changelog}\n\n"
-				f"Apakah Anda ingin mengunduh dan memperbarui sekarang?\n\n"
-				f"(Catatan: Jika Anda memilih 'No / Tidak', pemeriksaan pembaruan otomatis akan dihentikan sementara hingga NVDA dimuat ulang)."
-			)
-			res = wx.MessageBox(prompt_text, "Pembaruan JadwalKu Tersedia", wx.YES_NO | wx.ICON_INFORMATION, gui.mainFrame)
+			dlg = UpdatePromptDialog(gui.mainFrame, remote_ver, local_ver, changelog)
+			res = dlg.ShowModal()
+			dlg.Destroy()
 			
 			if res == wx.YES:
 				if download_url:
