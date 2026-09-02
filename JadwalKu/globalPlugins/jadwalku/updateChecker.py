@@ -4,7 +4,7 @@ import threading
 import urllib.request
 import json
 import webbrowser
-import logHandler
+from .logger import jk_log
 import ui
 import gui
 import os
@@ -46,7 +46,7 @@ class UpdateChecker:
 		wx.CallLater(25000, self.check_update_silent)
 		# Cek berkala setiap 3 jam (10800000 milidetik) selama sesi NVDA berjalan
 		self.timer.Start(10800000)
-		logHandler.log.info("JadwalKu: Fitur auto-check update dimulai.")
+		jk_log.info("JadwalKu: Fitur auto-check update dimulai.")
 
 	def stop(self):
 		if self.timer.IsRunning():
@@ -108,7 +108,7 @@ class UpdateChecker:
 					wx.CallAfter(ui.message, f"JadwalKu Anda sudah menggunakan versi terbaru ({local_ver}).")
 
 		except Exception as e:
-			logHandler.log.warning(f"JadwalKu: Gagal memeriksa pembaruan: {e}")
+			jk_log.warning(f"JadwalKu: Gagal memeriksa pembaruan: {e}")
 			if is_manual:
 				wx.CallAfter(ui.message, "Gagal memeriksa pembaruan. Periksa koneksi internet atau tautan server.")
 
@@ -148,7 +148,7 @@ class UpdateChecker:
 			else:
 				self.update_dismissed_this_session = True
 				ui.message("Pemeriksaan pembaruan otomatis dihentikan sampai NVDA dimuat ulang.")
-				logHandler.log.info("JadwalKu: Pengguna menekan No pada pembaruan. Auto-check dihentikan untuk sesi ini.")
+				jk_log.info("JadwalKu: Pengguna menekan No pada pembaruan. Auto-check dihentikan untuk sesi ini.")
 		finally:
 			if self.plugin:
 				self.plugin.is_dialog_open = False
@@ -183,7 +183,7 @@ class UpdateChecker:
 			if not zipfile.is_zipfile(temp_file):
 				raise ValueError("File yang diunduh rusak atau diblokir oleh jaringan (Bukan file ZIP yang valid).")
 			
-			logHandler.log.info(f"JadwalKu: Pembaruan berhasil diunduh ke {temp_file}")
+			jk_log.info(f"JadwalKu: Pembaruan berhasil diunduh ke {temp_file}")
 			wx.CallAfter(ui.message, "Unduhan selesai! Membuka installer dari folder Downloads...")
 			
 			def launch_installer():
@@ -191,11 +191,11 @@ class UpdateChecker:
 				try:
 					os.startfile(temp_file)
 				except Exception as popen_e:
-					logHandler.log.warning(f"JadwalKu: os.startfile gagal ({popen_e})")
+					jk_log.warning(f"JadwalKu: os.startfile gagal ({popen_e})")
 					
 			wx.CallAfter(launch_installer)
 		except Exception as e:
-			logHandler.log.warning(f"JadwalKu: Unduhan langsung di latar belakang gagal ({e}). Mengalihkan ke browser...")
+			jk_log.warning(f"JadwalKu: Unduhan langsung di latar belakang gagal ({e}). Mengalihkan ke browser...")
 			wx.CallAfter(ui.message, "Mengalihkan tautan unduhan ke browser...")
 			wx.CallAfter(webbrowser.open, download_url)
 

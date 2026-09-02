@@ -2,7 +2,7 @@
 import os
 import json
 import uuid
-import logHandler
+from .logger import jk_log
 
 try:
 	import globalVars
@@ -131,7 +131,7 @@ class ConfigManager:
 					self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
 				self.save_data()
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
+				jk_log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
 				self.data = DEFAULT_DATA.copy()
 				self.save_data()
 
@@ -142,7 +142,7 @@ class ConfigManager:
 			with open(DATA_FILE, "w", encoding="utf-8") as f:
 				json.dump(self.data, f, indent=4, ensure_ascii=False)
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal menyimpan jadwalku_data.json: {e}")
+			jk_log.error(f"JadwalKu: Gagal menyimpan jadwalku_data.json: {e}")
 
 	def get_schedules(self):
 		return self.data.get("schedules", [])

@@ -1,5 +1,5 @@
 {
-    "version": "1.7.6.2",
-    "changelog": "Pembaruan v1.7.6.2:\n- Perbaikan bug tombol bantuan (Opsi 1).\n- Menonaktifkan sementara simulasi interaktif (Opsi 2) untuk pengembangan.\n- Perbaikan installer dan crash audio saat update.",
-    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.6.2.nvda-addon"
+    "version": "1.7.6.3",
+    "changelog": "Pembaruan v1.7.6.3:\n- Perbaikan bug langka (Race Condition) di mana Voice Pack (Jam Bicara) mematikan suara lonceng perempat jam sebelum terdengar.\n- Memperbaiki lonceng jam (mulaiLonceng) agar bisa diputar berdampingan bersamaan (overlap) dengan Jam Bicara tanpa saling memotong.\n- Optimalisasi kinerja thread audio lonceng.",
+    "download_url": "https://github.com/RajuLaini/JadwalKu-NVDA/raw/main/JadwalKu-v1.7.6.3.nvda-addon"
 }

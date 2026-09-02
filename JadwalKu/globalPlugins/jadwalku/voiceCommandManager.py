@@ -121,8 +121,8 @@ class VoiceCommandManager:
 				arr[i] = val
 			return arr.tobytes()
 		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"JadwalKu VC: Error in mic boost: {e}")
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu VC: Error in mic boost: {e}")
 			return frames
 
 	def _listen_loop(self, stop_event):

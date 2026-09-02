@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import wx
 import datetime
-import logHandler
+from .logger import jk_log
 import ui
 import os
 import random
@@ -21,12 +21,12 @@ class Scheduler:
 
 	def start(self):
 		self.timer.Start(1000)
-		logHandler.log.info("JadwalKu: Scheduler background timer dimulai (tiap 1 detik).")
+		jk_log.info("JadwalKu: Scheduler background timer dimulai (tiap 1 detik).")
 
 	def stop(self):
 		if self.timer.IsRunning():
 			self.timer.Stop()
-		logHandler.log.info("JadwalKu: Scheduler berhenti.")
+		jk_log.info("JadwalKu: Scheduler berhenti.")
 
 	def add_quick_timer(self, duration, unit, audio_file, prep_seconds=0):
 		now = datetime.datetime.now()
@@ -149,7 +149,7 @@ class Scheduler:
 					rel_path = os.path.join("WaitingClock", chosen)
 					self.audio.play_sound(rel_path)
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Error memutar suara hitung mundur WaitingClock: {e}")
+			jk_log.error(f"JadwalKu: Error memutar suara hitung mundur WaitingClock: {e}")
 
 	def add_one_time_alarm(self, hour, minute, second, audio_file, is_alarm=True):
 		now = datetime.datetime.now()
@@ -226,19 +226,22 @@ class Scheduler:
 			self.last_check_minute = now.minute
 
 			# Hourly Lonceng check
-			if now.minute == 0:
-				if l_set.get("enabled", False):
-					st = l_set.get("start_hour", 6)
-					ed = l_set.get("end_hour", 22)
-					if st <= now.hour <= ed or (st > ed and (now.hour >= st or now.hour <= ed)):
+			if l_set.get("enabled", False):
+				st = int(l_set.get("start_hour", 6))
+				ed = int(l_set.get("end_hour", 22))
+				if st <= now.hour <= ed or (st > ed and (now.hour >= st or now.hour <= ed)):
+					if now.minute == 0:
 						if self.audio and hasattr(self.audio, "play_lonceng_sequence"):
 							self.audio.play_lonceng_sequence(l_set.get("volume", 80), now.hour)
+					elif now.minute in (15, 30, 45) and l_set.get("quarter_enabled", False):
+						if self.audio and hasattr(self.audio, "play_quarter_lonceng"):
+							self.audio.play_quarter_lonceng(l_set.get("volume", 80), now.minute)
 
 			self.check_time_reminder(now)
 			self.check_schedules(now)
 		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
 
 	def check_time_reminder(self, now):
 		try:
@@ -388,19 +391,19 @@ class Scheduler:
 											missing_words.append(w)
 											
 									if missing_words:
-										import logHandler
-										logHandler.log.warning(f"JadwalKu: Voice Pack kehilangan file berikut, namun tetap diputar: {missing_words}")
+										from .logger import jk_log
+										jk_log.warning(f"JadwalKu: Voice Pack kehilangan file berikut, namun tetap diputar: {missing_words}")
 											
 									if vp_files:
 										vp_vol = time_cfg.get("voice_pack_volume", 100)
 										self.audio.play_voice_pack_sequence(vp_files, volume_override=vp_vol)
 										return
 									else:
-										import logHandler
-										logHandler.log.warning("JadwalKu: Voice Pack tidak memiliki file yang dapat diputar.")
+										from .logger import jk_log
+										jk_log.warning("JadwalKu: Voice Pack tidak memiliki file yang dapat diputar.")
 						except Exception as e:
-							import logHandler
-							logHandler.log.error(f"JadwalKu: Gagal memutar Voice Pack: {e}")
+							from .logger import jk_log
+							jk_log.error(f"JadwalKu: Gagal memutar Voice Pack: {e}")
 
 					if hasattr(self, "tts_manager") and self.tts_manager and self.tts_manager.is_enabled():
 						self.tts_manager.speak(time_str)
@@ -414,7 +417,7 @@ class Scheduler:
 					speak_reminder()
 
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Error saat cek time reminder: {e}")
+			jk_log.error(f"JadwalKu: Error saat cek time reminder: {e}")
 
 
 	def snooze_schedule(self, sched_id, new_time):
@@ -485,7 +488,7 @@ class Scheduler:
 					if target_date == today_date_str:
 						match = True
 
-				trigger_key = f"{today_date_str}_{now.hour:02d}:{now.minute:02d}" if interval_hour > 0 else today_date_str
+				trigger_key = f"{today_date_str}_{now.hour:02d}:{now.minute:02d}" if (interval_hour > 0 or sched_id in self.daily_overrides) else today_date_str
 				if match and agenda.get("last_triggered_date") != trigger_key:
 					agenda["last_triggered_date"] = trigger_key
 					self.config.update_schedule(agenda["id"], agenda)
@@ -500,4 +503,4 @@ class Scheduler:
 					self.audio.notify(title, msg, speech_enabled=speech, audio_enabled=audio, audio_file=a_file, is_alarm=is_alarm)
 
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")
+			jk_log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")

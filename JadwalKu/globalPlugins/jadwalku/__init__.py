@@ -3,7 +3,7 @@ import globalPluginHandler
 import ui
 import gui
 import wx
-import logHandler
+from .logger import jk_log
 import datetime
 import scriptHandler
 import api
@@ -117,8 +117,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			from globalPlugins.jadwalku.configManager import CONFIG_DIR
 			self.habit_manager = HabitManager(CONFIG_DIR)
 		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"JadwalKu: Gagal memuat HabitManager: {e}")
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu: Gagal memuat HabitManager: {e}")
 			self.habit_manager = None
 		
 		from . import pomodoro
@@ -143,7 +143,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if vc_cfg.get("enabled", False):
 				self.vc_manager.start_listening()
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal memuat VoiceCommandManager: {e}")
+			jk_log.error(f"JadwalKu: Gagal memuat VoiceCommandManager: {e}")
 			self.vc_manager = None
 		
 		self.updater = UpdateChecker(self.config, self)
@@ -165,6 +165,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:j": "openHabitTracker",
 			"kb:l": "openBadgeShowcase",
 			"kb:h": "todayAgenda",
+			"kb:i": "openLog",
 			"kb:a": "toggleTimeReminder",
 			"kb:s": "openAudioManager",
 			"kb:m": "toggleVoiceCommand",
@@ -184,14 +185,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(JadwalKuSettingsPanel)
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal mendaftarkan panel pengaturan: {e}")
+			jk_log.error(f"JadwalKu: Gagal mendaftarkan panel pengaturan: {e}")
 			
 		# Daftarkan ke Tools Menu NVDA
 		try:
 			self.menu_item = gui.mainFrame.sysTrayIcon.toolsMenu.Append(wx.ID_ANY, "&JadwalKu - Manajemen Agenda & Pengingat...")
 			gui.mainFrame.sysTrayIcon.Bind(wx.EVT_MENU, self.on_tools_menu, self.menu_item)
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal menambah menu ke Tools: {e}")
+			jk_log.error(f"JadwalKu: Gagal menambah menu ke Tools: {e}")
 
 	def terminate(self):
 		global _plugin_instance
@@ -742,12 +743,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 							if os.path.exists(wav_path):
 								vp_files.append(wav_path)
 							else:
-								import logHandler
-								logHandler.log.warning(f"JadwalKu VoicePack: Word '{w}' not found in pack, skipping.")
+								from .logger import jk_log
+								jk_log.warning(f"JadwalKu VoicePack: Word '{w}' not found in pack, skipping.")
 						
 						if vp_files:
-							import logHandler
-							logHandler.log.info(f"JadwalKu DEBUG: vp_files = {vp_files}")
+							from .logger import jk_log
+							jk_log.info(f"JadwalKu DEBUG: vp_files = {vp_files}")
 							def delayed_play():
 								vp_vol = cfg.get("voice_pack_volume", 100)
 								self.audio.play_voice_pack_sequence(vp_files, volume_override=vp_vol)
@@ -755,11 +756,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 							ui.message(status_msg)
 							return
 						else:
-							import logHandler
-							logHandler.log.error(f"JadwalKu DEBUG: No valid words found in {words}")
+							from .logger import jk_log
+							jk_log.error(f"JadwalKu DEBUG: No valid words found in {words}")
 			except Exception as e:
-				import logHandler
-				logHandler.log.error(f"JadwalKu DEBUG EXCEPTION: {e}")
+				from .logger import jk_log
+				jk_log.error(f"JadwalKu DEBUG EXCEPTION: {e}")
 				pass
 				
 		# Fallback
@@ -889,6 +890,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			for stat in statuses:
 				ui.message(stat)
 
+	def script_openLog(self, gesture):
+		import os
+		import globalVars
+		log_path = os.path.join(globalVars.appArgs.configPath, "jadwalku.log")
+		if os.path.exists(log_path):
+			ui.message("Membuka catatan log JadwalKu.")
+			os.startfile(log_path)
+		else:
+			ui.message("File log belum tersedia.")
+
 	def script_showChangelog(self, gesture):
 		ui.message("JadwalKu Versi 1.6.2. Membuka riwayat pembaruan (Changelog)...")
 		wx.CallAfter(self.show_changelog_dialog)
@@ -940,9 +951,18 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message("Gagal mengaktifkan mikrofon. Pastikan modul terpasang dan mikrofon tersedia.")
 
 	def _on_voice_command_triggered(self):
-		import datetime
-		now = datetime.datetime.now()
+		import datetime, os, time
 		vc_cfg = self.config.get_voice_command()
+		
+		# Putar nada dering WhatTimeRing.wav sebelum mengumumkan jam
+		wtr_path = os.path.join(os.path.dirname(__file__), "sounds", "WhatTimeRing.wav")
+		if os.path.exists(wtr_path) and hasattr(self, "audio") and self.audio:
+			dev_id = self.audio.get_output_device_id()
+			vc_vol = vc_cfg.get("vc_volume", 100)
+			self.audio._play_wav_winmm(wtr_path, dev_id, allow_overlap=True, volume_override=vc_vol)
+			time.sleep(1.0)
+			
+		now = datetime.datetime.now()
 		style = vc_cfg.get("speech_style", "jam_lewat_menit")
 		
 		# Build time string
@@ -981,8 +1001,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		else:
 			# Just log it or send to braille only, but ui.message does speech+braille.
 			# Using braille.handler.message avoids speech if we only want braille, but NVDA might not need it.
-			import logHandler
-			logHandler.log.info("VC Triggered: " + time_str)
+			from .logger import jk_log
+			jk_log.info("VC Triggered: " + time_str)
 		
 		if out_engine == "NVDA Default":
 			pass
@@ -1013,8 +1033,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 							if vp_files:
 								self.audio.play_voice_pack_sequence(vp_files, volume_override=vc_vol)
 				except Exception as e:
-					import logHandler
-					logHandler.log.error(f"JadwalKu: Error playing VC voice pack: {e}")
+					from .logger import jk_log
+					jk_log.error(f"JadwalKu: Error playing VC voice pack: {e}")
 			else:
 				if mute_nvda: ui.message("Tidak ada Voice Pack aktif. " + time_str)
 		else:

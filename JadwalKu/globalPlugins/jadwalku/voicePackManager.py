@@ -323,8 +323,8 @@ class VoicePackManager:
 					if not os.path.exists(new_item):
 						shutil.move(old_item, new_item)
 			except Exception as e:
-				import logHandler
-				logHandler.log.error(f"JadwalKu: Gagal memigrasi voice packs lama: {e}")
+				from .logger import jk_log
+				jk_log.error(f"JadwalKu: Gagal memigrasi voice packs lama: {e}")
 				
 		# Folder sementara untuk sesi perekaman berjalan
 		self.temp_session_dir = os.path.join(tempfile.gettempdir(), "jadwalku_voice_session")
@@ -414,8 +414,8 @@ class VoicePackManager:
 					meta = json.load(f)
 				return meta
 		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"JadwalKu: Gagal ekstrak voice pack untuk diedit: {e}")
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu: Gagal ekstrak voice pack untuk diedit: {e}")
 		return None
 
 	def extract_pack_to_temp(self, pack_filepath):

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import wx
 import datetime
-import logHandler
+from .logger import jk_log
 import ui
 import gui
 import os
@@ -16,7 +16,7 @@ class HelpDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		help_text = (
-			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU (Versi 1.7.6.2) ===\n\n"
+			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU (Versi 1.7.6.3) ===\n\n"
 			"1. DAFTAR SHORTCUT GLOBAL UTAMA:\n"
 			"- NVDA + / : Masuk ke Mode Lapisan Perintah (Command Layer) JadwalKu.\n"
 			"- NVDA + Shift + / : Membacakan Status Dinamis dari seluruh pewaktu yang sedang aktif.\n"
@@ -32,6 +32,7 @@ class HelpDialog(wx.Dialog):
 			"- K : Buka Kalender Bulanan & Daftar Hari Libur Nasional (Tanggal Merah).\n"
 			"- D : Buka Jam Dunia & Kalkulator Konversi Zona Waktu.\n"
 			"- H : Bacakan seluruh daftar agenda aktif hari ini.\n"
+			"- I : Buka file log internal JadwalKu di Notepad.\n"
 			"- A : Check / Uncheck (Nyalakan/Matikan) Pengingat Waktu Berkala secara cepat.\n"
 			"- S : Buka Pengaturan Audio Manager (Memilih Speaker & Volume Independen, serta Lonceng Klasik).\n"
 			"- T : Buka Pengaturan Mesin TTS Mandiri SAPI 5 untuk notifikasi latar belakang.\n"
@@ -98,8 +99,15 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.3]\n"
+			"- Fitur Baru (Log Terisolasi): Memisahkan seluruh catatan log internal JadwalKu agar tidak lagi menumpuk dan mengotori NVDA Log Viewer. Kini Anda dapat mengakses log khusus JadwalKu secara instan di Notepad dengan menekan shortcut NVDA + / lalu I.\n"
+			"- Fitur Baru (Voice Command): Menambahkan umpan balik suara cerdas! Kini saat Anda bertanya \"What time?\" atau \"Jam berapa?\" ke mikrofon, JadwalKu akan memutar nada dering (WhatTimeRing) sesaat sebelum menjawab jamnya, persis seperti asisten virtual profesional.\n"
+			"- Penyempurnaan Habit Tracker: Memperbaiki kendala (crash) gagal buka pada jendela Pelacak Kebiasaan, serta menyempurnakan logika jadwal \"Sekali Saja\". Kini jika Anda menekan \"Belum / Lewati\" atau \"Tunda\" pada Habit Tracker untuk jadwal yang tidak berulang, ia akan ditunda secara pintar dan mengingatkan Anda kembali.\n"
+			"- Perbaikan Bug Super Langka (Race Condition): Memperbaiki isu di mana Voice Pack (Jam Bicara) mematikan paksa suara lonceng perempat jam (menit 15, 30, 45) secara prematur sebelum sempat terdengar.\n"
+			"- Penyempurnaan Audio Overlap: Lonceng utama per jam (mulaiLonceng) kini dapat terdengar beriringan (tumpang-tindih) secara harmonis dengan suara peringatan Voice Pack, menghasilkan sensasi Grandfather Clock sesungguhnya tanpa potong-memotong audio.\n"
+			"- Optimalisasi kestabilan thread mesin audio latar belakang JadwalKu.\n\n"
 			"[Versi 1.7.6.2]\n"
-			"- Perbaikan bug fatal pada menu bantuan di mana opsi '1' (Teks Panduan) gagal terbuka (Circular Import diselesaikan).\n"
+			"- Penambahan Opsi Perempat Jam pada Lonceng Klasik: Kini lonceng dapat diatur untuk berbunyi setiap menit ke-15, 30, dan 45 menggunakan suara dentangan khusus!\n			- Perbaikan bug fatal pada menu bantuan di mana opsi '1' (Teks Panduan) gagal terbuka (Circular Import diselesaikan).\n"
 			"- Menonaktifkan sementara opsi '2' (Simulasi Interaktif) ke mode Maintenance (Tahap Pengembangan).\n\n"
 			"[Versi 1.7.6.1]\n"
 			"- Penambahan Fitur Jam Lonceng Klasik (Grandfather Clock)! Nikmati sensasi jam kuno di rumah Anda dengan dentangan lonceng pada setiap pergantian jam dan opsi suara jarum detik di latar belakang. Dapat diatur hingga volume 1200% dan mengikuti perangkat audio favorit Anda (Akses via Pengaturan Agenda).\n"
@@ -1827,8 +1835,8 @@ class JadwalKuDialog(wx.Dialog):
 				err = traceback.format_exc()
 				import ui
 				ui.message(f"Error opening Studio: {e}")
-				import logHandler
-				logHandler.log.error(f"JadwalKu Studio Error: {err}")
+				from .logger import jk_log
+				jk_log.error(f"JadwalKu Studio Error: {err}")
 		finally:
 			gui.mainFrame.postPopup()
 
@@ -1847,8 +1855,8 @@ class JadwalKuDialog(wx.Dialog):
 				err = traceback.format_exc()
 				import ui
 				ui.message(f"Error opening Store: {e}")
-				import logHandler
-				logHandler.log.error(f"JadwalKu Store Error: {err}")
+				from .logger import jk_log
+				jk_log.error(f"JadwalKu Store Error: {err}")
 		finally:
 			gui.mainFrame.postPopup()
 
@@ -3208,6 +3216,7 @@ class ActiveAlarmManagerDialog(wx.Dialog):
 class HabitTrackerDialog(wx.Dialog):
 	def __init__(self, parent, scheduler, habit_manager):
 		super().__init__(parent, title="Pelacak Kebiasaan & Status Jadwal (Habit Tracker)", size=(600, 450), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+		self.scheduler = scheduler
 		self.habit_manager = habit_manager
 		self.habit_manager.check_and_reset_streaks()
 		
@@ -3394,16 +3403,28 @@ class HabitTrackerDialog(wx.Dialog):
 			msg = f"LUAR BIASA! Anda baru saja membuka {new_badge} untuk kebiasaan {sched['name']}!"
 			if hasattr(ui, 'message'):
 				ui.message(msg)
+				
+		# Jika sudah selesai, hapus dari tunda (snooze) agar tidak berbunyi lagi
+		if hasattr(self, 'scheduler') and self.scheduler and s_id in self.scheduler.daily_overrides:
+			del self.scheduler.daily_overrides[s_id]
 			
 		self._populate_list()
 		self.lb_habits.SetSelection(index)
 
 	def onMarkSkip(self, sched, index):
 		import ui
-		if hasattr(ui, 'message'):
-			ui.message(f"Jadwal {sched['name']} ditandai belum.")
-		# For interval schedules, we just skip. We don't record a completion.
-		pass
+		interval = sched.get("interval_hour", 0)
+		if interval == 0:
+			import datetime
+			now = datetime.datetime.now()
+			new_time = now + datetime.timedelta(hours=1)
+			if hasattr(self, 'scheduler') and self.scheduler:
+				self.scheduler.snooze_schedule(sched["id"], new_time)
+			if hasattr(ui, 'message'):
+				ui.message(f"Jadwal {sched['name']} ditandai belum. Otomatis ditunda 1 jam ke {new_time.strftime('%H:%M')}.")
+		else:
+			if hasattr(ui, 'message'):
+				ui.message(f"Jadwal {sched['name']} ditandai belum. Jadwal rutin dilewati.")
 
 	def onSnooze(self, sched, index):
 		dlg = wx.TextEntryDialog(self, "Masukkan waktu tunda (contoh: +15m, +1j, atau 14:30):", "Tunda Jadwal")
@@ -3522,6 +3543,10 @@ class LoncengDialog(wx.Dialog):
 		self.chk_enabled.SetValue(self.settings.get("enabled", False))
 		sizer.Add(self.chk_enabled, 0, wx.ALL, 5)
 		
+		self.chk_quarter = wx.CheckBox(self, label="Bunyikan juga setiap se&perempat jam (15, 30, 45 menit)")
+		self.chk_quarter.SetValue(self.settings.get("quarter_enabled", False))
+		sizer.Add(self.chk_quarter, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+		
 		sizer.Add(wx.StaticText(self, label="&Volume Lonceng Utama:"), 0, wx.ALL, 5)
 		self.slider_vol = wx.Slider(self, value=self.settings.get("volume", 80), minValue=0, maxValue=1200, style=wx.SL_HORIZONTAL | wx.SL_LABELS)
 		sizer.Add(self.slider_vol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
@@ -3600,6 +3625,7 @@ class LoncengDialog(wx.Dialog):
 	def onSave(self, evt):
 		new_settings = {
 			"enabled": self.chk_enabled.GetValue(),
+			"quarter_enabled": self.chk_quarter.GetValue(),
 			"volume": self.slider_vol.GetValue(),
 			"start_hour": self.cb_start.GetSelection(),
 			"end_hour": self.cb_end.GetSelection(),

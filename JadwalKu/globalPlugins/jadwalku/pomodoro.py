@@ -63,8 +63,8 @@ class PomodoroManager:
 				try:
 					self.audio.play_sound("chime.wav", allow_overlap=True)
 				except Exception as e:
-					import logHandler
-					logHandler.log.error(f"JadwalKu Pomodoro: Error playing alarm {e}")
+					from .logger import jk_log
+					jk_log.error(f"JadwalKu Pomodoro: Error playing alarm {e}")
 
 	def transition_state(self):
 		if not self.is_active:
@@ -173,8 +173,8 @@ class PomodoroTimerDialog(wx.Dialog):
 			dlg.ShowModal()
 			dlg.Destroy()
 		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"Error opening help from pomodoro: {e}")
+			from .logger import jk_log
+			jk_log.error(f"Error opening help from pomodoro: {e}")
 
 	def onStart(self, event):
 		try:

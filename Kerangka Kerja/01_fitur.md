@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.1
+# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.3
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -146,7 +146,7 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 - **VC Volume Override**: Penguatan volume keluaran (hingga 1200%) yang bekerja secara independen khusus untuk pembacaan Perintah Suara (Voice Command).
 
 ## 9. Sistem Perintah Suara (Voice Command) 100% Offline (Eksperimental)
-- **Tanya Jam Secara Langsung**: Pengguna dapat bertanya 'Jam berapa', 'Sekarang jam', atau 'What time' langsung ke mikrofon tanpa menekan tombol shortcut apa pun, dan NVDA akan merespons dengan laporan waktu saat ini.
+- **Tanya Jam Secara Langsung**: Pengguna dapat bertanya 'Jam berapa', 'Sekarang jam', atau 'What time' langsung ke mikrofon tanpa menekan tombol shortcut apa pun. Sebagai umpan balik cerdas, JadwalKu akan membunyikan nada dering sekilas (WhatTimeRing) sebelum NVDA merespons dengan laporan waktu saat ini.
 - **Arsitektur Modular Cloud (32-bit & 64-bit)**: Untuk menjaga ukuran JadwalKu tetap ringan (dibawah 3MB), modul AI Vosk (sekitar 45 MB) dipisahkan menjadi paket cloud. Pengguna dapat mengunduhnya langsung melalui Pengaturan JadwalKu (Tab 4). Sistem cerdas akan mendeteksi otomatis apakah NVDA berjalan pada sistem 32-bit atau 64-bit dan memberikan file yang sesuai agar anti-*crash*.
 - **Aman Bagi Hardisk (RAM-Based)**: Sistem pendengaran mikrofon hanya menggunakan buffer di memori RAM tanpa menyimpan data ke disk, sehingga tidak memperpendek umur SSD/Hardisk, sekalipun dibiarkan memantau seharian.
 - **Penguat Mikrofon (Mic Boost) hingga 1200%**: JadwalKu memproses bit PCM audio secara mandiri sehingga perintah Anda tetap terdengar dari kejauhan meskipun sensitivitas bawaan mikrofon Windows Anda sangat rendah.

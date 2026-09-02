@@ -5,7 +5,7 @@ import threading
 import time
 import ctypes
 import wx
-import logHandler
+from .logger import jk_log
 import nvwave
 import ui
 import tempfile
@@ -146,7 +146,7 @@ class AudioManager:
 					if name:
 						devices.append(f"{i}: {name}")
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal mengambil daftar audio device WinMM: {e}")
+			jk_log.error(f"JadwalKu: Gagal mengambil daftar audio device WinMM: {e}")
 			
 		return devices
 
@@ -175,7 +175,7 @@ class AudioManager:
 					idx = names.index(device_name)
 					return idx - 1 if idx > 0 else -1
 		except Exception as e:
-			logHandler.log.warning(f"JadwalKu: Gagal mendapatkan ID perangkat audio ({device_name}): {e}")
+			jk_log.warning(f"JadwalKu: Gagal mendapatkan ID perangkat audio ({device_name}): {e}")
 		return getattr(nvwave, "outputDeviceID", -1)
 
 	def _boost_pcm_16bit(self, frames, factor):
@@ -197,7 +197,7 @@ class AudioManager:
 					arr[i] = val
 			return arr.tobytes()
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
+			jk_log.error(f"JadwalKu: Gagal boost volume audio PCM: {e}")
 			return frames
 
 	def _play_wav_winmm(self, filepath, device_id, allow_overlap=True, stop_alarm=False, loop=False, volume_override=None):
@@ -244,6 +244,9 @@ class AudioManager:
 		self._is_playing = True
 		self.last_played_file = filepath
 
+		from .logger import jk_log
+		jk_log.warning(f"JadwalKu DEBUG: Memutar file: {filepath}")
+
 		def worker():
 			hWaveOut = ctypes.c_void_p()
 			handle_val = None
@@ -261,7 +264,7 @@ class AudioManager:
 						break
 
 				if res != 0:
-					logHandler.log.error(f"JadwalKu: waveOutOpen gagal (kode {res}) pada device ID {device_id}")
+					jk_log.error(f"JadwalKu: waveOutOpen gagal (kode {res}) pada device ID {device_id}")
 					return
 
 				handle_val = hWaveOut.value or ctypes.addressof(hWaveOut)
@@ -282,12 +285,12 @@ class AudioManager:
 
 					res_prep = ctypes.windll.winmm.waveOutPrepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
 					if res_prep != 0:
-						logHandler.log.error(f"JadwalKu: waveOutPrepareHeader gagal (kode {res_prep})")
+						jk_log.error(f"JadwalKu: waveOutPrepareHeader gagal (kode {res_prep})")
 						break
 
 					res_write = ctypes.windll.winmm.waveOutWrite(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
 					if res_write != 0:
-						logHandler.log.error(f"JadwalKu: waveOutWrite gagal (kode {res_write})")
+						jk_log.error(f"JadwalKu: waveOutWrite gagal (kode {res_write})")
 						try:
 							ctypes.windll.winmm.waveOutUnprepareHeader(hWaveOut, ctypes.byref(hdr), ctypes.sizeof(hdr))
 						except Exception:
@@ -335,7 +338,7 @@ class AudioManager:
 								break
 						time.sleep(0.1)
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu: Error saat pemutaran audio di thread: {e}")
+				jk_log.error(f"JadwalKu: Error saat pemutaran audio di thread: {e}")
 			finally:
 				if handle_val is not None:
 					try:
@@ -377,7 +380,7 @@ class AudioManager:
 							w.writeframes(s.get_raw())
 							w.close()
 						except Exception as ex:
-							logHandler.log.warning(f"JadwalKu: Gagal konversi MP3 ke WAV on the fly: {ex}")
+							jk_log.warning(f"JadwalKu: Gagal konversi MP3 ke WAV on the fly: {ex}")
 					if os.path.exists(wav_equiv):
 						path = wav_equiv
 						self.last_played_file = path
@@ -431,7 +434,7 @@ class AudioManager:
 					self.last_played_file = path
 					return self._play_wav_winmm(path, dev_id, allow_overlap=allow_overlap, stop_alarm=stop_alarm, loop=loop)
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
+				jk_log.error(f"JadwalKu: Gagal memutar file suara '{path}': {e}")
 		return False
 	def play_voice_pack_sequence(self, filepaths, volume_override=None):
 		"""Memutar kumpulan file WAV secara berurutan dan mulus."""
@@ -443,10 +446,10 @@ class AudioManager:
 		channels = 1
 		bitsPerSample = 16
 		
-		import logHandler
+		from .logger import jk_log
 		for fp in filepaths:
 			if not os.path.exists(fp): 
-				logHandler.log.warning(f"VP: File not found {fp}")
+				jk_log.warning(f"VP: File not found {fp}")
 				continue
 			try:
 				with wave.open(fp, 'rb') as wf:
@@ -455,15 +458,15 @@ class AudioManager:
 					b = wf.getsampwidth() * 8
 					frames = wf.readframes(wf.getnframes())
 					combined_frames.extend(frames)
-					logHandler.log.info(f"VP: Parsed {fp} | {c}ch {f}Hz {b}bit | {len(frames)} bytes")
+					jk_log.info(f"VP: Parsed {fp} | {c}ch {f}Hz {b}bit | {len(frames)} bytes")
 					channels = c
 					framerate = f
 					bitsPerSample = b
 			except Exception as e:
-				logHandler.log.error(f"VP: Error reading {fp}: {e}")
+				jk_log.error(f"VP: Error reading {fp}: {e}")
 				
 		if not combined_frames: 
-			logHandler.log.error("VP: combined_frames is EMPTY! Aborting playback.")
+			jk_log.error("VP: combined_frames is EMPTY! Aborting playback.")
 			return
 		
 		temp_path = os.path.join(tempfile.gettempdir(), "jadwalku_vp_seq.wav")
@@ -474,14 +477,15 @@ class AudioManager:
 				wf.setframerate(framerate)
 				wf.writeframes(combined_frames)
 			
-			logHandler.log.info(f"VP: Playing combined WAV {temp_path} | {channels}ch {framerate}Hz {bitsPerSample}bit | Total {len(combined_frames)} bytes")
+			jk_log.info(f"VP: Playing combined WAV {temp_path} | {channels}ch {framerate}Hz {bitsPerSample}bit | Total {len(combined_frames)} bytes")
 			# Mainkan file gabungan tersebut menggunakan WinMM
+			# allow_overlap=True agar tidak menghentikan lonceng (mulaiLonceng)
 			device_id = self.get_output_device_id()
-			t = threading.Thread(target=self._play_wav_winmm, args=(temp_path, device_id, False, False, False, volume_override))
+			t = threading.Thread(target=self._play_wav_winmm, args=(temp_path, device_id, True, False, False, volume_override))
 			t.daemon = True
 			t.start()
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu VoicePack: Gagal memutar sequence: {e}")
+			jk_log.error(f"JadwalKu VoicePack: Gagal memutar sequence: {e}")
 	def stop_sound(self, stop_alarm=True):
 		try:
 			if stop_alarm:
@@ -524,10 +528,10 @@ class AudioManager:
 				nvwave.playWaveFile("")
 			except Exception:
 				pass
-			logHandler.log.info("JadwalKu: Audio dihentikan.")
+			jk_log.info("JadwalKu: Audio dihentikan.")
 			return True
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal stop audio: {e}")
+			jk_log.error(f"JadwalKu: Gagal stop audio: {e}")
 			return False
 
 	def start_alarm_loop(self, audio_file, title, message):
@@ -543,7 +547,7 @@ class AudioManager:
 				dlg = AlarmNotificationDialog(gui.mainFrame, title, message, self)
 				dlg.ShowModal()
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu: Gagal menampilkan AlarmNotificationDialog: {e}")
+				jk_log.error(f"JadwalKu: Gagal menampilkan AlarmNotificationDialog: {e}")
 			finally:
 				try:
 					import gui
@@ -616,8 +620,53 @@ class AudioManager:
 		dev_id = self.get_output_device_id()
 		self._play_wav_winmm(tick_path, dev_id, allow_overlap=True, volume_override=volume)
 
+	def play_quarter_lonceng(self, volume, minute):
+		import os
+		import threading
+		from .logger import jk_log
+		jk_log.warning(f"JadwalKu DEBUG: play_quarter_lonceng dipanggil untuk menit {minute} dengan volume {volume}")
+		
+		base_dir = os.path.join(os.path.dirname(__file__), "sounds", "Lonceng")
+		
+		if minute == 15:
+			wav_file = "SeperempatJam.wav"
+		elif minute == 30:
+			wav_file = "SetengahJam.wav"
+		elif minute == 45:
+			wav_file = "TigaQua.wav"
+		else:
+			return
+			
+		wav_path = os.path.join(base_dir, wav_file)
+		if not os.path.exists(wav_path):
+			from .logger import jk_log
+			jk_log.warning(f"JadwalKu: File lonceng perempat {wav_file} tidak ditemukan!")
+			return
+			
+		dev_id = self.get_output_device_id()
+		
+		def quarter_thread():
+			self._is_playing = True
+			self._play_wav_winmm(wav_path, dev_id, allow_overlap=True, volume_override=volume)
+			
+			import time
+			dur = 35.0
+			if minute == 15: dur = 34.0
+			elif minute == 30: dur = 33.0
+			elif minute == 45: dur = 38.0
+			
+			elapsed = 0.0
+			while elapsed < dur:
+				if not self._is_playing: return
+				time.sleep(0.1)
+				elapsed += 0.1
+
+		threading.Thread(target=quarter_thread, daemon=True).start()
+
 	def play_lonceng_sequence(self, volume, hour, test_mode=False):
 		import threading
+		from .logger import jk_log
+		jk_log.warning(f"JadwalKu DEBUG: play_lonceng_sequence dipanggil untuk jam {hour} dengan volume {volume}")
 		def lonceng_thread():
 			import os
 			import time
@@ -627,8 +676,8 @@ class AudioManager:
 			ketuk_path = os.path.join(base_dir, "ketukanLonceng.wav")
 			
 			if not os.path.exists(mulai_path) or not os.path.exists(ketuk_path):
-				import logHandler
-				logHandler.log.warning("JadwalKu: File lonceng tidak ditemukan!")
+				from .logger import jk_log
+				jk_log.warning("JadwalKu: File lonceng tidak ditemukan!")
 				return
 				
 			dev_id = self.get_output_device_id()

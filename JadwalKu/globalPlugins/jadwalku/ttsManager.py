@@ -2,7 +2,7 @@
 import os
 import tempfile
 import threading
-import logHandler
+from .logger import jk_log
 import ui
 
 try:
@@ -38,7 +38,7 @@ class TTSManager:
 				except Exception as e:
 					continue
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu TTSManager: Gagal memuat daftar suara SAPI: {e}")
+			jk_log.error(f"JadwalKu TTSManager: Gagal memuat daftar suara SAPI: {e}")
 		return voices_list
 
 	def speak(self, text, volume_override=None):
@@ -78,7 +78,7 @@ class TTSManager:
 				# Putar melalui AudioManager agar tepat masuk ke speaker/kartu suara pilihan di JadwalKu
 				self.audio.play_sound(self.temp_wav, is_tts=True)
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu TTSManager: Gagal sintesis suara SAPI ({e}). Menggunakan NVDA fallback.")
+				jk_log.error(f"JadwalKu TTSManager: Gagal sintesis suara SAPI ({e}). Menggunakan NVDA fallback.")
 				ui.message(text)
 
 	def test_voice(self, voice_id, rate, volume):
@@ -113,7 +113,7 @@ class TTSManager:
 				ui.message("Memutar contoh suara TTS Mandiri...")
 				self.audio.play_sound(self.temp_wav, is_tts=True)
 			except Exception as e:
-				logHandler.log.error(f"JadwalKu TTSManager: Gagal tes suara SAPI: {e}")
+				jk_log.error(f"JadwalKu TTSManager: Gagal tes suara SAPI: {e}")
 				ui.message(f"Gagal memutar suara tes SAPI: {e}")
 
 	def stop(self):

@@ -104,3 +104,9 @@ Project_Jadwalku/
 
 ### statusChecker.py
 Modul ini memusatkan pengecekan status dari semua pewaktu aktif (Pomodoro, Timer Rutin, dan Alarm Sekali Pakai) dan mengembalikan string array untuk dibacakan oleh NVDA melalui shortcut NVDA + Shift + /.
+
+## 6. Arsitektur Logging Terisolasi (Isolated Logger)
+Mulai JadwalKu v1.7.6.3, JadwalKu menggunakan objek log mandiri berbasis logging.FileHandler (jadwalku.log) yang ditempatkan sejajar dengan file konfigurasi addon (globalVars.appArgs.configPath).
+- **Isolasi Log**: propagate = False digunakan untuk mencegah NVDA Log Viewer tercemar oleh detak aktivitas background JadwalKu.
+- **Pembersihan Otomatis**: Handler dibuka dalam mode w (Write), sehingga file log ini tidak akan mengalami *Disk Bloat* karena akan secara otomatis mereset teks lama setiap kali NVDA (dan JadwalKu) dimulai ulang.
+- **Aksesibilitas**: Pengguna dapat membaca file log ini melalui perintah lapisan NVDA + / lalu menekan huruf I.

@@ -6,7 +6,7 @@ import urllib.error
 import threading
 import datetime
 import platform
-import logHandler
+from .logger import jk_log
 import wx
 import api
 
@@ -114,7 +114,7 @@ def check_can_send_report(config_manager):
 			except Exception:
 				return (False, "Mohon maaf, kuota penerimaan laporan JadwalKu untuk hari ini telah penuh. Silakan coba kembali besok pagi!")
 	except Exception as e:
-		logHandler.log.debug(f"JadwalKu: Cek limit laporan server offline/timeout ({e}), mengizinkan dialog dibuka.")
+		jk_log.debug(f"JadwalKu: Cek limit laporan server offline/timeout ({e}), mengizinkan dialog dibuka.")
 	
 	return (True, "")
 
@@ -182,7 +182,7 @@ def send_report_async(config_manager, report_data, on_complete_callback):
 					raise
 					
 		except Exception as e:
-			logHandler.log.error(f"JadwalKu: Gagal mengirim laporan ke server proxy: {e}")
+			jk_log.error(f"JadwalKu: Gagal mengirim laporan ke server proxy: {e}")
 			
 			backup_text = (
 				f"=== LAPORAN & SARAN JADWALKU (v1.6.2) ===\n"
