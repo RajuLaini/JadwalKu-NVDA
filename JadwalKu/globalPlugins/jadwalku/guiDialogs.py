@@ -101,6 +101,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.4.3]\n"
+			"- Perbaikan Kritis (Hotfix): Memperbaiki fitur Auto-Updater bawaan yang mogok dan gagal menampilkan jendela unduhan saat menemukan versi baru.\n\n"
 			"[Versi 1.7.6.4.2]\n"
 			"- Perbaikan Voice Pack (Bugfix): Memperbaiki bug RAM Cache di mana mesin memori salah memutar audio jam sebelumnya (misal \"0 menit\") saat jam berganti (misal \"30 menit\"). Kini mesin memori bisa membedakan file suara gabungan.\n\n"
 			"[Versi 1.7.6.4.1]\n"
