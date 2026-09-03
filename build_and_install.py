@@ -3,7 +3,7 @@ import shutil
 import zipfile
 
 ADDON_NAME = "JadwalKu"
-ADDON_VERSION = "1.7.6.4.1"
+ADDON_VERSION = "1.7.6.4.2"
 BASE_DIR = os.path.join(os.path.dirname(__file__), ADDON_NAME)
 ADDON_PATH = os.path.join(os.path.dirname(__file__), f"{ADDON_NAME}-v{ADDON_VERSION}.nvda-addon")
 NVDA_ADDON_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "nvda", "addons", ADDON_NAME)

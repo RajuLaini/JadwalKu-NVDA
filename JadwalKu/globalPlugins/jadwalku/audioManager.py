@@ -223,7 +223,12 @@ class AudioManager:
 			vol = self.config.get_audio_volume() if hasattr(self, 'config') and self.config else 100
 			
 		cache_key = (filepath, vol)
-		if hasattr(self, '_audio_cache') and cache_key in self._audio_cache:
+		
+		# Jangan gunakan cache untuk file sekuensial Voice Pack (karena isinya selalu berubah-ubah)
+		import os
+		bypass_cache = os.path.basename(filepath) == "jadwalku_vp_seq.wav"
+		
+		if not bypass_cache and hasattr(self, '_audio_cache') and cache_key in self._audio_cache:
 			cached_data = self._audio_cache[cache_key]
 			frames = cached_data['frames']
 			wfx = cached_data['wfx']
@@ -263,7 +268,7 @@ class AudioManager:
 			except Exception:
 				pass
 				
-			if hasattr(self, '_audio_cache'):
+			if not bypass_cache and hasattr(self, '_audio_cache'):
 				self._audio_cache[cache_key] = {
 					'frames': frames,
 					'wfx': wfx,
