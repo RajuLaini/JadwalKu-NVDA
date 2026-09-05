@@ -72,7 +72,13 @@ class TTSManager:
 				# 3 = SSFMCreateForWrite
 				stream.Open(self.temp_wav, 3)
 				voice.AudioOutputStream = stream
-				voice.Speak(text, 0)
+				voice.Speak(text, 1) # SVSFlagsAsync
+				
+				# Tunggu maksimal 5 detik agar tidak memblokir sistem jika jaringan Neural Voice bermasalah
+				if not voice.WaitUntilDone(5000):
+					voice.Speak("", 2) # SVSFPurgeBeforeSpeak
+					raise Exception("Timeout jaringan TTS (melebihi 5 detik)")
+					
 				stream.Close()
 
 				# Putar melalui AudioManager agar tepat masuk ke speaker/kartu suara pilihan di JadwalKu
@@ -107,7 +113,13 @@ class TTSManager:
 				stream = comtypes.client.CreateObject("SAPI.SpFileStream")
 				stream.Open(self.temp_wav, 3)
 				voice.AudioOutputStream = stream
-				voice.Speak(text, 0)
+				voice.Speak(text, 1) # SVSFlagsAsync
+				
+				# Tunggu maksimal 5 detik agar tidak memblokir sistem jika jaringan Neural Voice bermasalah
+				if not voice.WaitUntilDone(5000):
+					voice.Speak("", 2) # SVSFPurgeBeforeSpeak
+					raise Exception("Timeout jaringan TTS (melebihi 5 detik)")
+					
 				stream.Close()
 
 				ui.message("Memutar contoh suara TTS Mandiri...")

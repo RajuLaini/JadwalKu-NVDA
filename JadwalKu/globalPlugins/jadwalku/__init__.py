@@ -711,7 +711,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if hasattr(self, "pomodoro_manager") and self.pomodoro_manager.is_active:
 			pomodoro_msg = " " + self.pomodoro_manager.get_status_str()
 			
-		full_msg = f"{time_str}. {status_msg}{pomodoro_msg}"
+		full_msg = f"{time_str}.{pomodoro_msg}"
 		
 		active_vp = cfg.get("active_voice_pack", "")
 		mode = cfg.get("mode", "both")

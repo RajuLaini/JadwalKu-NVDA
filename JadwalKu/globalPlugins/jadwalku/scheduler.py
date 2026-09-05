@@ -16,7 +16,9 @@ class Scheduler:
 		self.last_check_minute = -1
 		self.quick_timers = []
 		self.one_time_alarms = []
-		self.daily_overrides = {}
+		if "daily_overrides" not in self.config.data:
+			self.config.data["daily_overrides"] = {}
+		self.daily_overrides = self.config.data["daily_overrides"]
 		self.last_day = datetime.datetime.now().day
 
 	def start(self):
@@ -422,6 +424,8 @@ class Scheduler:
 
 	def snooze_schedule(self, sched_id, new_time):
 		self.daily_overrides[sched_id] = {"hour": new_time.hour, "minute": new_time.minute}
+		self.config.data["daily_overrides"] = self.daily_overrides
+		self.config.save_data()
 
 	def check_schedules(self, now):
 		try:
@@ -432,6 +436,9 @@ class Scheduler:
 
 			if now.day != self.last_day:
 				self.daily_overrides.clear()
+				if "daily_overrides" in self.config.data:
+					self.config.data["daily_overrides"] = self.daily_overrides
+				self.config.save_data()
 				self.last_day = now.day
 
 			for agenda in schedules:
@@ -445,7 +452,8 @@ class Scheduler:
 					eff_start_hour = self.daily_overrides[sched_id]["hour"]
 					eff_minute = self.daily_overrides[sched_id]["minute"]
 
-				if eff_minute != now.minute:
+				diff_minutes = (now.hour * 60 + now.minute) - (eff_start_hour * 60 + eff_minute)
+				if diff_minutes < 0 or diff_minutes > 1: # Toleransi keterlambatan 1 menit (anti-drift)
 					continue
 
 				interval_hour = int(agenda.get("interval_hour", 0))
@@ -465,8 +473,7 @@ class Scheduler:
 						else:
 							continue
 				else:
-					if eff_start_hour != now.hour:
-						continue
+					pass # Hour is already checked by diff_minutes above
 
 				freq = agenda.get("frequency", "Setiap Hari")
 				match = False

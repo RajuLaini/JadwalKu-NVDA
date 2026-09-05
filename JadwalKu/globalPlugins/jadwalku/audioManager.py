@@ -224,9 +224,9 @@ class AudioManager:
 			
 		cache_key = (filepath, vol)
 		
-		# Jangan gunakan cache untuk file sekuensial Voice Pack (karena isinya selalu berubah-ubah)
+		# Jangan gunakan cache untuk file dinamis (Voice Pack & TTS Mandiri) karena isinya selalu berubah
 		import os
-		bypass_cache = os.path.basename(filepath) == "jadwalku_vp_seq.wav"
+		bypass_cache = os.path.basename(filepath) in ("jadwalku_vp_seq.wav", "jadwalku_tts.wav")
 		
 		if not bypass_cache and hasattr(self, '_audio_cache') and cache_key in self._audio_cache:
 			cached_data = self._audio_cache[cache_key]
@@ -720,11 +720,10 @@ class AudioManager:
 			self._play_wav_winmm(mulai_path, dev_id, allow_overlap=True, volume_override=volume)
 			
 			# Selalu tunggu 16.5 detik (Sengaja dibuat tumpang tindih agar suaranya menyambung mulus tanpa putus)
-			elapsed = 0.0
-			while elapsed < 16.5:
+			target_time = time.time() + 16.5
+			while time.time() < target_time:
 				if not self._is_playing: return
-				time.sleep(0.1)
-				elapsed += 0.1
+				time.sleep(0.05)
 			
 			strike_count = hour % 12
 			if strike_count == 0:
@@ -733,11 +732,11 @@ class AudioManager:
 			for i in range(strike_count):
 				if not self._is_playing: return
 				self._play_wav_winmm(ketuk_path, dev_id, allow_overlap=True, volume_override=volume)
+				
 				# Jeda alami 1.8 detik antar ketukan (menggantikan jeda lag komputasi yang hilang karena optimasi)
-				elapsed2 = 0.0
-				while elapsed2 < 1.8:
+				target2 = time.time() + 1.8
+				while time.time() < target2:
 					if not self._is_playing: return
-					time.sleep(0.1)
-					elapsed2 += 0.1
+					time.sleep(0.05)
 				
 		threading.Thread(target=lonceng_thread, daemon=True).start()

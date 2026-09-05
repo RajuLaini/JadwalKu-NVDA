@@ -101,6 +101,13 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.5]\n"
+			"- Perbaikan Bug (Habit Tracker Bisu): Memperbaiki masalah pada penundaan jadwal 'Sekali Saja' yang gagal membunyikan alarm satu jam kemudian jika NVDA sempat dimuat ulang (restart) atau jika detak komputer meleset. Kini data penundaan (snooze) disimpan secara permanen!\n"
+			"- Perbaikan Bug (Pengumuman Ganda): Memperbaiki anomali mesin Cache RAM yang mengulang nama jadwal pertama saat 2 jadwal aktif secara bersamaan, menjamin suara bacaan jadwal selalu otentik.\n"
+			"- Pemadatan Irama Lonceng (Audio Engine): Beralih menggunakan target waktu absolut (milidetik presisi) pada mesin pemutar lonceng, sehingga ayunan 16.5 detik dan jeda 1.8 detik tidak lagi melar tertahan proses komputasi. Irama ketukan lonceng 100% presisi.\n"
+			"- Penyempurnaan UX Laporan TTS (NVDA + / lalu W): Memangkas info 'Interval Waktu Berkala Aktif' pada pintasan waktu, sehingga laporan jam via TTS terasa jauh lebih ringkas, elegan, dan profesional (Terima kasih kepada Dedi Sanjaya atas laporannya).\n"
+			"- Ketangguhan Mesin Suara (Anti-Freeze): Menambahkan batas waktu maksimal (timeout) 5 detik pada sintesis TTS. Kini jika Anda menggunakan SAPI5 Neural Voice online dan internet bermasalah, JadwalKu tidak akan lagi macet (hang) belasan detik, melainkan langsung menggunakan suara NVDA cadangan secara instan!\n"
+			"- Perbaikan Bug (Jadwal Diedit): Memperbaiki anomali di mana jadwal (tanpa interval) yang sudah berbunyi hari ini tidak akan berbunyi lagi jika Anda hanya mengedit menit/jamnya. Kini, mengubah waktu jadwal akan me-reset status pemicunya sehingga bisa berbunyi lagi di hari yang sama!\n\n"
 			"[Versi 1.7.6.4.3]\n"
 			"- Perbaikan Kritis (Hotfix): Memperbaiki fitur Auto-Updater bawaan yang mogok dan gagal menampilkan jendela unduhan saat menemukan versi baru.\n\n"
 			"[Versi 1.7.6.4.2]\n"
@@ -115,7 +122,7 @@ class ChangelogDialog(wx.Dialog):
 						"- Pembaruan Antarmuka Updater: Mengganti jendela konfirmasi pembaruan bawaan Windows (MessageBox) dengan jendela dialog khusus JadwalKu. Kini Anda dapat menelusuri dan mengeja catatan pembaruan (Changelog) baris demi baris menggunakan panah atas/bawah sebelum memutuskan untuk mengunduh versi baru.\n\n"
 			"[Versi 1.7.6.3]\n"
 			"- Fitur Baru (Log Terisolasi): Memisahkan seluruh catatan log internal JadwalKu agar tidak lagi menumpuk dan mengotori NVDA Log Viewer. Kini Anda dapat mengakses log khusus JadwalKu secara instan di Notepad dengan menekan shortcut NVDA + / lalu I.\n"
-			"- Fitur Baru (Voice Command): Menambahkan umpan balik suara cerdas! Kini saat Anda bertanya \"What time?\" atau \"Jam berapa?\" ke mikrofon, JadwalKu akan memutar nada dering (WhatTimeRing) sesaat sebelum menjawab jamnya, persis seperti asisten virtual profesional.\n"
+			"- Fitur Baru (Voice Command): Menambahkan umpan balik suara cerdas! Kini saat Anda bertanya \"What time?\" atau \"Jam berapa?\" ke mikrofon, JadwalKu akan memutar nada dering (WhatTimeRing) sesaat sebelum menjawab jamnya, persis seperti asisten virtual profesional (Saran dari Atikah Fina Wulandari).\n"
 			"- Penyempurnaan Habit Tracker: Memperbaiki kendala (crash) gagal buka pada jendela Pelacak Kebiasaan, serta menyempurnakan logika jadwal \"Sekali Saja\". Kini jika Anda menekan \"Belum / Lewati\" atau \"Tunda\" pada Habit Tracker untuk jadwal yang tidak berulang, ia akan ditunda secara pintar dan mengingatkan Anda kembali.\n"
 			"- Perbaikan Bug Super Langka (Race Condition): Memperbaiki isu di mana Voice Pack (Jam Bicara) mematikan paksa suara lonceng perempat jam (menit 15, 30, 45) secara prematur sebelum sempat terdengar.\n"
 			"- Penyempurnaan Audio Overlap: Lonceng utama per jam (mulaiLonceng) kini dapat terdengar beriringan (tumpang-tindih) secara harmonis dengan suara peringatan Voice Pack, menghasilkan sensasi Grandfather Clock sesungguhnya tanpa potong-memotong audio.\n"
@@ -772,14 +779,26 @@ class AgendaDialog(wx.Dialog):
 			"Pemberitahuan Singkat (Sekali Bunyi / Chime)",
 			"Alarm Jam Weker (Berdering Berulang + Fitur Tunda / Snooze)"
 		]
+		
+		new_hour = int(self.cb_hour.GetValue())
+		new_minute = int(self.cb_minute.GetValue())
+		
+		# Reset trigger history if time was changed, so it can trigger again today
+		last_trigger = self.schedule_data.get("last_triggered_date", "")
+		old_hour = self.schedule_data.get("hour")
+		old_minute = self.schedule_data.get("minute")
+		if old_hour is not None and old_minute is not None:
+			if old_hour != new_hour or old_minute != new_minute:
+				last_trigger = ""
+				
 		return {
 			"id": self.schedule_data.get("id", ""),
 			"name": self.txt_name.GetValue().strip() or "Agenda Tanpa Nama",
 			"frequency": self.cb_freq.GetValue(),
 			"custom_days": getattr(self, "custom_days", []),
 			"date": self.txt_date.GetValue().strip(),
-			"hour": int(self.cb_hour.GetValue()),
-			"minute": int(self.cb_minute.GetValue()),
+			"hour": new_hour,
+			"minute": new_minute,
 			"interval_hour": interval_val,
 			"interval_end_hour": interval_end_val,
 			"audio_enabled": audio_enabled,
@@ -789,7 +808,7 @@ class AgendaDialog(wx.Dialog):
 			"is_alarm": is_alarm_sel,
 			"alarm_mode": alarm_modes[1] if is_alarm_sel else alarm_modes[0],
 			"is_habit": self.chk_habit.GetValue(),
-			"last_triggered_date": self.schedule_data.get("last_triggered_date", "")
+			"last_triggered_date": last_trigger
 		}
 
 	def onTestSound(self, event):
@@ -1825,6 +1844,14 @@ class JadwalKuDialog(wx.Dialog):
 			res = dlg.ShowModal()
 			if res == wx.ID_OK:
 				updated = dlg.get_result()
+				
+				# Jika waktu diubah, batalkan penundaan (snooze) yang sedang berjalan
+				if updated.get("last_triggered_date") == "":
+					overrides = self.config.data.get("daily_overrides", {})
+					if item["id"] in overrides:
+						del overrides[item["id"]]
+						self.config.save_data()
+						
 				self.config.update_schedule(item["id"], updated)
 				ui.message("Jadwal berhasil diperbarui.")
 				self.refreshList(select_index=sel)
@@ -3539,6 +3566,9 @@ class HabitTrackerDialog(wx.Dialog):
 		# Jika sudah selesai, hapus dari tunda (snooze) agar tidak berbunyi lagi
 		if hasattr(self, 'scheduler') and self.scheduler and s_id in self.scheduler.daily_overrides:
 			del self.scheduler.daily_overrides[s_id]
+			if hasattr(self.scheduler, 'config') and self.scheduler.config:
+				self.scheduler.config.data["daily_overrides"] = self.scheduler.daily_overrides
+				self.scheduler.config.save_data()
 			
 		self._populate_list()
 		self.lb_habits.SetSelection(index)
