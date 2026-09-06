@@ -172,7 +172,7 @@ class UpdateChecker:
 			res = dlg.ShowModal()
 			dlg.Destroy()
 			
-			if res == wx.YES:
+			if res == wx.ID_YES:
 				if download_url:
 					ui.message("Mengunduh pembaruan JadwalKu di latar belakang tanpa membuka browser... Mohon tunggu.")
 					threading.Thread(target=self._download_and_install_direct, args=(download_url,), daemon=True).start()
