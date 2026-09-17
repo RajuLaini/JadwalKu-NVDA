@@ -49,8 +49,13 @@ class TTSManager:
 		threading.Thread(target=self._worker_speak, args=(text, volume_override), daemon=True).start()
 
 	def _worker_speak(self, text, volume_override=None):
-		with self.lock:
-			try:
+		if not self.lock.acquire(timeout=2.0):
+			import addonHandler
+			log = addonHandler.log
+			log.error("JadwalKu TTSManager: TTS thread hang (deadlock/timeout jaringan). Menggunakan NVDA fallback.")
+			ui.message(text)
+			return
+		try:
 				cfg = self.config.get_tts_config()
 				voice_id = int(cfg.get("voice_id", 0))
 				rate = int(cfg.get("rate", 0))
@@ -68,9 +73,12 @@ class TTSManager:
 				voice.Rate = max(-10, min(10, rate))
 				voice.Volume = max(0, min(100, volume))
 
+				import uuid
+				import os
+				target_wav = self.temp_wav.replace(".wav", f"_{uuid.uuid4().hex[:8]}.wav")
 				stream = comtypes.client.CreateObject("SAPI.SpFileStream")
 				# 3 = SSFMCreateForWrite
-				stream.Open(self.temp_wav, 3)
+				stream.Open(target_wav, 3)
 				voice.AudioOutputStream = stream
 				voice.Speak(text, 1) # SVSFlagsAsync
 				
@@ -82,10 +90,12 @@ class TTSManager:
 				stream.Close()
 
 				# Putar melalui AudioManager agar tepat masuk ke speaker/kartu suara pilihan di JadwalKu
-				self.audio.play_sound(self.temp_wav, is_tts=True)
-			except Exception as e:
-				jk_log.error(f"JadwalKu TTSManager: Gagal sintesis suara SAPI ({e}). Menggunakan NVDA fallback.")
-				ui.message(text)
+				self.audio.play_sound(target_wav, is_tts=True)
+		except Exception as e:
+			jk_log.error(f"JadwalKu TTSManager: Gagal sintesis suara SAPI ({e}). Menggunakan NVDA fallback.")
+			ui.message(text)
+		finally:
+			self.lock.release()
 
 	def test_voice(self, voice_id, rate, volume):
 		if not COMTYPES_AVAILABLE:
@@ -100,8 +110,13 @@ class TTSManager:
 		).start()
 
 	def _worker_test(self, voice_id, rate, volume, text):
-		with self.lock:
-			try:
+		if not self.lock.acquire(timeout=2.0):
+			import addonHandler
+			log = addonHandler.log
+			log.error("JadwalKu TTSManager: TTS thread hang saat tes (deadlock).")
+			ui.message("Gagal memutar suara tes SAPI: Sistem sedang sibuk (Timeout)")
+			return
+		try:
 				voice = comtypes.client.CreateObject("SAPI.SpVoice")
 				voices = voice.GetVoices()
 				if voice_id >= 0 and voice_id < voices.Count:
@@ -124,9 +139,11 @@ class TTSManager:
 
 				ui.message("Memutar contoh suara TTS Mandiri...")
 				self.audio.play_sound(self.temp_wav, is_tts=True)
-			except Exception as e:
-				jk_log.error(f"JadwalKu TTSManager: Gagal tes suara SAPI: {e}")
-				ui.message(f"Gagal memutar suara tes SAPI: {e}")
+		except Exception as e:
+			jk_log.error(f"JadwalKu TTSManager: Gagal tes suara SAPI: {e}")
+			ui.message(f"Gagal memutar suara tes SAPI: {e}")
+		finally:
+			self.lock.release()
 
 	def stop(self):
 		if self.audio:

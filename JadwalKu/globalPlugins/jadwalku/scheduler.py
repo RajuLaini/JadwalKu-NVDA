@@ -18,6 +18,13 @@ class Scheduler:
 		self.one_time_alarms = []
 		if "daily_overrides" not in self.config.data:
 			self.config.data["daily_overrides"] = {}
+			
+		today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+		if self.config.data.get("daily_overrides_date") != today_str:
+			self.config.data["daily_overrides"] = {}
+			self.config.data["daily_overrides_date"] = today_str
+			self.config.save_data()
+			
 		self.daily_overrides = self.config.data["daily_overrides"]
 		self.last_day = datetime.datetime.now().day
 
@@ -425,6 +432,7 @@ class Scheduler:
 	def snooze_schedule(self, sched_id, new_time):
 		self.daily_overrides[sched_id] = {"hour": new_time.hour, "minute": new_time.minute}
 		self.config.data["daily_overrides"] = self.daily_overrides
+		self.config.data["daily_overrides_date"] = datetime.datetime.now().strftime("%Y-%m-%d")
 		self.config.save_data()
 
 	def check_schedules(self, now):
@@ -438,6 +446,7 @@ class Scheduler:
 				self.daily_overrides.clear()
 				if "daily_overrides" in self.config.data:
 					self.config.data["daily_overrides"] = self.daily_overrides
+				self.config.data["daily_overrides_date"] = today_date_str
 				self.config.save_data()
 				self.last_day = now.day
 
@@ -452,28 +461,39 @@ class Scheduler:
 					eff_start_hour = self.daily_overrides[sched_id]["hour"]
 					eff_minute = self.daily_overrides[sched_id]["minute"]
 
-				diff_minutes = (now.hour * 60 + now.minute) - (eff_start_hour * 60 + eff_minute)
-				if diff_minutes < 0 or diff_minutes > 1: # Toleransi keterlambatan 1 menit (anti-drift)
-					continue
-
 				interval_hour = int(agenda.get("interval_hour", 0))
 				interval_end_hour = int(agenda.get("interval_end_hour", 23))
 
+				diff_minutes_total = (now.hour * 60 + now.minute) - (eff_start_hour * 60 + eff_minute)
+				drift = 0
+				
 				if interval_hour > 0:
+					if diff_minutes_total < 0:
+						diff_minutes_total += 24 * 60
+						
+					interval_minutes = interval_hour * 60
+					drift = diff_minutes_total % interval_minutes
+					if drift > 1:
+						continue
+						
 					if eff_start_hour <= interval_end_hour:
-						if now.hour < eff_start_hour or now.hour > interval_end_hour or (now.hour - eff_start_hour) % interval_hour != 0:
+						if now.hour < eff_start_hour or now.hour > interval_end_hour:
 							continue
-					else:  # Lintas malam / overnight
-						if now.hour >= eff_start_hour:
-							if (now.hour - eff_start_hour) % interval_hour != 0:
-								continue
-						elif now.hour <= interval_end_hour:
-							if ((now.hour + 24) - eff_start_hour) % interval_hour != 0:
+					else:
+						if not (now.hour >= eff_start_hour or now.hour <= interval_end_hour):
+							continue
+				else:
+					is_future = diff_minutes_total < 0
+					if diff_minutes_total < 0:
+						diff_minutes_total += 24 * 60
+					drift = diff_minutes_total
+					
+					if drift > 1:
+						if not is_future and agenda.get("is_habit", True) and sched_id not in self.daily_overrides:
+							if agenda.get("last_triggered_date", "").startswith(today_date_str):
 								continue
 						else:
 							continue
-				else:
-					pass # Hour is already checked by diff_minutes above
 
 				freq = agenda.get("frequency", "Setiap Hari")
 				match = False
@@ -505,7 +525,9 @@ class Scheduler:
 						except Exception:
 							pass
 
-				trigger_key = f"{today_date_str}_{now.hour:02d}:{now.minute:02d}" if (interval_hour > 0 or sched_id in self.daily_overrides) else today_date_str
+				import datetime
+				target_time = now - datetime.timedelta(minutes=drift)
+				trigger_key = f"{target_time.strftime('%Y-%m-%d')}_{target_time.hour:02d}:{target_time.minute:02d}" if (interval_hour > 0 or sched_id in self.daily_overrides) else target_time.strftime('%Y-%m-%d')
 				if match and agenda.get("last_triggered_date") != trigger_key:
 					agenda["last_triggered_date"] = trigger_key
 					self.config.update_schedule(agenda["id"], agenda)

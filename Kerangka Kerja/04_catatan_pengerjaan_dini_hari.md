@@ -87,3 +87,18 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 - **Bypass Blokir WAF Cloudflare 1010**: Menemukan *bug* besar di mana pengguna mendapat laporan `Koneksi ditolak (HTTP 403)` saat hendak menghapus paket suara mereka sendiri. Investigasi agen menyimpulkan peladen WAF (*Web Application Firewall*) Cloudflare memblokir permintaan `DELETE` yang dikirim dari klien karena lupa disisipkan penanda `User-Agent`. Agen lalu menambalnya dengan `User-Agent: JadwalKu-NVDA` dan menambahkan fungsionalitas sandi darurat (*Master Password*) khusus admin menggunakan Cloudflare Secrets (`MASTER_PASSWORD`) untuk mengatasi kasus pengguna yang benar-benar lupa sandi tanpa mengekspos kata sandi admin ke repositori publik.
 
 -- *Semua rintangan berhasil dilampaui, Senin Pagi, 27 Juli 2026.*
+
+---
+
+## Tanggal 16-17 September 2026: SAPI 5 Deadlock & Midnight Drift
+**1. Midnight Drift Bug**
+- Masalah: Pada pergantian hari pukul 00:00, jadwal masa depan (seperti 03:25) memiliki selisih negatif yang berubah menjadi drift yang lebih besar dari interval, menyebabkan jadwal kebiasaan menafsirkan itu sebagai jadwal terlewat dari kemarin dan mengeksekusinya secara paksa di jam nol pagi.
+- Solusi: Menambahkan pemeriksaan is_future = diff_minutes_total < 0 sebelum perulangan jadwal kebiasaan di scheduler.py dan memblokirnya.
+
+**2. SAPI 5 Deadlock Bug**
+- Masalah: SAPI 5 versi Neural / Cloud menggunakan voice.Speak(text, 1) (Asinkronus). Jika koneksi internet putus, COM voice.Speak ini akan hang tanpa batas, menyebabkan self.lock di-lock permanen. Semua panggilan TTS dari jadwal berikutnya ikut terjebak dan antrean NVDA macet.
+- Solusi: Beralih menggunakan if not self.lock.acquire(timeout=2.0): alih-alih with self.lock. Jika sistem antrean macet karena internet, JadwalKu akan mundur secara aman dan memutar suara NVDA dalam hitungan detik.
+
+**3. UUID File Cache Collision Bug**
+- Masalah: SAPI 5 TTS menyimpan temp_wav di folder temp dengan nama jadwalku_tts.wav. Jika diputar oleh audioManager bersamaan, cache akan membaca file lama yang belum selesai ditulis karena namanya sama.
+- Solusi: Menambahkan uuid4().hex sebagai postfix pada nama file dinamis agar unik, serta menambahkan file unik ini pada daftar bypass_cache audioManager.py agar tidak mengakibatkan memory leak.

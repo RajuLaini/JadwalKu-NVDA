@@ -226,7 +226,8 @@ class AudioManager:
 		
 		# Jangan gunakan cache untuk file dinamis (Voice Pack & TTS Mandiri) karena isinya selalu berubah
 		import os
-		bypass_cache = os.path.basename(filepath) in ("jadwalku_vp_seq.wav", "jadwalku_tts.wav")
+		basename = os.path.basename(filepath)
+		bypass_cache = basename in ("jadwalku_vp_seq.wav", "jadwalku_tts.wav") or basename.startswith("jadwalku_tts_")
 		
 		if not bypass_cache and hasattr(self, '_audio_cache') and cache_key in self._audio_cache:
 			cached_data = self._audio_cache[cache_key]
