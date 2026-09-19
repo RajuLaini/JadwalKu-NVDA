@@ -101,6 +101,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.5.3]\n"
+			"- Inisiasi Pengembangan Android & iOS: Fondasi awal JadwalKuApp berbasis React Native telah berhasil dibangun dan dikompilasi secara luring (standalone offline). Struktur navigasi Bottom Tabs aksesibel mulai diimplementasikan untuk uji coba TalkBack.\n\n"
 			"[Versi 1.7.6.5.2]\n"
 			"- Perbaikan Kritis (Habit Tracker Liar): Memperbaiki bug pergantian hari di tengah malam di mana jadwal kebiasaan yang belum waktunya tiba malah tereksekusi secara paksa di jam 00:00.\n"
 			"- Perbaikan Kritis (SAPI 5 Deadlock): Memperbaiki bug kebuntuan sistem (deadlock) pada antrean suara TTS mandiri. Jika Anda menggunakan suara SAPI5 berbasis Cloud/Neural dan jaringan internet Anda terputus mendadak, jadwal-jadwal berikutnya kini tidak akan macet melainkan langsung dialihkan ke suara NVDA dalam waktu 2 detik.\n"
