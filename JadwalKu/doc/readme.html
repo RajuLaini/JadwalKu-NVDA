@@ -5,8 +5,8 @@
 <title>Panduan Penggunaan Add-on JadwalKu</title>
 </head>
 <body>
-<h1>Add-on JadwalKu untuk NVDA (Versi 1.7.6.1)</h1>
-<p><b>JadwalKu</b> adalah add-on manajemen waktu tingkat lanjut, pengingat agenda, pewaktu fokus (Pomodoro), serta pengingat waktu berkala (hourly chime) yang 100% ramah aksesibilitas screen reader dan sangat dinamis.</p>
+<h1>Add-on JadwalKu untuk NVDA (Versi 1.7.6.5.2)</h1>
+<p><b>JadwalKu</b> adalah add-on manajemen waktu tingkat lanjut, pelacak kebiasaan, pengingat agenda, pewaktu fokus (Pomodoro), serta pengingat waktu berkala (hourly chime) yang 100% ramah aksesibilitas screen reader dan sangat dinamis.</p>
 
 <h2>Daftar Pintasan Global (Shortcut Utama)</h2>
 <ul>
@@ -18,35 +18,39 @@
 <h2>Mode Lapisan Perintah (Setelah Menekan NVDA + /)</h2>
 <p>Setelah menekan <b>NVDA + /</b>, lepaskan, lalu tekan salah satu tombol berikut untuk menjalankan fungsi spesifik:</p>
 <ul>
-  <li><b>L</b> atau <b>Enter</b> atau <b>P</b>: Membuka Dialog Utama Manajemen Jadwal & Pengaturan.</li>
-  <li><b>1</b>: Membuka <b>Manajer Timer Rutin (Quick Timer)</b>. Anda bisa membuat timer baru, atau melakukan Jeda (Pause), Lanjutkan (Resume), dan Berhenti jika ada timer yang sedang berjalan.</li>
+  <li><b>O</b> atau <b>Enter</b> atau <b>P</b>: Membuka Dialog Utama Manajemen Jadwal & Pengaturan.</li>
+  <li><b>J</b>: Buka <b>Pelacak Kebiasaan (Habit Tracker)</b> untuk menandai jadwal yang sudah/belum selesai.</li>
+  <li><b>L</b>: Buka <b>Papan Skor & Lencana Ketekunan (Badge Showcase)</b>.</li>
+  <li><b>1</b>: Membuka <b>Manajer Timer Rutin (Quick Timer)</b>. Anda bisa membuat timer baru, atau melakukan Jeda (Pause), Lanjutkan (Resume), dan Berhenti.</li>
   <li><b>2</b>: Membuka <b>Manajer Alarm Sekali Pakai (One-Time Alarm)</b> dengan kemampuan Jeda/Lanjutkan.</li>
   <li><b>3</b>: Membuka <b>Pomodoro Timer</b> (Pengaturan Fokus, Istirahat Pendek, Istirahat Panjang, dan Penghentian Otomatis).</li>
-  <li><b>W</b>: Membacakan laporan waktu dan jam saat ini dengan ringkas.</li>
-  <li><b>K</b>: Membuka <b>Kalender & Daftar Hari Libur Nasional</b> (Tanggal Merah Indonesia).</li>
-  <li><b>D</b>: Membuka <b>Jam Dunia & Kalkulator Konversi Waktu</b> lintas zona waktu.</li>
-  <li><b>J</b>: Membacakan <b>jadwal/agenda terdekat berikutnya</b> untuk hari ini beserta sisa waktunya.</li>
+  <li><b>W</b>: Membacakan laporan jam saat ini dan status pengingat waktu berkala (Time Reminder).</li>
+  <li><b>K</b>: Membuka <b>Kalender Bulanan & Daftar Hari Libur Nasional</b> (Tanggal Merah Indonesia).</li>
+  <li><b>D</b>: Membuka <b>Jam Dunia & Kalkulator Konversi Zona Waktu</b> lintas negara.</li>
   <li><b>H</b>: Membacakan <b>seluruh daftar agenda aktif</b> untuk hari ini.</li>
+  <li><b>I</b>: Buka file log internal JadwalKu di Notepad untuk kebutuhan debugging/analisis.</li>
   <li><b>A</b>: Nyalakan/Matikan (Toggle Check/Uncheck) Pengingat Waktu Berkala secara instan.</li>
-  <li><b>S</b>: Membuka <b>Manajer Audio</b> untuk memilih perangkat keluaran suara (Speaker) dan mengatur volume independen.</li>
-  <li><b>T</b>: Membuka <b>Manajer TTS Mandiri (SAPI5)</b> untuk mengatur suara latar belakang NVDA.</li>
-  <li><b>R</b>: Membuka formulir Laporan Bug/Kritik/Saran (Terkoneksi langsung ke Telegram Bot).</li>
+  <li><b>S</b>: Membuka <b>Manajer Audio</b> untuk memilih perangkat keluaran suara (Speaker) dan mengatur volume independen, serta Lonceng Klasik (Grandfather Clock).</li>
+  <li><b>T</b>: Membuka <b>Manajer TTS Mandiri (SAPI5)</b> untuk mengatur suara notifikasi latar belakang.</li>
+  <li><b>R</b>: Membuka formulir <b>Kirim Laporan, Kritik, Saran & Bug Fix</b> (Terkoneksi langsung ke Telegram Bot).</li>
   <li><b>G</b>: Membagikan Add-on (Menyalin tautan unduhan langsung / direct download ke clipboard).</li>
-  <li><b>U</b>: Memeriksa Pembaruan JadwalKu secara manual (Auto-Updater).</li>
-  <li><b>V</b>: Menampilkan Riwayat Pembaruan (Changelog).</li>
-  <li><b>Z</b>: <b>Snooze</b> (Menunda alarm/timer yang sedang berdering).</li>
-  <li><b>M</b>: Aktifkan pemantauan Microphone (Untuk perintah suara).</li>
-  <li><b>Spasi</b>: <b>Stop</b> (Menghentikan suara notifikasi/chime yang sedang berdering).</li>
-  <li><b>B</b> atau <b>F1</b>: Membuka dialog Bantuan (Panduan Lengkap in-app).</li>
-  <li><b>Escape</b>: Membatalkan/Keluar dari mode Lapisan Perintah JadwalKu.</li>
+  <li><b>U</b>: Memeriksa Pembaruan JadwalKu secara manual dari server (Auto-Updater).</li>
+  <li><b>V</b>: Menampilkan dialog <b>Riwayat Pembaruan (Changelog)</b>.</li>
+  <li><b>Z</b>: <b>Tunda (Snooze)</b> alarm/timer yang sedang berdering ke 10 menit ke depan.</li>
+  <li><b>M</b>: Aktifkan pemantauan Microphone (Untuk mode perintah suara).</li>
+  <li><b>Spasi</b>: <b>Stop</b> (Menghentikan suara notifikasi/chime atau matikan alarm weker yang sedang berdering).</li>
+  <li><b>B</b> atau <b>F1</b>: Membuka dialog Bantuan (Panduan Lengkap in-app dalam mode baca).</li>
+  <li><b>Escape</b>: Membatalkan/Keluar dari mode Lapisan Perintah JadwalKu tanpa aksi.</li>
 </ul>
 
-<h2>Fitur & Kemampuan Utama</h2>
+<h2>Fitur & Kemampuan Utama Tambahan</h2>
 <ul>
+  <li><b>Pelacak Kebiasaan & Lencana (Gamifikasi)</b>: JadwalKu kini memiliki Pelacak Kebiasaan (J) yang akan memberikan Anda Lencana Ketekunan (L) untuk setiap hari Anda konsisten menyelesaikan target rutin.</li>
   <li><b>Antarmuka Combo Box & Checkbox</b>: Seluruh pengaturan dibuat sangat ramah screen reader tanpa perlu mengetik format waktu manual. Cukup gunakan panah atas/bawah.</li>
-  <li><b>Tombol Tes Suara (Alt + T)</b>: Di dalam formulir penambahan agenda, Anda dapat langsung mencoba mendengarkan sampel suara chime/alarm sebelum menyimpannya.</li>
+  <li><b>Tombol Tes Suara (Alt + T)</b>: Di dalam formulir penambahan agenda, Anda dapat langsung mencoba mendengarkan sampel suara chime/alarm/TTS sebelum menyimpannya.</li>
   <li><b>Pembaruan Otomatis Latar Belakang (Auto-Updater)</b>: JadwalKu mampu mengecek versi terbaru dan mengunduh paket instalasi secara otomatis dan aman, tanpa harus membuka browser eksternal.</li>
-  <li><b>Manajemen Energi & Fokus</b>: Dilengkapi dengan Pomodoro dan kemampuan menjeda (Pause) segala bentuk timer agar waktu Anda menjadi jauh lebih fleksibel.</li>
+  <li><b>Mode Jam Weker Ekstrim</b>: Saat Anda memilih mode "Alarm Jam Weker", suara akan terus berdering tanpa henti melanggar batas jeda, memutus pemutaran TTS, sampai Anda secara fisik menekan Spasi untuk mematikannya, atau Z untuk menunda (Snooze). Sangat cocok untuk rutinitas Bangun Pagi.</li>
+  <li><b>SAPI 5 Deadlock Protection</b>: Jika Anda menggunakan TTS Neural secara online dan koneksi terputus mendadak, JadwalKu tidak akan hang melainkan otomatis memanggil NVDA sebagai backup suara dalam hitungan 2 detik.</li>
 </ul>
 </body>
 </html>

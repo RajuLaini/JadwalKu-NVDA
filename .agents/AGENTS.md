@@ -36,3 +36,7 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
   2. Memperbarui terjemahan HTML bahasa Inggris di `JadwalKu/doc/en/readme.html`.
   3. Memperbarui variabel string `help_text` di kelas `HelpDialog` (`guiDialogs.py`) yang muncul saat pengguna menekan tombol bantuan `B`.
 - Dokumentasi bantuan tidak boleh tertinggal satu versi pun dari kode aslinya.
+
+## 8. Hati-Hati Logika Waktu (Anti-Midnight Drift & Deadlock)
+- **Logika Penjadwalan Ekstrim**: Saat menangani modifikasi pada scheduler.py atau habitManager.py, agen wajib mewaspadai potensi *bug* lintas hari (Midnight Drift) dan penundaan siklus. Ingatlah bahwa perhitungan diff_minutes_total < 0 menentukan apakah sebuah jadwal itu berada di masa depan dan dilarang tereksekusi.
+- **Proteksi Antrean Suara (Deadlock)**: Setiap modifikasi yang memanggil fungsi pemutaran jaringan lambat (seperti SAPI 5 Online) tidak boleh memblokir thread utama. Selalu pertahankan arsitektur 	imeout=2.0 pada *lock* atau tangani *fallback* NVDA jika terjadi kegagalan jaringan.

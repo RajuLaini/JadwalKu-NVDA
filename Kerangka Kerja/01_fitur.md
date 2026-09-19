@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.3
+# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.5.2
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -155,3 +155,11 @@ Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda y
 
 ## Arsitektur Jeda/Lanjutkan (Versi 1.7.5)
 Pada versi 1.7.5, Timer dan Alarm kini mendukung operasi Jeda (Pause) dan Lanjutkan (Resume). Status pewaktu yang dijeda dicatat di scheduler.py dan pewaktu tersebut dilewati (di-skip) saat pengecekan detak (tick) oleh metode check_quick_timers atau check_one_time_alarms. Saat dilanjutkan, sisa waktunya akan dikembalikan secara dinamis atau diundur keesokan harinya jika jam telah lewat.
+
+## Arsitektur Habit Tracker & Gamifikasi (Versi 1.7.6.5)
+- **Logika Eksekusi Paksa (Force-Trigger)**: Berbeda dengan jadwal interval yang dilewati jika terlewat, jadwal harian "Sekali Sehari" (Pelacak Kebiasaan) dijamin tidak akan pernah terlewat. Jika komputer mati pada jam target (misal 08:30) dan baru menyala pada 15:00, JadwalKu akan langsung memaksanya berbunyi saat itu juga.
+- **Sistem Penundaan Permanen (Snooze Cache)**: Jika jadwal habit berbunyi, jadwal tersebut akan menunda dirinya sendiri (snooze) setiap 1 jam berikutnya sampai pengguna menekan tombol "Sudah Selesai". Hebatnya, status penundaan (snooze) ini dicatat permanen dalam file konfigurasi sehingga jadwal akan tetap berlanjut menagih setiap jam bahkan jika NVDA direstart atau komputer direboot.
+- **Midnight Drift Anti-Bug**: Jadwal masa depan tidak lagi tereksekusi secara liar di jam 00:00 berkat logika deteksi diff_minutes_total < 0 yang menghalau "drift" fiktif dari sisa menit negatif.
+- **Perlindungan Deadlock SAPI 5**: Memiliki mekanisme lock.acquire(timeout=2.0). Jika mesin TTS SAPI 5 Online (Neural) menggantung tanpa batas waktu karena koneksi internet putus, JadwalKu akan mundur dengan aman dan memutar suara cadangan NVDA tanpa membuat macet antrean jadwal yang lain.
+- **Dinamika File TTS Acak**: Setiap file .wav sintesis TTS kini dibuat dengan nama unik (jadwalku_tts_uuid.wav) alih-alih saling tumpuk, mencegah bentrok (file locking) dan suara "basi" dari sisa cache masa lalu.
+

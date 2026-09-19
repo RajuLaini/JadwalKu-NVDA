@@ -115,3 +115,13 @@ Mulai JadwalKu v1.7.6.3, JadwalKu menggunakan objek log mandiri berbasis logging
 Sistem audio JadwalKu sangat dioptimasi pada versi 1.7.6.4.
 - **AudioOp (C-Level)**: Untuk menyesuaikan volume frame PCM 16-bit, JadwalKu menggunakan udioop.mul yang mengalkulasi jutaan frame di tingkat bahasa C hanya dalam waktu < 0.001 detik tanpa menyandera GIL Python.
 - **RAM Caching**: Data file .wav beserta hasil kalkulasi volume di-*cache* (disimpan di RAM) ke dalam self._audio_cache pada putaran pertama. Putaran ke-2 hingga ke-12 (misal pada rentetan ketukan lonceng jam 12) akan menembakkan raw frame langsung dari RAM, menyelamatkan hardisk dari I/O masif berulang dan menjaga stabilitas NVDA.
+
+## Arsitektur Habit Tracker (Versi 1.7.6.5)
+Modul Habit Tracker (\habitManager.py\) terintegrasi langsung dengan \scheduler.py\.
+- **Force Trigger**: Jika jadwal berstatus 'Sekali Sehari' dan terlewatkan (dikarenakan komputer mati), \scheduler.py\ akan memaksanya berbunyi (*is_habit = True* dan *diff_minutes_total > 0*).
+- **Snooze Eksekusi**: Setelah berbunyi, jadwal akan ditambahkan ke \daily_overrides\ dengan penundaan (*snooze*) 1 jam penuh. Status ini disimpan permanen dalam file JSON sehingga tidak hilang meski komputer di-restart. Penghentian *snooze* ini hanya terjadi jika pengguna menekan tombol "Sudah Selesai" melalui \HabitTrackerDialog\ di \guiDialogs.py\.
+
+## Arsitektur Anti-Deadlock TTS SAPI 5
+- Pada \	tsManager.py\, mekanisme antrean (lock) \_worker_speak\ menggunakan \lock.acquire(timeout=2.0)\ untuk menghentikan antrean secara proaktif. SAPI 5 dengan profil suara Neural/Online akan membeku (hang) jika jaringan internet mati. Dengan *timeout* ini, \scheduler.py\ dan \udioManager.py\ NVDA tidak akan ikut macet.
+- Penamaan file \	arget_wav\ TTS menggunakan injeksi UUID acak (_uuid4().hex[:8]) agar terhindar dari tabrakan kunci memori cache (File Locking Collision).
+

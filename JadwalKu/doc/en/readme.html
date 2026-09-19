@@ -5,48 +5,52 @@
 <title>JadwalKu Add-on User Guide</title>
 </head>
 <body>
-<h1>JadwalKu Add-on for NVDA (Version 1.7.6.1)</h1>
-<p><b>JadwalKu</b> is an advanced time management, agenda reminder, focus timer (Pomodoro), and periodic interval chime add-on that is 100% screen reader accessible and highly dynamic.</p>
+<h1>JadwalKu Add-on for NVDA (Version 1.7.6.5.2)</h1>
+<p><b>JadwalKu</b> is an advanced time management add-on, habit tracker, agenda reminder, focus timer (Pomodoro), and hourly chime reminder that is 100% screen reader accessible and highly dynamic.</p>
 
-<h2>Global Shortcuts (Main Shortcuts)</h2>
+<h2>Global Shortcut List (Main Shortcuts)</h2>
 <ul>
-  <li><b>NVDA + /</b>: Enter the <b>JadwalKu Command Layer</b>. <i>(See the key list below for advanced commands).</i></li>
-  <li><b>NVDA + Shift + /</b>: Read <b>Dynamic Status</b>. NVDA will instantly iterate and read the remaining time of all currently active Timers, Alarms, and Pomodoro sessions simultaneously.</li>
-  <li><b>NVDA + F12 (1, 2, 3, times)</b>: Announce the current time, date, and countdown to the end of the current year.</li>
+  <li><b>NVDA + /</b>: Enter the <b>JadwalKu Command Layer Mode</b>. <i>(See the list of keys below for advanced commands).</i></li>
+  <li><b>NVDA + Shift + /</b>: Announce <b>Dynamic Status</b>. NVDA will immediately calculate and announce the remaining time of all active Timers, Alarms, and Pomodoros simultaneously.</li>
+  <li><b>NVDA + F12 (1, 2, 3, times)</b>: Announce the current Time, Date, and countdown to the end of the current year.</li>
 </ul>
 
 <h2>Command Layer Mode (After Pressing NVDA + /)</h2>
-<p>After pressing <b>NVDA + /</b>, release the keys, then press one of the following keys to execute specific functions:</p>
+<p>After pressing <b>NVDA + /</b>, release it, then press one of the following keys to execute a specific function:</p>
 <ul>
-  <li><b>L</b> or <b>Enter</b> or <b>P</b>: Open the Main Schedule Management & Settings Dialog.</li>
-  <li><b>1</b>: Open <b>Quick Timer Manager</b>. You can create a new timer, or Pause, Resume, and Stop if any timer is currently running.</li>
-  <li><b>2</b>: Open <b>One-Time Alarm Manager</b> with Pause/Resume capabilities.</li>
-  <li><b>3</b>: Open <b>Pomodoro Timer</b> (Focus, Short Break, Long Break, and Auto-Stop settings).</li>
-  <li><b>W</b>: Announce the current time concisely.</li>
-  <li><b>K</b>: Open <b>Calendar & National Holidays List</b> (Indonesian Red Dates).</li>
-  <li><b>D</b>: Open <b>World Clock & Timezone Converter Calculator</b>.</li>
-  <li><b>J</b>: Announce the <b>next closest upcoming agenda</b> for today along with its remaining time.</li>
-  <li><b>H</b>: Announce <b>all active agendas</b> for today.</li>
-  <li><b>A</b>: Toggle (Check/Uncheck) the periodic Time Reminder instantly.</li>
-  <li><b>S</b>: Open <b>Audio Manager</b> to select sound output devices (Speakers) and adjust independent volume.</li>
-  <li><b>T</b>: Open <b>Independent TTS Manager (SAPI5)</b> to configure background voice notifications.</li>
-  <li><b>R</b>: Open the Bug Report/Feedback form (Directly connected to a Telegram Bot).</li>
-  <li><b>G</b>: Share Add-on (Copy the direct download link to clipboard).</li>
-  <li><b>U</b>: Check for JadwalKu Updates manually (Auto-Updater).</li>
-  <li><b>V</b>: View Update History (Changelog).</li>
-  <li><b>Z</b>: <b>Snooze</b> (Snooze currently ringing alarm/timer).</li>
-  <li><b>M</b>: Enable Microphone monitoring (For voice commands).</li>
-  <li><b>Space</b>: <b>Stop</b> (Stop the currently ringing notification/chime sound).</li>
-  <li><b>B</b> or <b>F1</b>: Open the Help dialog (In-app comprehensive guide).</li>
-  <li><b>Escape</b>: Cancel/Exit the JadwalKu Command Layer mode.</li>
+  <li><b>O</b> or <b>Enter</b> or <b>P</b>: Open the Main Schedule Management & Settings Dialog.</li>
+  <li><b>J</b>: Open the <b>Habit Tracker</b> to mark completed schedules.</li>
+  <li><b>L</b>: Open the <b>Badge Showcase</b> (Persistence Scoreboard).</li>
+  <li><b>1</b>: Open the <b>Quick Timer Manager</b>. You can create a new timer, or Pause, Resume, and Stop an existing one.</li>
+  <li><b>2</b>: Open the <b>One-Time Alarm Manager</b> with Pause/Resume capabilities.</li>
+  <li><b>3</b>: Open the <b>Pomodoro Timer</b> (Focus, Short Break, Long Break, and Auto-Stop settings).</li>
+  <li><b>W</b>: Announce a concise report of the current time and hourly chime status.</li>
+  <li><b>K</b>: Open the <b>Monthly Calendar & National Holidays List</b>.</li>
+  <li><b>D</b>: Open the <b>World Clock & Time Zone Conversion Calculator</b>.</li>
+  <li><b>H</b>: Announce the <b>entire list of active agendas</b> for today.</li>
+  <li><b>I</b>: Open the internal JadwalKu log file in Notepad for debugging/analysis.</li>
+  <li><b>A</b>: Toggle Check/Uncheck the Hourly Time Reminder instantly.</li>
+  <li><b>S</b>: Open the <b>Audio Manager</b> to select output devices (Speakers), set independent volumes, and toggle the Grandfather Clock.</li>
+  <li><b>T</b>: Open the <b>Standalone TTS Manager (SAPI5)</b> to configure background notification voices.</li>
+  <li><b>R</b>: Open the <b>Submit Bug/Feedback Form</b> (Directly connected to a Telegram Bot).</li>
+  <li><b>G</b>: Share Add-on (Copy the direct download link to the clipboard).</li>
+  <li><b>U</b>: Manually Check for JadwalKu Updates from the server (Auto-Updater).</li>
+  <li><b>V</b>: Show the <b>Update History (Changelog)</b> dialog.</li>
+  <li><b>Z</b>: <b>Snooze</b> a ringing alarm/timer for the next 10 minutes.</li>
+  <li><b>M</b>: Toggle Microphone monitoring (For voice command mode).</li>
+  <li><b>Space</b>: <b>Stop</b> (Stop a ringing notification/chime or turn off a ringing alarm clock).</li>
+  <li><b>B</b> or <b>F1</b>: Open the Help dialog (Comprehensive in-app guide in read-only mode).</li>
+  <li><b>Escape</b>: Cancel/Exit the JadwalKu Command Layer mode without taking action.</li>
 </ul>
 
-<h2>Key Features & Capabilities</h2>
+<h2>Additional Key Features & Capabilities</h2>
 <ul>
-  <li><b>Combo Box & Checkbox Interface</b>: All settings are extremely screen reader friendly without the need to manually type time formats. Simply use the up/down arrows.</li>
-  <li><b>Sound Test Button (Alt + T)</b>: Inside the add agenda form, you can instantly test and listen to chime/alarm sound samples before saving.</li>
-  <li><b>Background Auto-Updater</b>: JadwalKu is capable of checking for the latest version and downloading installation packages automatically and securely, without having to open an external browser.</li>
-  <li><b>Energy & Focus Management</b>: Equipped with a Pomodoro timer and the ability to Pause any active timers so your schedule becomes much more flexible.</li>
+  <li><b>Habit Tracker & Badges (Gamification)</b>: JadwalKu now features a Habit Tracker (J) that awards you Persistence Badges (L) for every day you consistently complete your routine targets.</li>
+  <li><b>Combo Box & Checkbox Interface</b>: All settings are designed to be extremely screen reader friendly without the need to manually type time formats. Simply use the up/down arrows.</li>
+  <li><b>Sound Test Button (Alt + T)</b>: Inside the agenda addition form, you can instantly listen to sample chime/alarm/TTS sounds before saving them.</li>
+  <li><b>Background Auto-Updater</b>: JadwalKu can check for the latest versions and download installation packages automatically and securely, without opening an external browser.</li>
+  <li><b>Extreme Alarm Clock Mode</b>: When you select the "Alarm Clock" mode, the sound will ring continuously without pause, interrupting TTS playback, until you physically press Space to stop it, or Z to snooze. Perfect for wake-up routines.</li>
+  <li><b>SAPI 5 Deadlock Protection</b>: If you use Neural TTS online and your connection drops suddenly, JadwalKu will not hang but will automatically call NVDA as a backup voice within 2 seconds.</li>
 </ul>
 </body>
 </html>
