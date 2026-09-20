@@ -16,7 +16,7 @@ class HelpDialog(wx.Dialog):
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
 		help_text = (
-			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU (Versi 1.7.6.3) ===\n\n"
+			"=== PANDUAN PENGGUNAAN ADD-ON JADWALKU (Versi 1.7.6.5.4) ===\n\n"
 			"1. DAFTAR SHORTCUT GLOBAL UTAMA:\n"
 			"- NVDA + / : Masuk ke Mode Lapisan Perintah (Command Layer) JadwalKu.\n"
 			"- NVDA + Shift + / : Membacakan Status Dinamis dari seluruh pewaktu yang sedang aktif.\n"
@@ -37,6 +37,7 @@ class HelpDialog(wx.Dialog):
 			"- S : Buka Pengaturan Audio Manager (Memilih Speaker & Volume Independen, serta Lonceng Klasik).\n"
 			"- T : Buka Pengaturan Mesin TTS Mandiri SAPI 5 untuk notifikasi latar belakang.\n"
 			"- R : Buka Dialog Kirim Laporan, Kritik, Saran & Bug Fix (Terhubung ke Telegram Bot).\n"
+			"- C : Bergabung dengan Grup Komunitas Telegram JadwalKu.\n"
 			"- G : Bagikan Add-on (Salin tautan unduhan langsung / direct download ke clipboard).\n"
 			"- U : Periksa pembaruan terbaru add-on secara langsung dari server.\n"
 			"- V : Buka dialog catatan riwayat pembaruan (Changelog Read-Only).\n"
@@ -101,6 +102,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.5.4]\n"
+			"- Integrasi Komunitas Telegram: JadwalKu kini menyediakan portal langsung menuju Grup Komunitas Telegram resmi. Anda dapat bergabung melalui tombol di Pengaturan NVDA, tombol di menu Laporan (NVDA + / lalu R), atau menekan shortcut instan (NVDA + / lalu C) untuk berdiskusi dengan pengguna JadwalKu lainnya!\n\n"
 			"[Versi 1.7.6.5.3]\n"
 			"- Inisiasi Pengembangan Android & iOS: Fondasi awal JadwalKuApp berbasis React Native telah berhasil dibangun dan dikompilasi secara luring (standalone offline). Struktur navigasi Bottom Tabs aksesibel mulai diimplementasikan untuk uji coba TalkBack.\n\n"
 			"[Versi 1.7.6.5.2]\n"
@@ -255,6 +258,10 @@ class FeedbackDialog(wx.Dialog):
 		self.btn_send.Bind(wx.EVT_BUTTON, self.onSend)
 		btn_sizer.Add(self.btn_send, 0, wx.ALL, 6)
 		
+		self.btn_community = wx.Button(self, label="&Diskusi Langsung di Grup Telegram...")
+		self.btn_community.Bind(wx.EVT_BUTTON, self.onCommunity)
+		btn_sizer.Add(self.btn_community, 0, wx.ALL, 6)
+
 		self.btn_cancel = wx.Button(self, wx.ID_CANCEL, label="&Batal")
 		self.btn_cancel.Bind(wx.EVT_BUTTON, lambda evt: self.EndModal(wx.ID_CANCEL))
 		btn_sizer.Add(self.btn_cancel, 0, wx.ALL, 6)
@@ -263,6 +270,10 @@ class FeedbackDialog(wx.Dialog):
 		
 		self.SetSizer(sizer)
 		self.Centre()
+
+	def onCommunity(self, event):
+		import webbrowser
+		webbrowser.open("https://t.me/+V2-9i-tq-hY5NmI9")
 
 	def onCategoryChange(self, event):
 		sel = self.cb_category.GetSelection()

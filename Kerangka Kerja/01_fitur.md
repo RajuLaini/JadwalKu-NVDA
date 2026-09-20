@@ -1,4 +1,4 @@
-# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.5.2
+# Daftar Fitur Lengkap Add-on JadwalKu v1.7.6.5.4
 
 Add-on **JadwalKu** didesain khusus sebagai manajer waktu dan pengingat agenda yang 100% ramah aksesibilitas screen reader NVDA.
 
@@ -162,4 +162,8 @@ Pada versi 1.7.5, Timer dan Alarm kini mendukung operasi Jeda (Pause) dan Lanjut
 - **Midnight Drift Anti-Bug**: Jadwal masa depan tidak lagi tereksekusi secara liar di jam 00:00 berkat logika deteksi diff_minutes_total < 0 yang menghalau "drift" fiktif dari sisa menit negatif.
 - **Perlindungan Deadlock SAPI 5**: Memiliki mekanisme lock.acquire(timeout=2.0). Jika mesin TTS SAPI 5 Online (Neural) menggantung tanpa batas waktu karena koneksi internet putus, JadwalKu akan mundur dengan aman dan memutar suara cadangan NVDA tanpa membuat macet antrean jadwal yang lain.
 - **Dinamika File TTS Acak**: Setiap file .wav sintesis TTS kini dibuat dengan nama unik (jadwalku_tts_uuid.wav) alih-alih saling tumpuk, mencegah bentrok (file locking) dan suara "basi" dari sisa cache masa lalu.
+
+
+## Integrasi Komunitas (Versi 1.7.6.5.4)
+- **Grup Komunitas Telegram**: Menyediakan portal instan ke grup komunitas Telegram resmi JadwalKu untuk mewadahi diskusi antar pengguna. Tersedia melalui tombol khusus di Pengaturan NVDA, tombol di menu Laporan & Saran (FeedbackDialog), dan *shortcut* cepat NVDA + / lalu C di Command Layer.
 

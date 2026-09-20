@@ -40,3 +40,7 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
 ## 8. Hati-Hati Logika Waktu (Anti-Midnight Drift & Deadlock)
 - **Logika Penjadwalan Ekstrim**: Saat menangani modifikasi pada scheduler.py atau habitManager.py, agen wajib mewaspadai potensi *bug* lintas hari (Midnight Drift) dan penundaan siklus. Ingatlah bahwa perhitungan diff_minutes_total < 0 menentukan apakah sebuah jadwal itu berada di masa depan dan dilarang tereksekusi.
 - **Proteksi Antrean Suara (Deadlock)**: Setiap modifikasi yang memanggil fungsi pemutaran jaringan lambat (seperti SAPI 5 Online) tidak boleh memblokir thread utama. Selalu pertahankan arsitektur 	imeout=2.0 pada *lock* atau tangani *fallback* NVDA jika terjadi kegagalan jaringan.
+  
+## 9. ATURAN DARURAT (FASE ANDROID)  
+- DILARANG MENYENTUH KODE .py NVDA: Selama Anda bekerja di folder PengembanganAplikasi, dilarang keras mengubah file .py apa pun milik Add-on NVDA tanpa izin spesifik.  
+- DILARANG GIT PUSH: Jangan pernah melakukan git push ke GitHub tanpa izin eksplisit pengguna. Repositori ini terhubung dengan Auto-Updater publik, push sembarangan akan sangat berbahaya bagi pengguna lain. 

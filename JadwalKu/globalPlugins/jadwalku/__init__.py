@@ -59,6 +59,12 @@ class JadwalKuSettingsPanel(gui.settingsDialogs.SettingsPanel):
 		self.btnFeedback.Bind(wx.EVT_BUTTON, self.onOpenFeedback)
 		btnSizer3.Add(self.btnFeedback, 0, wx.ALL, 5)
 		settingsSizer.Add(btnSizer3, 0, wx.ALL, 2)
+		
+		btnSizer4 = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnCommunity = wx.Button(self, label="&Gabung Grup Komunitas Telegram...")
+		self.btnCommunity.Bind(wx.EVT_BUTTON, self.onOpenCommunity)
+		btnSizer4.Add(self.btnCommunity, 0, wx.ALL, 5)
+		settingsSizer.Add(btnSizer4, 0, wx.ALL, 2)
 
 	def onOpenLayout(self, event):
 		global _plugin_instance
@@ -177,6 +183,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			"kb:z": "snoozeAlarm",
 			"kb:space": "stopAudio",
 			"kb:b": "help",
+			"kb:c": "openCommunity",
 			"kb:f1": "help",
 			"kb:escape": "exitLayer",
 		}
@@ -906,6 +913,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def script_shareAddon(self, gesture):
 		wx.CallAfter(self.share_addon_link)
+
+	def script_openCommunity(self, gesture):
+		import webbrowser
+		ui.message("Membuka grup Telegram JadwalKu")
+		webbrowser.open("https://t.me/+V2-9i-tq-hY5NmI9")
 
 	def script_openFeedback(self, gesture):
 		wx.CallAfter(self.show_feedback_dialog)
