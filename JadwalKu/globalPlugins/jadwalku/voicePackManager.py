@@ -238,7 +238,7 @@ class VoiceRecorder:
 		t.daemon = True
 		t.start()
 
-def trim_silence(input_wav, output_wav, threshold=300, chunk_ms=10):
+def trim_silence(input_wav, output_wav, threshold=1500, chunk_ms=10):
 	"""Membuang bagian hening (silence) di awal dan akhir rekaman."""
 	try:
 		with wave.open(input_wav, 'rb') as w_in:
@@ -266,7 +266,7 @@ def trim_silence(input_wav, output_wav, threshold=300, chunk_ms=10):
 			if not chunk: break
 			rms = math.sqrt(sum(s*s for s in chunk) / len(chunk))
 			if rms > threshold:
-				start_idx = max(0, i - (chunk_samples * 5)) # Sisakan margin 50ms (5 chunks)
+				start_idx = max(0, i - (chunk_samples * 3)) # Sisakan margin 30ms (3 chunks)
 				break
 				
 		# Cari batas akhir (suara mulai hilang)
@@ -275,7 +275,7 @@ def trim_silence(input_wav, output_wav, threshold=300, chunk_ms=10):
 			if not chunk: break
 			rms = math.sqrt(sum(s*s for s in chunk) / len(chunk))
 			if rms > threshold:
-				end_idx = min(len(samples), i + (chunk_samples * 5)) # Sisakan margin 50ms
+				end_idx = min(len(samples), i + (chunk_samples * 15)) # Sisakan margin 150ms di akhir agar ekor suara konsonan tidak buntung
 				break
 				
 		if start_idx >= end_idx:

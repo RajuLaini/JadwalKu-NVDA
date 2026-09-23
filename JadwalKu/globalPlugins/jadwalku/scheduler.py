@@ -544,7 +544,13 @@ class Scheduler:
 					if agenda.get("is_habit", True) and interval_hour == 0:
 						import datetime
 						new_time = now + datetime.timedelta(hours=1)
-						self.snooze_schedule(agenda["id"], new_time)
+						interval_end_hour = int(agenda.get("interval_end_hour", 23))
+						eff_start_hour = int(agenda.get("hour", -1))
+						if eff_start_hour <= interval_end_hour:
+							if new_time.hour <= interval_end_hour:
+								self.snooze_schedule(agenda["id"], new_time)
+						else:
+							self.snooze_schedule(agenda["id"], new_time)
 
 		except Exception as e:
 			jk_log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")

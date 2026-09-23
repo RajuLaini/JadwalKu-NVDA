@@ -159,6 +159,16 @@ class HabitManager:
 		
 		return "\n".join(lines)
 		
+
+	def fail_habit_today(self, schedule_id):
+		today_str = self.get_today_str()
+		if schedule_id in self.stats:
+			data = self.stats[schedule_id]
+			if data.get("last_daily_date") != today_str:
+				if data.get("current_streak", 0) > 0:
+					data["current_streak"] = 0
+					self._save_stats()
+					
 	def get_daily_count(self, schedule_id):
 		today_str = self.get_today_str()
 		data = self.stats.get(schedule_id, {})
