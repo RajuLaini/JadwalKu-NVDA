@@ -4,3 +4,12 @@ __pycache__/
 *.log
 .DS_Store
 Backup/
+
+# Rahasia dan File Audio AIVoiceStudio
+PengembanganAplikasi/AIVoiceStudio/config.json
+PengembanganAplikasi/AIVoiceStudio/audio/
+PengembanganAplikasi/AIVoiceStudio/TempAudio/
+*.wav
+*.jvp
+*.mp3
+
