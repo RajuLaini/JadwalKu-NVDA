@@ -13,3 +13,7 @@ PengembanganAplikasi/AIVoiceStudio/TempAudio/
 *.jvp
 *.mp3
 
+
+# Abaikan seluruh folder PengembanganAplikasi dari Repository
+PengembanganAplikasi/
+
