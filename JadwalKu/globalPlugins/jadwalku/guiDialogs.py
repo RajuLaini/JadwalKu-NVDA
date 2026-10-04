@@ -7,85 +7,6 @@ import gui
 import os
 import api
 
-
-	def refreshEvents(self):
-		self.listEvents.DeleteAllItems()
-		events = self.config.get_events()
-		import datetime
-		# Urutkan berdasarkan tanggal terdekat
-		now = datetime.datetime.now()
-		
-		def get_next_date(evt):
-			date_str = evt.get("date", "")
-			if not date_str: return datetime.date.max
-			try:
-				if evt.get("type") == "one-time":
-					return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
-				else:
-					dt = datetime.datetime.strptime(f"{now.year}-{date_str}", "%Y-%m-%d").date()
-					if dt < now.date():
-						return datetime.date(now.year + 1, dt.month, dt.day)
-					return dt
-			except:
-				return datetime.date.max
-				
-		events_sorted = sorted(events, key=get_next_date)
-		
-		for idx, evt in enumerate(events_sorted):
-			self.listEvents.InsertItem(idx, evt.get("title", ""))
-			self.listEvents.SetItem(idx, 1, evt.get("date", ""))
-			t_str = "Sekali" if evt.get("type") == "one-time" else "Tahunan"
-			self.listEvents.SetItem(idx, 2, t_str)
-			self.listEvents.SetItem(idx, 3, evt.get("time", "-"))
-			
-			rem = str(evt.get("reminder", "0"))
-			rem_str = "Hari H"
-			if rem == "1": rem_str = "H-1"
-			elif rem == "7": rem_str = "H-7"
-			elif rem == "30": rem_str = "1 Bulan"
-			self.listEvents.SetItem(idx, 4, rem_str)
-			
-			self.listEvents.SetItemData(idx, int(idx))
-		
-		# set index map
-		self.event_map = events_sorted
-		
-	def onSaveBriefing(self, evt):
-		cfg = self.config.get_events_config()
-		cfg["briefing_enabled"] = self.chk_briefing.GetValue()
-		cfg["briefing_hour"] = self.sp_briefing.GetValue()
-		self.config.update_events_config(cfg)
-		import ui
-		ui.message("Pengaturan Briefing Pagi berhasil disimpan.")
-		
-	def onAddEvent(self, evt):
-		dlg = EventEditorDialog(self)
-		if dlg.ShowModal() == wx.ID_OK:
-			data = dlg.get_data()
-			self.config.add_event(data)
-			self.refreshEvents()
-		dlg.Destroy()
-		
-	def onEditEvent(self, evt):
-		sel = self.listEvents.GetFirstSelected()
-		if sel < 0: return
-		event_data = self.event_map[sel]
-		dlg = EventEditorDialog(self, event_data)
-		if dlg.ShowModal() == wx.ID_OK:
-			data = dlg.get_data()
-			self.config.update_event(event_data["id"], data)
-			self.refreshEvents()
-		dlg.Destroy()
-		
-	def onDeleteEvent(self, evt):
-		sel = self.listEvents.GetFirstSelected()
-		if sel < 0: return
-		event_data = self.event_map[sel]
-		if self.config.delete_event(event_data["id"]):
-			import ui
-			ui.message("Acara dihapus.")
-			self.refreshEvents()
-
 class HelpDialog(wx.Dialog):
 	def __init__(self, parent):
 		super().__init__(parent, title="Panduan & Bantuan JadwalKu", size=(580, 460), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
@@ -2373,6 +2294,85 @@ def get_indonesian_holidays(year):
 			datetime.date(2024, 9, 16): "Maulid Nabi Muhammad SAW"
 		})
 	return holidays
+
+
+	def refreshEvents(self):
+		self.listEvents.DeleteAllItems()
+		events = self.config.get_events()
+		import datetime
+		# Urutkan berdasarkan tanggal terdekat
+		now = datetime.datetime.now()
+		
+		def get_next_date(evt):
+			date_str = evt.get("date", "")
+			if not date_str: return datetime.date.max
+			try:
+				if evt.get("type") == "one-time":
+					return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+				else:
+					dt = datetime.datetime.strptime(f"{now.year}-{date_str}", "%Y-%m-%d").date()
+					if dt < now.date():
+						return datetime.date(now.year + 1, dt.month, dt.day)
+					return dt
+			except:
+				return datetime.date.max
+				
+		events_sorted = sorted(events, key=get_next_date)
+		
+		for idx, evt in enumerate(events_sorted):
+			self.listEvents.InsertItem(idx, evt.get("title", ""))
+			self.listEvents.SetItem(idx, 1, evt.get("date", ""))
+			t_str = "Sekali" if evt.get("type") == "one-time" else "Tahunan"
+			self.listEvents.SetItem(idx, 2, t_str)
+			self.listEvents.SetItem(idx, 3, evt.get("time", "-"))
+			
+			rem = str(evt.get("reminder", "0"))
+			rem_str = "Hari H"
+			if rem == "1": rem_str = "H-1"
+			elif rem == "7": rem_str = "H-7"
+			elif rem == "30": rem_str = "1 Bulan"
+			self.listEvents.SetItem(idx, 4, rem_str)
+			
+			self.listEvents.SetItemData(idx, int(idx))
+		
+		# set index map
+		self.event_map = events_sorted
+		
+	def onSaveBriefing(self, evt):
+		cfg = self.config.get_events_config()
+		cfg["briefing_enabled"] = self.chk_briefing.GetValue()
+		cfg["briefing_hour"] = self.sp_briefing.GetValue()
+		self.config.update_events_config(cfg)
+		import ui
+		ui.message("Pengaturan Briefing Pagi berhasil disimpan.")
+		
+	def onAddEvent(self, evt):
+		dlg = EventEditorDialog(self)
+		if dlg.ShowModal() == wx.ID_OK:
+			data = dlg.get_data()
+			self.config.add_event(data)
+			self.refreshEvents()
+		dlg.Destroy()
+		
+	def onEditEvent(self, evt):
+		sel = self.listEvents.GetFirstSelected()
+		if sel < 0: return
+		event_data = self.event_map[sel]
+		dlg = EventEditorDialog(self, event_data)
+		if dlg.ShowModal() == wx.ID_OK:
+			data = dlg.get_data()
+			self.config.update_event(event_data["id"], data)
+			self.refreshEvents()
+		dlg.Destroy()
+		
+	def onDeleteEvent(self, evt):
+		sel = self.listEvents.GetFirstSelected()
+		if sel < 0: return
+		event_data = self.event_map[sel]
+		if self.config.delete_event(event_data["id"]):
+			import ui
+			ui.message("Acara dihapus.")
+			self.refreshEvents()
 
 
 class CalendarDialog(wx.Dialog):
