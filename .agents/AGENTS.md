@@ -44,3 +44,8 @@ Setiap kali melakukan penambahan fitur baru, perbaikan bug (*bugfix*), atau modi
 ## 9. ATURAN DARURAT (FASE ANDROID)  
 - DILARANG MENYENTUH KODE .py NVDA: Selama Anda bekerja di folder PengembanganAplikasi, dilarang keras mengubah file .py apa pun milik Add-on NVDA tanpa izin spesifik.  
 - DILARANG GIT PUSH: Jangan pernah melakukan git push ke GitHub tanpa izin eksplisit pengguna. Repositori ini terhubung dengan Auto-Updater publik, push sembarangan akan sangat berbahaya bagi pengguna lain. 
+
+
+## 10. PROTOKOL KETAT RILIS & GITHUB
+- **Rujukan Wajib**: Baca selengkapnya di `.agents/18_protokol_rilis_dan_github.md`.
+- **INTI PROTOKOL**: DILARANG KERAS melakukan `git push` ke GitHub kecuali ada instruksi eksplisit dari pengguna (misal: "push ke github" atau "rilis ke publik"). Jika pengguna meminta "tetap di versi yang sama", JANGAN mengubah `version.json` atau `manifest.ini`. Selalu batasi alur kerja hanya sampai tahap kompilasi lokal (`build_and_install.py`) dan `git commit` lokal.
