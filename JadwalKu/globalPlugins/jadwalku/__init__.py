@@ -1079,4 +1079,4 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		else:
 			msg = "Tidak ada acara untuk hari ini."
 			
-		self.tts.queue_speech(msg)
+		self.tts.speak(msg)
