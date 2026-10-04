@@ -2243,59 +2243,6 @@ class JadwalKuDialog(wx.Dialog):
 		ui.message("Pengaturan Perintah Suara berhasil disimpan!")
 
 
-def get_indonesian_holidays(year):
-	holidays = {
-		datetime.date(year, 1, 1): "Tahun Baru Masehi",
-		datetime.date(year, 5, 1): "Hari Buruh Internasional",
-		datetime.date(year, 6, 1): "Hari Lahir Pancasila",
-		datetime.date(year, 8, 17): f"Hari Kemerdekaan Republik Indonesia ke-{year - 1945}",
-		datetime.date(year, 12, 25): "Hari Raya Natal"
-	}
-	if year == 2026:
-		holidays.update({
-			datetime.date(2026, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
-			datetime.date(2026, 2, 10): "Tahun Baru Imlek 2577 Kongzili",
-			datetime.date(2026, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1948",
-			datetime.date(2026, 3, 20): "Hari Raya Idul Fitri 1447 Hijriah (Hari Pertama)",
-			datetime.date(2026, 3, 21): "Hari Raya Idul Fitri 1447 Hijriah (Hari Kedua)",
-			datetime.date(2026, 4, 3): "Wafat Yesus Kristus",
-			datetime.date(2026, 5, 14): "Kenaikan Yesus Kristus",
-			datetime.date(2026, 5, 27): "Hari Raya Idul Adha 1447 Hijriah",
-			datetime.date(2026, 5, 31): "Hari Raya Waisak 2570 BE",
-			datetime.date(2026, 6, 16): "Tahun Baru Islam 1448 Hijriah",
-			datetime.date(2026, 8, 25): "Maulid Nabi Muhammad SAW"
-		})
-	elif year == 2025:
-		holidays.update({
-			datetime.date(2025, 1, 27): "Isra Mi'raj Nabi Muhammad SAW",
-			datetime.date(2025, 1, 29): "Tahun Baru Imlek 2576 Kongzili",
-			datetime.date(2025, 3, 29): "Hari Suci Nyepi Tahun Baru Saka 1947",
-			datetime.date(2025, 3, 31): "Hari Raya Idul Fitri 1446 Hijriah (Hari Pertama)",
-			datetime.date(2025, 4, 1): "Hari Raya Idul Fitri 1446 Hijriah (Hari Kedua)",
-			datetime.date(2025, 4, 18): "Wafat Yesus Kristus",
-			datetime.date(2025, 5, 12): "Hari Raya Waisak 2569 BE",
-			datetime.date(2025, 5, 29): "Kenaikan Yesus Kristus",
-			datetime.date(2025, 6, 6): "Hari Raya Idul Adha 1446 Hijriah",
-			datetime.date(2025, 6, 27): "Tahun Baru Islam 1447 Hijriah",
-			datetime.date(2025, 9, 5): "Maulid Nabi Muhammad SAW"
-		})
-	elif year == 2024:
-		holidays.update({
-			datetime.date(2024, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
-			datetime.date(2024, 2, 10): "Tahun Baru Imlek 2575 Kongzili",
-			datetime.date(2024, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1946",
-			datetime.date(2024, 3, 29): "Wafat Yesus Kristus",
-			datetime.date(2024, 4, 10): "Hari Raya Idul Fitri 1445 Hijriah (Hari Pertama)",
-			datetime.date(2024, 4, 11): "Hari Raya Idul Fitri 1445 Hijriah (Hari Kedua)",
-			datetime.date(2024, 5, 9): "Kenaikan Yesus Kristus",
-			datetime.date(2024, 5, 23): "Hari Raya Waisak 2568 BE",
-			datetime.date(2024, 6, 17): "Hari Raya Idul Adha 1445 Hijriah",
-			datetime.date(2024, 7, 7): "Tahun Baru Islam 1446 Hijriah",
-			datetime.date(2024, 9, 16): "Maulid Nabi Muhammad SAW"
-		})
-	return holidays
-
-
 	def refreshEvents(self):
 		self.listEvents.DeleteAllItems()
 		events = self.config.get_events()
@@ -2373,6 +2320,59 @@ def get_indonesian_holidays(year):
 			import ui
 			ui.message("Acara dihapus.")
 			self.refreshEvents()
+
+
+def get_indonesian_holidays(year):
+	holidays = {
+		datetime.date(year, 1, 1): "Tahun Baru Masehi",
+		datetime.date(year, 5, 1): "Hari Buruh Internasional",
+		datetime.date(year, 6, 1): "Hari Lahir Pancasila",
+		datetime.date(year, 8, 17): f"Hari Kemerdekaan Republik Indonesia ke-{year - 1945}",
+		datetime.date(year, 12, 25): "Hari Raya Natal"
+	}
+	if year == 2026:
+		holidays.update({
+			datetime.date(2026, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2026, 2, 10): "Tahun Baru Imlek 2577 Kongzili",
+			datetime.date(2026, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1948",
+			datetime.date(2026, 3, 20): "Hari Raya Idul Fitri 1447 Hijriah (Hari Pertama)",
+			datetime.date(2026, 3, 21): "Hari Raya Idul Fitri 1447 Hijriah (Hari Kedua)",
+			datetime.date(2026, 4, 3): "Wafat Yesus Kristus",
+			datetime.date(2026, 5, 14): "Kenaikan Yesus Kristus",
+			datetime.date(2026, 5, 27): "Hari Raya Idul Adha 1447 Hijriah",
+			datetime.date(2026, 5, 31): "Hari Raya Waisak 2570 BE",
+			datetime.date(2026, 6, 16): "Tahun Baru Islam 1448 Hijriah",
+			datetime.date(2026, 8, 25): "Maulid Nabi Muhammad SAW"
+		})
+	elif year == 2025:
+		holidays.update({
+			datetime.date(2025, 1, 27): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2025, 1, 29): "Tahun Baru Imlek 2576 Kongzili",
+			datetime.date(2025, 3, 29): "Hari Suci Nyepi Tahun Baru Saka 1947",
+			datetime.date(2025, 3, 31): "Hari Raya Idul Fitri 1446 Hijriah (Hari Pertama)",
+			datetime.date(2025, 4, 1): "Hari Raya Idul Fitri 1446 Hijriah (Hari Kedua)",
+			datetime.date(2025, 4, 18): "Wafat Yesus Kristus",
+			datetime.date(2025, 5, 12): "Hari Raya Waisak 2569 BE",
+			datetime.date(2025, 5, 29): "Kenaikan Yesus Kristus",
+			datetime.date(2025, 6, 6): "Hari Raya Idul Adha 1446 Hijriah",
+			datetime.date(2025, 6, 27): "Tahun Baru Islam 1447 Hijriah",
+			datetime.date(2025, 9, 5): "Maulid Nabi Muhammad SAW"
+		})
+	elif year == 2024:
+		holidays.update({
+			datetime.date(2024, 2, 8): "Isra Mi'raj Nabi Muhammad SAW",
+			datetime.date(2024, 2, 10): "Tahun Baru Imlek 2575 Kongzili",
+			datetime.date(2024, 3, 11): "Hari Suci Nyepi Tahun Baru Saka 1946",
+			datetime.date(2024, 3, 29): "Wafat Yesus Kristus",
+			datetime.date(2024, 4, 10): "Hari Raya Idul Fitri 1445 Hijriah (Hari Pertama)",
+			datetime.date(2024, 4, 11): "Hari Raya Idul Fitri 1445 Hijriah (Hari Kedua)",
+			datetime.date(2024, 5, 9): "Kenaikan Yesus Kristus",
+			datetime.date(2024, 5, 23): "Hari Raya Waisak 2568 BE",
+			datetime.date(2024, 6, 17): "Hari Raya Idul Adha 1445 Hijriah",
+			datetime.date(2024, 7, 7): "Tahun Baru Islam 1446 Hijriah",
+			datetime.date(2024, 9, 16): "Maulid Nabi Muhammad SAW"
+		})
+	return holidays
 
 
 class CalendarDialog(wx.Dialog):
