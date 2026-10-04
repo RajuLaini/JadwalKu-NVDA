@@ -1590,25 +1590,6 @@ class JadwalKuDialog(wx.Dialog):
 		self.panel_events = wx.Panel(self.notebook)
 		sizer_events = wx.BoxSizer(wx.VERTICAL)
 		
-		# Briefing Config
-		box_briefing = wx.StaticBox(self.panel_events, label="Pengaturan Briefing Pagi (Sapaan TTS)")
-		sizer_briefing = wx.StaticBoxSizer(box_briefing, wx.VERTICAL)
-		
-		self.chk_briefing = wx.CheckBox(self.panel_events, label="Aktifkan Briefing Acara Harian")
-		sizer_briefing.Add(self.chk_briefing, 0, wx.ALL, 5)
-		
-		hz_brief_time = wx.BoxSizer(wx.HORIZONTAL)
-		hz_brief_time.Add(wx.StaticText(self.panel_events, label="Jam Briefing Pagi:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-		self.sp_briefing = wx.SpinCtrl(self.panel_events, min=0, max=23, initial=7)
-		hz_brief_time.Add(self.sp_briefing, 0, wx.ALL, 5)
-		sizer_briefing.Add(hz_brief_time, 0, wx.ALL, 5)
-		
-		btn_save_briefing = wx.Button(self.panel_events, label="Simpan Pengaturan Briefing")
-		btn_save_briefing.Bind(wx.EVT_BUTTON, self.onSaveBriefing)
-		sizer_briefing.Add(btn_save_briefing, 0, wx.ALL, 5)
-		
-		sizer_events.Add(sizer_briefing, 0, wx.EXPAND | wx.ALL, 5)
-		
 		# Events List
 		box_list = wx.StaticBox(self.panel_events, label="Daftar Acara & Peringatan")
 		sizer_list = wx.StaticBoxSizer(box_list, wx.VERTICAL)
@@ -1636,6 +1617,26 @@ class JadwalKuDialog(wx.Dialog):
 		
 		sizer_list.Add(hz_evt_btn, 0, wx.ALL, 5)
 		sizer_events.Add(sizer_list, 1, wx.EXPAND | wx.ALL, 5)
+
+		# Briefing Config
+		box_briefing = wx.StaticBox(self.panel_events, label="Pengaturan Briefing Pagi (Sapaan TTS)")
+		sizer_briefing = wx.StaticBoxSizer(box_briefing, wx.VERTICAL)
+		
+		self.chk_briefing = wx.CheckBox(self.panel_events, label="Aktifkan Briefing Acara Harian")
+		sizer_briefing.Add(self.chk_briefing, 0, wx.ALL, 5)
+		
+		hz_brief_time = wx.BoxSizer(wx.HORIZONTAL)
+		hz_brief_time.Add(wx.StaticText(self.panel_events, label="Jam Briefing Pagi:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+		self.sp_briefing = wx.SpinCtrl(self.panel_events, min=0, max=23, initial=7)
+		hz_brief_time.Add(self.sp_briefing, 0, wx.ALL, 5)
+		sizer_briefing.Add(hz_brief_time, 0, wx.ALL, 5)
+		
+		btn_save_briefing = wx.Button(self.panel_events, label="Simpan Pengaturan Briefing")
+		btn_save_briefing.Bind(wx.EVT_BUTTON, self.onSaveBriefing)
+		sizer_briefing.Add(btn_save_briefing, 0, wx.ALL, 5)
+		
+		sizer_events.Add(sizer_briefing, 0, wx.EXPAND | wx.ALL, 5)
+		
 		
 		self.panel_events.SetSizer(sizer_events)
 
@@ -4071,6 +4072,8 @@ class EventEditorDialog(wx.Dialog):
 		
 		self.SetSizer(sizer)
 		self.Centre()
+		wx.CallAfter(self.txt_title.SetFocus)
+
 		
 	def get_data(self):
 		sel = self.cb_reminder.GetSelection()
