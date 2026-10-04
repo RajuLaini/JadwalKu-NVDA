@@ -1,0 +1,142 @@
+{
+    "update_url": "https://raw.githubusercontent.com/RajuLaini/JadwalKu-NVDA/main/version.json",
+    "time_reminder": {
+        "enabled": true,
+        "interval": 60,
+        "mode": "both",
+        "start_hour": 4,
+        "end_hour": 0,
+        "last_triggered_minute": "2026-09-30 17:00",
+        "speech_style": "jam_lewat_menit",
+        "time_format": "24",
+        "voice_pack_volume": 1200,
+        "active_voice_pack": "RajuPC_R_Suara_Raju_Laini.jvp"
+    },
+    "schedules": [
+        {
+            "id": "afe5b65a-cecd-4d5a-a077-d207b0dfdb01",
+            "name": "bangun pagi",
+            "frequency": "Setiap Hari",
+            "custom_days": [],
+            "date": "2026-07-13",
+            "hour": 4,
+            "minute": 0,
+            "interval_hour": 0,
+            "interval_end_hour": 6,
+            "audio_enabled": true,
+            "audio_file": "wind-up-clock-alarm-bell.wav",
+            "speech_enabled": true,
+            "active": true,
+            "is_alarm": true,
+            "alarm_mode": "Alarm Jam Weker (Berdering Berulang + Fitur Tunda / Snooze)",
+            "is_habit": true,
+            "last_triggered_date": "2026-09-30"
+        },
+        {
+            "id": "e928351f-1208-4efd-b898-c3b4381fdafd",
+            "name": "minum air",
+            "frequency": "Setiap Hari",
+            "custom_days": [],
+            "date": "2026-08-06",
+            "hour": 6,
+            "minute": 0,
+            "interval_hour": 2,
+            "interval_end_hour": 22,
+            "audio_enabled": true,
+            "audio_file": "chime.wav",
+            "speech_enabled": true,
+            "active": true,
+            "is_alarm": false,
+            "alarm_mode": "Pemberitahuan Singkat (Sekali Bunyi / Chime)",
+            "is_habit": true,
+            "last_triggered_date": "2026-09-29_22:00"
+        },
+        {
+            "id": "d726d6e7-47eb-4613-abab-c305e06b1db5",
+            "name": "tidur siang",
+            "frequency": "Setiap Hari",
+            "custom_days": [],
+            "date": "2026-08-06",
+            "hour": 12,
+            "minute": 0,
+            "interval_hour": 0,
+            "interval_end_hour": 15,
+            "audio_enabled": true,
+            "audio_file": "bell.wav",
+            "speech_enabled": true,
+            "active": true,
+            "is_alarm": false,
+            "alarm_mode": "Pemberitahuan Singkat (Sekali Bunyi / Chime)",
+            "is_habit": true,
+            "last_triggered_date": "2026-09-30"
+        },
+        {
+            "id": "4a6d6804-1b43-4936-8d8d-2e34d00c6679",
+            "name": "istirahat",
+            "frequency": "Setiap Hari",
+            "custom_days": [],
+            "date": "2026-08-06",
+            "hour": 22,
+            "minute": 30,
+            "interval_hour": 0,
+            "interval_end_hour": 7,
+            "audio_enabled": true,
+            "audio_file": "bell.wav",
+            "speech_enabled": true,
+            "active": true,
+            "is_alarm": false,
+            "alarm_mode": "Pemberitahuan Singkat (Sekali Bunyi / Chime)",
+            "is_habit": true,
+            "last_triggered_date": "2026-09-29"
+        }
+    ],
+    "update_token": "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",
+    "audio_device": "1: Speakers (Realtek(R) Audio)",
+    "audio_volume": 481,
+    "time_settings": {
+        "override_nvda_f12": true,
+        "time_format": "12",
+        "time_speech_style": "only_time",
+        "include_seconds": false,
+        "date_speech_style": "default",
+        "full_speech_style": "default"
+    },
+    "tts_config": {
+        "enabled": true,
+        "voice_id": 11,
+        "voice_name": "Microsoft EmmaMultilingual Online (Natural) - English (United States)",
+        "rate": 0,
+        "volume": 100
+    },
+    "voice_command": {
+        "enabled": false,
+        "input_device": "Microphone Array (Realtek(R) Au",
+        "output_device": "1: Speakers (Realtek(R) Audio)",
+        "tts_engine": "Voice Pack Kustom",
+        "time_format": "12",
+        "speech_style": "jam_lewat_menit",
+        "mute_nvda_fallback": true,
+        "vc_volume": 1200,
+        "mic_boost": 1200
+    },
+    "feedback_config": {
+        "last_report_date": "2026-07-23",
+        "proxy_url": "https://butterflywings.my.id/api/jadwalku/proxy"
+    },
+    "lonceng_settings": {
+        "enabled": true,
+        "quarter_enabled": false,
+        "volume": 840,
+        "start_hour": 5,
+        "end_hour": 22,
+        "ticking_enabled": false,
+        "ticking_volume": 720
+    },
+    "daily_overrides": {
+        "d726d6e7-47eb-4613-abab-c305e06b1db5": {
+            "hour": 15,
+            "minute": 3
+        }
+    },
+    "daily_overrides_date": "2026-09-30"
+}

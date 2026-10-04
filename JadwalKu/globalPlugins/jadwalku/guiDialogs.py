@@ -102,6 +102,8 @@ class ChangelogDialog(wx.Dialog):
 		
 		changelog_text = (
 			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
+			"[Versi 1.7.6.5.6]\n"
+			"- Perbaikan Bug (Auto-Trim Voice Pack Studio): Menurunkan ambang batas volume (*threshold*) pemotong keheningan menjadi 300 RMS dan memperketat margin menjadi 50 milidetik di perekam suara bawaan JadwalKu. Hal ini mengatasi masalah di mana rekaman dengan suara lembut (seperti konsonan 's' atau 't' di awal dan akhir kata) tidak terpotong sama sekali atau menyisakan ruang kosong yang terlalu panjang.\n\n"
 			"[Versi 1.7.6.5.5]\n"
 			"- Perbaikan Kritis (Habit Tracker Kedaluwarsa): Jika jadwal (baik yang sekali putar maupun berulang) melewati Jam Selesai tanpa Anda tandai selesai, sistem kini akan langsung BERHENTI memutar alarm dan SEKETIKA memvonis GAGAL jadwal tersebut untuk hari itu tanpa perlu menunggu tengah malam! Terima kasih yang sebesar-besarnya kepada Atikah Fina Wulandari atas kejeliannya menemukan celah logika kritis ini.\n"
 			"- Peningkatan ekstrem pada Studio Rekaman (Voice Pack Manager): Algoritma Auto-Trim Silence kini menggunakan batas RMS 1500 (mengabaikan bunyi klik mic dan hembusan napas kencang) dengan margin 30 milidetik. Terima kasih tak terhingga kepada Tuan Muhammad Saleh atas dedikasi dan riset rekaman suaranya yang luar biasa, sehingga kalibrasi presisi maha karya pada studio ini dapat terwujud sempurna!\n"
