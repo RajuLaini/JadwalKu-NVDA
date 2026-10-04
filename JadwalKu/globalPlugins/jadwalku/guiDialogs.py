@@ -4057,7 +4057,7 @@ class EventEditorDialog(wx.Dialog):
 		
 		hz5 = wx.BoxSizer(wx.HORIZONTAL)
 		hz5.Add(wx.StaticText(self, label="Peringatan Dini (Briefing):"), 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-		self.cb_reminder = wx.ComboBox(self, choices=["Hanya Hari H", "H-1 (Besok)", "H-7 (Minggu Depan)", "1 Bulan Sebelumnya"], style=wx.CB_READONLY)
+		self.cb_reminder = wx.ComboBox(self, choices=["Hanya Hari H", "H-1 (Setiap Hari)", "H-7 (Setiap Minggu)", "1 Bulan (Setiap Bulan)"], style=wx.CB_READONLY)
 		
 		rem = str(self.event_data.get("reminder", "0"))
 		if rem == "1": self.cb_reminder.SetSelection(1)
