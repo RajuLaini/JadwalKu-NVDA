@@ -2258,9 +2258,17 @@ class JadwalKuDialog(wx.Dialog):
 				if evt.get("type") == "one-time":
 					return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
 				else:
-					dt = datetime.datetime.strptime(f"{now.year}-{date_str}", "%Y-%m-%d").date()
+					parts = date_str.split("-")
+					if len(parts) == 3:
+						m, d = int(parts[1]), int(parts[2])
+					elif len(parts) == 2:
+						m, d = int(parts[0]), int(parts[1])
+					else:
+						return datetime.date.max
+					
+					dt = datetime.date(now.year, m, d)
 					if dt < now.date():
-						return datetime.date(now.year + 1, dt.month, dt.day)
+						return datetime.date(now.year + 1, m, d)
 					return dt
 			except:
 				return datetime.date.max
