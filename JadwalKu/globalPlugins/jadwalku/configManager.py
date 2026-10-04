@@ -87,6 +87,12 @@ DEFAULT_DATA = {
 		"rate": 0,
 		"volume": 100
 	},
+	"events": [],
+	"events_config": {
+		"briefing_enabled": True,
+		"briefing_hour": 7,
+		"last_briefing_date": ""
+	},
 	"feedback_config": {
 		"last_report_date": "",
 		"proxy_url": "https://butterflywings.my.id/api/jadwalku/proxy"
@@ -129,6 +135,10 @@ class ConfigManager:
 					self.data["voice_command"] = DEFAULT_DATA["voice_command"].copy()
 				if "tts_config" not in self.data:
 					self.data["tts_config"] = DEFAULT_DATA["tts_config"].copy()
+				if "events" not in self.data:
+					self.data["events"] = []
+				if "events_config" not in self.data:
+					self.data["events_config"] = DEFAULT_DATA["events_config"].copy()
 				self.save_data()
 			except Exception as e:
 				jk_log.error(f"JadwalKu: Gagal memuat jadwalku_data.json: {e}")
@@ -270,3 +280,41 @@ class ConfigManager:
 		cfg["last_report_date"] = date_str
 		self.update_feedback_config(cfg)
 
+
+	def get_events(self):
+		return self.data.get("events", [])
+		
+	def add_event(self, event_dict):
+		if "id" not in event_dict or not event_dict["id"]:
+			event_dict["id"] = "evt-" + str(uuid.uuid4())
+		self.data.setdefault("events", []).append(event_dict)
+		self.save_data()
+		return event_dict["id"]
+		
+	def update_event(self, event_id, updated_dict):
+		events = self.get_events()
+		for i, item in enumerate(events):
+			if item.get("id") == event_id:
+				updated_dict["id"] = event_id
+				events[i] = updated_dict
+				self.save_data()
+				return True
+		return False
+		
+	def delete_event(self, event_id):
+		events = self.get_events()
+		initial_len = len(events)
+		self.data["events"] = [item for item in events if item.get("id") != event_id]
+		if len(self.data["events"]) < initial_len:
+			self.save_data()
+			return True
+		return False
+		
+	def get_events_config(self):
+		return self.data.get("events_config", DEFAULT_DATA["events_config"].copy())
+		
+	def update_events_config(self, updated_dict):
+		if "events_config" not in self.data:
+			self.data["events_config"] = DEFAULT_DATA["events_config"].copy()
+		self.data["events_config"].update(updated_dict)
+		self.save_data()

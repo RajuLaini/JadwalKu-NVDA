@@ -248,6 +248,7 @@ class Scheduler:
 
 			self.check_time_reminder(now)
 			self.check_schedules(now)
+			self.check_events(now)
 		except Exception as e:
 			from .logger import jk_log
 			jk_log.error(f"JadwalKu: Error di dalam scheduler on_tick: {e}")
@@ -554,3 +555,100 @@ class Scheduler:
 
 		except Exception as e:
 			jk_log.error(f"JadwalKu: Error saat cek schedule agenda: {e}")
+
+	def check_events(self, now):
+		try:
+			events = self.config.data.get("events", [])
+			if not events: return
+			
+			events_config = self.config.data.get("events_config", {})
+			today_str = now.strftime("%Y-%m-%d")
+			
+			import datetime
+			# 1. Pemicu spesifik waktu
+			for evt in events:
+				if evt.get("is_completed", False): continue
+				evt_time = evt.get("time", "")
+				if evt_time:
+					try:
+						h, m = map(int, evt_time.split(':'))
+						if now.hour == h and now.minute == m:
+							should_trigger = False
+							evt_type = evt.get("type", "one-time")
+							evt_date = evt.get("date", "")
+							
+							if evt_type == "one-time" and evt_date == today_str:
+								should_trigger = True
+							elif evt_type == "yearly" and evt_date == now.strftime("%m-%d"):
+								should_trigger = True
+								
+							# Cegah trigger berkali-kali di menit yang sama
+							last_triggered = evt.get("last_triggered_date", "")
+							if should_trigger and last_triggered != today_str:
+								msg = f"Pengingat Acara: {evt.get('title', '')}"
+								if self.tts:
+									self.tts.queue_speech(msg)
+								elif self.audio:
+									import ui
+									ui.message(msg)
+								
+								evt["last_triggered_date"] = today_str
+								# Jika one-time, tandai selesai
+								if evt_type == "one-time":
+									evt["is_completed"] = True
+								self.config.save_data()
+					except Exception:
+						pass
+
+			# 2. Briefing Pagi
+			if events_config.get("briefing_enabled", True):
+				briefing_hour = int(events_config.get("briefing_hour", 7))
+				last_brief = events_config.get("last_briefing_date", "")
+				
+				if now.hour == briefing_hour and last_brief != today_str:
+					events_today = []
+					for evt in events:
+						if evt.get("is_completed", False): continue
+						evt_type = evt.get("type", "one-time")
+						evt_date = evt.get("date", "")
+						reminder = int(evt.get("reminder", 0)) # 0: Hari H, 1: H-1, 7: H-7, 30: 1 Bulan
+						
+						try:
+							if evt_type == "one-time":
+								evt_dt = datetime.datetime.strptime(evt_date, "%Y-%m-%d")
+							else:
+								evt_dt = datetime.datetime.strptime(f"{now.year}-{evt_date}", "%Y-%m-%d")
+							
+							diff_days = (evt_dt.date() - now.date()).days
+							
+							if diff_days == 0 and reminder == 0:
+								events_today.append(f"hari ini, {evt.get('title')}")
+							elif diff_days == 1 and reminder == 1:
+								events_today.append(f"besok, {evt.get('title')}")
+							elif diff_days == 7 and reminder == 7:
+								events_today.append(f"minggu depan, {evt.get('title')}")
+							elif reminder == 30:
+								next_m = now.month % 12 + 1
+								next_y = now.year + (now.month // 12)
+								try:
+									target_date = datetime.date(next_y, next_m, now.day)
+									if evt_dt.date() == target_date:
+										events_today.append(f"bulan depan di tanggal yang sama, {evt.get('title')}")
+								except ValueError:
+									pass
+						except Exception:
+							continue
+					
+					if events_today:
+						greeting = f"Selamat pagi. Anda memiliki {len(events_today)} acara peringatan. " + "; ".join(events_today)
+						if self.tts:
+							self.tts.queue_speech(greeting)
+						elif self.audio:
+							import ui
+							ui.message(greeting)
+					
+					events_config["last_briefing_date"] = today_str
+					self.config.save_data()
+		except Exception as e:
+			from .logger import jk_log
+			jk_log.error(f"JadwalKu: Error check_events: {e}")
