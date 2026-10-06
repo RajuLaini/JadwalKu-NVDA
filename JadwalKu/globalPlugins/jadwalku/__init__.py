@@ -1063,36 +1063,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		events = self.config.get_events()
 		today_str = now.strftime("%Y-%m-%d")
 		
-		events_today = []
-		for evt in events:
-			if evt.get("is_completed", False): continue
-			evt_type = evt.get("type", "one-time")
-			evt_date = evt.get("date", "")
-			evt_title = evt.get("title", "")
-			
-			try:
-				if evt_type == "one-time":
-					if evt_date == today_str:
-						events_today.append(evt_title)
-				else:
-					parts = evt_date.split("-")
-					if len(parts) == 3:
-						base_year = int(parts[0])
-						m, d = int(parts[1]), int(parts[2])
-					elif len(parts) == 2:
-						base_year = None
-						m, d = int(parts[0]), int(parts[1])
-					else:
-						continue
-					
-					if m == now.month and d == now.day:
-						if base_year is not None:
-							ke = now.year - base_year
-							if ke > 0:
-								evt_title += f" yang ke-{ke}"
-						events_today.append(evt_title)
-			except Exception:
-				continue
+		events_today = self.scheduler.get_todays_events(now)
 				
 		if events_today:
 			msg = f"Hari ini Anda memiliki {len(events_today)} acara: " + ", ".join(events_today)
