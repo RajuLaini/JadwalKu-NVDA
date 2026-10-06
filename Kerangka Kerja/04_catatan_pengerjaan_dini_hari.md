@@ -119,3 +119,8 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 **4. GUI Crash Diam-Diam (Timer dan Alarm Aktif)**
 - **Masalah:** Saat pengguna mencoba memanggil dialog ActiveTimer/ActiveAlarm dengan shortcut 1 atau 2 saat sedang ada timer/alarm yang berjalan, dialog tersebut mogok tanpa menampilkan peringatan error.
 - **Solusi:** Constructor \__init__\ pada \ActiveTimerManagerDialog\ dan \ActiveAlarmManagerDialog\ meminta parameter \scheduler\ tetapi gagal mendefinisikannya menjadi \self.scheduler\ sebelum pemanggilan \get_timer_choices()\. Ditambal dengan \self.scheduler = scheduler\ pada \guiDialogs.py\.
+
+**5. Restorasi Sejarah & Desain Ulang Changelog (List View)**
+- **Masalah:** Daftar riwayat pembaruan (Changelog) terlalu membengkak sebagai kotak teks tunggal yang sulit dinavigasi oleh *Screen Reader*, dan banyak catatan versi lawas hilang tergerus pembaruan.
+- **Solusi:** Merombak \ChangelogDialog\ menjadi arsitektur \wx.ListBox\ dan mengekstraksi ulang 32 catatan versi lawas dari dalam file \.nvda-addon\ menggunakan Python *AST parsing*, sehingga seluruh riwayat peradaban JadwalKu dapat dinavigasi dengan rapi.
+
