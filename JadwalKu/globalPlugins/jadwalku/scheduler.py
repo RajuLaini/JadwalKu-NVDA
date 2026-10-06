@@ -674,7 +674,7 @@ class Scheduler:
 							if should_trigger and last_triggered != today_str:
 								msg = f"Pengingat Acara: {evt.get('title', '')}"
 								if self.tts:
-									self.tts.queue_speech(msg)
+									self.tts.speak(msg)
 								elif self.audio:
 									import ui
 									ui.message(msg)
@@ -697,7 +697,7 @@ class Scheduler:
 					if events_today:
 						greeting = f"Selamat pagi. Anda memiliki {len(events_today)} acara peringatan. " + "; ".join(events_today)
 						if self.tts:
-							self.tts.queue_speech(greeting)
+							self.tts.speak(greeting)
 						elif self.audio:
 							import ui
 							ui.message(greeting)
