@@ -167,3 +167,10 @@ Pada versi 1.7.5, Timer dan Alarm kini mendukung operasi Jeda (Pause) dan Lanjut
 ## Integrasi Komunitas (Versi 1.7.6.5.4)
 - **Grup Komunitas Telegram**: Menyediakan portal instan ke grup komunitas Telegram resmi JadwalKu untuk mewadahi diskusi antar pengguna. Tersedia melalui tombol khusus di Pengaturan NVDA, tombol di menu Laporan & Saran (FeedbackDialog), dan *shortcut* cepat NVDA + / lalu C di Command Layer.
 
+
+## Arsitektur Kalender & Acara Pribadi (Versi 1.7.6.5.7)
+- **Kalender Terintegrasi**: Mengubah JadwalKu dari sekadar jam alarm menjadi asisten pribadi. Mendukung pembuatan acara 'Sekali Jalan' (seperti Rapat atau Tenggat Waktu) dan 'Tahunan' (Ulang Tahun, Anniversary).
+- **Kalkulator Usia Cerdas**: Acara tahunan yang didefinisikan dengan tahun dasar (YYYY-MM-DD) akan dihitung secara otomatis, sehingga asisten dapat melaporkan 'Ulang Tahun yang ke-27' dengan presisi matematika.
+- **Briefing Pagi & Peringatan Dini**: Di setiap jam 06:00 (bisa disesuaikan), JadwalKu akan merangkum seluruh acara hari ini. Pengguna juga dapat mengatur peringatan dini (Sehari Sebelumnya, Seminggu Sebelumnya, Sebulan Sebelumnya) untuk persiapan maksimal.
+- **Pembersihan Otomatis (Auto-Cleanup)**: Agar data memori JSON tidak bengkak, acara berjenis 'Sekali Jalan' yang telah tereksekusi atau usang (terlewat berhari-hari) akan otomatis disapu bersih dan dihapus permanen oleh sistem di latar belakang.
+- **Laporan Waktu Nyata**: Shortcut NVDA + / lalu E membacakan daftar acara hari ini secara spesifik, lengkap dengan keterangan waktu detail (misal: 'pada jam 16:10') apabila diatur oleh pengguna.

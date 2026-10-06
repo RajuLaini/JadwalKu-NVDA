@@ -102,3 +102,20 @@ Catatan ini merangkum seluruh pencapaian, keputusan desain teknis, dan alur kerj
 **3. UUID File Cache Collision Bug**
 - Masalah: SAPI 5 TTS menyimpan temp_wav di folder temp dengan nama jadwalku_tts.wav. Jika diputar oleh audioManager bersamaan, cache akan membaca file lama yang belum selesai ditulis karena namanya sama.
 - Solusi: Menambahkan uuid4().hex sebagai postfix pada nama file dinamis agar unik, serta menambahkan file unik ini pada daftar bypass_cache audioManager.py agar tidak mengakibatkan memory leak.
+
+## Tanggal 6 Oktober 2026: Sinkronisasi Fitur Acara (Event) & Penyelamatan GUI
+**1. Bug Waktu Spesifik (Event Time Trigger) Tidak Berbunyi**
+- **Masalah:** Pengguna mengeluhkan fitur waktu spesifik (seperti pengingat acara di jam 15:55) gagal berbunyi dan tidak menandai acara sebagai selesai.
+- **Solusi:** Ternyata pada blok kode di \scheduler.py\, variabel instans mesin pembicara disebut \self.tts\, padahal yang dideklarasikan saat konstruktor adalah \self.tts_manager\. Ini menyebabkan \AttributeError\ yang ditangkap diam-diam oleh \except\, membatalkan pengingat tanpa suara. Diperbaiki dengan menyeragamkan pemanggilan variabel \	ts_manager\ di seluruh file \scheduler.py\.
+
+**2. Auto-Cleanup untuk Acara Sekali Pakai (One-Time)**
+- **Masalah:** Acara yang sudah berbunyi terus menumpuk di daftar sebagai sampah visual, memaksa pengguna menghapusnya secara manual.
+- **Solusi:** Menambahkan rutin penyapu pintar yang langsung membuang acara dari memori JSON setelah sukses disuarakan, serta menyapu bersih semua acara usang peninggalan kemarin apabila komputer sempat mati.
+
+**3. Pemolesan Shortcut E (Laporan Waktu Nyata)**
+- **Masalah:** Tombol E hanya mengumumkan nama acara tanpa menyebutkan detail jamnya.
+- **Solusi:** Menyelipkan logika \pada jam {evt_time}\ jika acara tersebut menyematkan pengaturan waktu, sekaligus menyelaraskan otak perhitungan usia ulang tahun ke shortcut E sehingga seragam dengan pengumuman _Briefing_ pagi.
+
+**4. GUI Crash Diam-Diam (Timer dan Alarm Aktif)**
+- **Masalah:** Saat pengguna mencoba memanggil dialog ActiveTimer/ActiveAlarm dengan shortcut 1 atau 2 saat sedang ada timer/alarm yang berjalan, dialog tersebut mogok tanpa menampilkan peringatan error.
+- **Solusi:** Constructor \__init__\ pada \ActiveTimerManagerDialog\ dan \ActiveAlarmManagerDialog\ meminta parameter \scheduler\ tetapi gagal mendefinisikannya menjadi \self.scheduler\ sebelum pemanggilan \get_timer_choices()\. Ditambal dengan \self.scheduler = scheduler\ pada \guiDialogs.py\.
