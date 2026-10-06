@@ -97,75 +97,48 @@ class ChangelogDialog(wx.Dialog):
 		super().__init__(parent, title="Catatan Riwayat Pembaruan JadwalKu (Changelog)", size=(620, 500), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		
-		info_label = wx.StaticText(self, label="Gunakan Panah Atas/Bawah untuk membaca riwayat pembaruan dari versi terbaru hingga terlama:")
+		info_label = wx.StaticText(self, label="Pilih &versi menggunakan Panah Atas/Bawah, lalu tekan Tab untuk membaca detail pembaruan:")
 		sizer.Add(info_label, 0, wx.ALL, 8)
 		
-		changelog_text = (
-			"=== RIWAYAT PEMBARUAN JADWALKU ===\n\n"
-			"[Versi 1.7.6.5.7]\n"
-			"- Fitur Raksasa Baru (Kalender & Acara): JadwalKu kini telah berevolusi menjadi asisten pribadi! Anda dapat menjadwalkan 'Acara Sekali Jalan' (seperti Rapat atau Tenggat Waktu Proyek) atau 'Acara Tahunan' (Ulang Tahun, Anniversary). Lengkap dengan fitur *Briefing Pagi* dan *Peringatan Dini* yang mampu mengingatkan Anda sehari, seminggu, atau bahkan tepat 1 bulan sebelum acara tersebut tiba!\n"
-			"- Pintar Menghitung Usia: JadwalKu kini memiliki kalkulator cerdas untuk acara tahunan. Cukup masukkan tanggal format YYYY-MM-DD (contoh: 1999-12-26), dan sistem otomatis menyebutkan 'Ulang Tahun yang ke-27' saat alarm peringatannya bergema!\n"
-			"- Sinkronisasi Laporan (E) dan Pembersihan Otomatis: Shortcut pelaporan manual acara (E) kini memuat algoritma cerdas yang sama dengan Briefing Pagi, plus tambahan sebutan jam acara. Dan untuk acara One-Time yang telah lewat atau berhasil disuarakan, sistem kini akan langsung membersihkan/menghapusnya dari daftar secara otomatis agar tidak menumpuk menjadi sampah memori.\n"
-			"- Perbaikan Bug (Silent Crash): Memperbaiki bug diam yang membuat jendela 'Manajer Timer Aktif' dan 'Manajer Alarm Aktif' gagal terbuka ketika ada alarm yang berjalan, serta menyembuhkan pemicu waktu spesifik Acara dari masalah fungsi usang.\n"
-			"- Tab Navigasi Baru: Penambahan tab khusus 'Kalender & Acara (Events)' di pengaturan utama.\n"
-			"- Pintasan Baru: Tekan NVDA + / lalu E untuk mendengarkan TTS menyebutkan rincian acara hari ini beserta jamnya.\n\n"
-			"[Versi 1.7.6.5.6]\n"
-			"- Perbaikan Bug (Auto-Trim Voice Pack Studio): Menurunkan ambang batas volume (*threshold*) pemotong keheningan menjadi 300 RMS dan memperketat margin menjadi 50 milidetik di perekam suara bawaan JadwalKu. Hal ini mengatasi masalah di mana rekaman dengan suara lembut (seperti konsonan 's' atau 't' di awal dan akhir kata) tidak terpotong sama sekali atau menyisakan ruang kosong yang terlalu panjang.\n\n"
-			"[Versi 1.7.6.5.5]\n"
-			"- Perbaikan Kritis (Habit Tracker Kedaluwarsa): Jika jadwal (baik yang sekali putar maupun berulang) melewati Jam Selesai tanpa Anda tandai selesai, sistem kini akan langsung BERHENTI memutar alarm dan SEKETIKA memvonis GAGAL jadwal tersebut untuk hari itu tanpa perlu menunggu tengah malam! Terima kasih yang sebesar-besarnya kepada Atikah Fina Wulandari atas kejeliannya menemukan celah logika kritis ini.\n"
-			"- Peningkatan ekstrem pada Studio Rekaman (Voice Pack Manager): Algoritma Auto-Trim Silence kini menggunakan batas RMS 1500 (mengabaikan bunyi klik mic dan hembusan napas kencang) dengan margin 30 milidetik. Terima kasih tak terhingga kepada Tuan Muhammad Saleh atas dedikasi dan riset rekaman suaranya yang luar biasa, sehingga kalibrasi presisi maha karya pada studio ini dapat terwujud sempurna!\n"
-			"- Rekonstruksi Sejarah: Menambahkan dan merestorasi riwayat pembaruan (Changelog) lengkap dari awal pengembangan (Versi 1.0.0) hingga saat ini agar pengguna dapat melacak seluruh evolusi arsitektur dan fitur JadwalKu secara transparan.\n\n"
-			"[Versi 1.7.6.5.4]\n"
-			"- Integrasi Komunitas Telegram: JadwalKu kini menyediakan portal langsung menuju Grup Komunitas Telegram resmi. Anda dapat bergabung melalui tombol di Pengaturan NVDA, tombol di menu Laporan (NVDA + / lalu R), atau menekan shortcut instan (NVDA + / lalu C) untuk berdiskusi dengan pengguna JadwalKu lainnya!\n\n"
-			"[Versi 1.7.6.5.3]\n"
-			"- Inisiasi Pengembangan Android & iOS: Fondasi awal JadwalKuApp berbasis React Native telah berhasil dibangun dan dikompilasi secara luring (standalone offline). Struktur navigasi Bottom Tabs aksesibel mulai diimplementasikan untuk uji coba TalkBack.\n\n"
-			"[Versi 1.7.6.5.2]\n"
-			"- Perbaikan Kritis (Habit Tracker Liar): Memperbaiki bug pergantian hari di tengah malam di mana jadwal kebiasaan yang belum waktunya tiba malah tereksekusi secara paksa di jam 00:00.\n"
-			"- Perbaikan Kritis (SAPI 5 Deadlock): Memperbaiki bug kebuntuan sistem (deadlock) pada antrean suara TTS mandiri. Jika Anda menggunakan suara SAPI5 berbasis Cloud/Neural dan jaringan internet Anda terputus mendadak, jadwal-jadwal berikutnya kini tidak akan macet melainkan langsung dialihkan ke suara NVDA dalam waktu 2 detik.\n"
-			"- Peningkatan Akurasi Suara TTS Dinamis: Sistem TTS mandiri kini menggunakan mekanisme penamaan file dinamis secara acak, sehingga bentrok/terkuncinya file (file locking) saat beberapa jadwal berbunyi bersamaan dapat dihindari 100% tanpa adanya suara basi masa lalu yang terputar.\n\n"
-			"[Versi 1.7.6.5.1]\n"
-			"- Perbaikan Kritis (Jadwal Interval & Ganda): Memperbaiki dua bug logika matematika waktu utama pada mesin penjadwal. Jadwal berulang (interval setiap x jam) kini akan selalu berbunyi secara konsisten, dan jadwal tidak akan pernah lagi berbunyi dua kali berturut-turut pada menit yang sama.\n\n"
-			"[Versi 1.7.6.5]\n"
-			"- Perbaikan Bug (Habit Tracker Bisu): Memperbaiki masalah pada penundaan jadwal 'Sekali Saja' yang gagal membunyikan alarm satu jam kemudian jika NVDA sempat dimuat ulang (restart) atau detak komputer meleset. Kini data penundaan disimpan secara permanen di file konfigurasi.\n"
-			"- Pemadatan Irama Lonceng (Audio Engine): Target waktu presisi mutlak. Ayunan 16.5 detik dan jeda 1.8 detik tidak lagi melar.\n"
-			"- Ketangguhan Mesin Suara (Anti-Freeze): Menambahkan batas waktu maksimal 5 detik pada TTS. Jika Neural Voice online gagal/lemot karena jaringan, JadwalKu akan langsung mengambil alih (fallback) menggunakan suara NVDA secara instan tanpa membuat sistem macet!\n"
-			"- Perbaikan Kritis (Auto-Updater): Memperbaiki bug pada kotak dialog Pembaruan, di mana menekan tombol 'Ya' justru dianggap sebagai 'Tidak' oleh sistem.\n\n"
-			"[Versi 1.7.6.4.3 & 1.7.6.4.2 & 1.7.6.4.1]\n"
-			"- Hotfix Beruntun: Memperbaiki bug tombol Spasi/Enter pada Pelacak Kebiasaan, perbaikan bug RAM Cache yang memutar audio jam sebelumnya, dan memperbaiki fitur Auto-Updater yang mogok saat menemukan versi baru.\n\n"
-			"[Versi 1.7.6.4]\n"
-			"- Optimasi Memori (RAM Cache): Mengimplementasikan optimasi C-Level audioop untuk performa volume tinggi dan menyematkan sistem caching audio di RAM agar NVDA tidak tersendat (lag) saat memutar suara berulang.\n\n"
-			"[Versi 1.7.6.3]\n"
-			"- Fitur Gamifikasi & Lencana (Badge Showcase): Menambahkan Pelacak Kebiasaan (Habit Tracker) untuk membangun rutinitas. Dapatkan lencana dari Perunggu hingga Berlian Emas seiring ketekunan Anda! (Shortcut NVDA + / lalu J atau L).\n\n"
-			"[Versi 1.7.6.2]\n"
-			"- Pomodoro Timer: Teknik manajemen waktu populer kini hadir di JadwalKu. Fokus 25 menit, istirahat 5 menit secara otomatis berulang (Shortcut NVDA + / lalu 3).\n\n"
-			"[Versi 1.7.6.1]\n"
-			"- Auto-Updater: Mesin pengunduh latar belakang senyap (Silent Background Downloader). Add-on kini bisa memperbarui dirinya sendiri langsung dari GitHub.\n\n"
-			"[Versi 1.7.5]\n"
-			"- Arsitektur Jeda/Lanjutkan (Pause/Resume): Timer dan Alarm kini dapat dijeda dan dilanjutkan tanpa kehilangan sisa waktu hitung mundur.\n\n"
-			"[Versi 1.7.4 & 1.7.3 & 1.7.2]\n"
-			"- Restrukturisasi File: Pemisahan modul scheduler, audio, dan UI untuk meningkatkan performa NVDA (Lazy Loading).\n\n"
-			"[Versi 1.6.5]\n"
-			"- Voice Pack Store: Fitur pengunduh paket suara langsung dari aplikasi (Voice Pack) tanpa perlu mencari file secara manual.\n\n"
-			"[Versi 1.6.2]\n"
-			"- Laporan Bug Aman (Web Proxy): Pengguna dapat mengirim laporan, kritik, dan bug yang terhubung langsung ke Telegram Developer via PHP Proxy, dilengkapi pembatasan kuota 1 laporan/hari per user.\n\n"
-			"[Versi 1.6.1]\n"
-			"- Salin Tautan (Bagikan Add-on): Shortcut cepat NVDA + / lalu G untuk menyalin direct-link Add-on terbaru ke clipboard.\n\n"
-			"[Versi 1.6.0]\n"
-			"- Mesin TTS Mandiri SAPI 5: Revolusi Notifikasi! JadwalKu kini membacakan jadwal menggunakan mesin suara (TTS) terpisah di latar belakang sehingga tidak pernah menumpuk atau mengganggu ucapan pembaca layar NVDA utama! (Shortcut NVDA + / lalu T).\n\n"
-			"[Versi 1.5.0]\n"
-			"- Kalender & Jam Dunia: Pengaturan lanjutan pada Tab 2. Menambahkan fitur Kalender Nasional (K), Jam Dunia (D), dan penimpaan pengumuman waktu bawaan NVDA F12.\n\n"
-			"[Versi 1.4.2]\n"
-			"- Audio Routing Engine (WinMM): Suara alarm dan lonceng diputar tepat pada speaker pilihan Anda, bukan sekadar perangkat default Windows, dengan perulangan tanpa jeda (Infinite Looping).\n\n"
-			"[Versi 1.3.0]\n"
-			"- Quick Timer & Alarm Cepat: Fitur penghitung waktu mundur presisi tinggi (Jam, Menit, Detik) dan alarm sekali pakai.\n\n"
-			"[Versi 1.2.0]\n"
-			"- Alarm Weker & Snooze: Penambahan mode alarm Weker tanpa henti yang bisa dihentikan dengan Spasi atau ditunda (Snooze 10 Menit) dengan tombol Z.\n\n"
-			"[Versi 1.0.0]\n"
-			"- Rilis Perdana: JadwalKu lahir! Konsep murni antarmuka Combo Box Dropdown 100% ramah Screen Reader untuk menggantikan format ketikan manual yang rentan error.\n"
-		)
+		self.versions = [
+			("Versi 1.7.6.5.7", "- Fitur Raksasa Baru (Kalender & Acara): JadwalKu kini telah berevolusi menjadi asisten pribadi! Anda dapat menjadwalkan 'Acara Sekali Jalan' (seperti Rapat atau Tenggat Waktu Proyek) atau 'Acara Tahunan' (Ulang Tahun, Anniversary). Lengkap dengan fitur *Briefing Pagi* dan *Peringatan Dini* yang mampu mengingatkan Anda sehari, seminggu, atau bahkan tepat 1 bulan sebelum acara tersebut tiba!\n- Pintar Menghitung Usia: JadwalKu kini memiliki kalkulator cerdas untuk acara tahunan. Cukup masukkan tanggal format YYYY-MM-DD (contoh: 1999-12-26), dan sistem otomatis menyebutkan 'Ulang Tahun yang ke-27' saat alarm peringatannya bergema!\n- Sinkronisasi Laporan (E) dan Pembersihan Otomatis: Shortcut pelaporan manual acara (E) kini memuat algoritma cerdas yang sama dengan Briefing Pagi, plus tambahan sebutan jam acara. Dan untuk acara One-Time yang telah lewat atau berhasil disuarakan, sistem kini akan langsung membersihkan/menghapusnya dari daftar secara otomatis agar tidak menumpuk menjadi sampah memori.\n- Perbaikan Bug (Silent Crash): Memperbaiki bug diam yang membuat jendela 'Manajer Timer Aktif' dan 'Manajer Alarm Aktif' gagal terbuka ketika ada alarm yang berjalan, serta menyembuhkan pemicu waktu spesifik Acara dari masalah fungsi usang.\n- Tab Navigasi Baru: Penambahan tab khusus 'Kalender & Acara (Events)' di pengaturan utama.\n- Pintasan Baru: Tekan NVDA + / lalu E untuk mendengarkan TTS menyebutkan rincian acara hari ini beserta jamnya."),
+			("Versi 1.7.6.5.6", "- Perbaikan Bug (Auto-Trim Voice Pack Studio): Menurunkan ambang batas volume (*threshold*) pemotong keheningan menjadi 300 RMS dan memperketat margin menjadi 50 milidetik di perekam suara bawaan JadwalKu. Hal ini mengatasi masalah di mana rekaman dengan suara lembut (seperti konsonan 's' atau 't' di awal dan akhir kata) tidak terpotong sama sekali atau menyisakan ruang kosong yang terlalu panjang."),
+			("Versi 1.7.6.5.5", "- Perbaikan Kritis (Habit Tracker Kedaluwarsa): Jika jadwal (baik yang sekali putar maupun berulang) melewati Jam Selesai tanpa Anda tandai selesai, sistem kini akan langsung BERHENTI memutar alarm dan SEKETIKA memvonis GAGAL jadwal tersebut untuk hari itu tanpa perlu menunggu tengah malam! Terima kasih yang sebesar-besarnya kepada Atikah Fina Wulandari atas kejeliannya menemukan celah logika kritis ini.\n- Peningkatan ekstrem pada Studio Rekaman (Voice Pack Manager): Algoritma Auto-Trim Silence kini menggunakan batas RMS 1500 (mengabaikan bunyi klik mic dan hembusan napas kencang) dengan margin 30 milidetik. Terima kasih tak terhingga kepada Tuan Muhammad Saleh atas dedikasi dan riset rekaman suaranya yang luar biasa, sehingga kalibrasi presisi maha karya pada studio ini dapat terwujud sempurna!\n- Rekonstruksi Sejarah: Menambahkan dan merestorasi riwayat pembaruan (Changelog) lengkap dari awal pengembangan (Versi 1.0.0) hingga saat ini agar pengguna dapat melacak seluruh evolusi arsitektur dan fitur JadwalKu secara transparan."),
+			("Versi 1.7.6.5.4", "- Integrasi Komunitas Telegram: JadwalKu kini menyediakan portal langsung menuju Grup Komunitas Telegram resmi. Anda dapat bergabung melalui tombol di Pengaturan NVDA, tombol di menu Laporan (NVDA + / lalu R), atau menekan shortcut instan (NVDA + / lalu C) untuk berdiskusi dengan pengguna JadwalKu lainnya!"),
+			("Versi 1.7.6.5.3", "- Inisiasi Pengembangan Android & iOS: Fondasi awal JadwalKuApp berbasis React Native telah berhasil dibangun dan dikompilasi secara luring (standalone offline). Struktur navigasi Bottom Tabs aksesibel mulai diimplementasikan untuk uji coba TalkBack."),
+			("Versi 1.7.6.5.2", "- Perbaikan Kritis (Habit Tracker Liar): Memperbaiki bug pergantian hari di tengah malam di mana jadwal kebiasaan yang belum waktunya tiba malah tereksekusi secara paksa di jam 00:00.\n- Perbaikan Kritis (SAPI 5 Deadlock): Memperbaiki bug kebuntuan sistem (deadlock) pada antrean suara TTS mandiri. Jika Anda menggunakan suara SAPI5 berbasis Cloud/Neural dan jaringan internet Anda terputus mendadak, jadwal-jadwal berikutnya kini tidak akan macet melainkan langsung dialihkan ke suara NVDA dalam waktu 2 detik.\n- Peningkatan Akurasi Suara TTS Dinamis: Sistem TTS mandiri kini menggunakan mekanisme penamaan file dinamis secara acak, sehingga bentrok/terkuncinya file (file locking) saat beberapa jadwal berbunyi bersamaan dapat dihindari 100% tanpa adanya suara basi masa lalu yang terputar."),
+			("Versi 1.7.6.5.1", "- Perbaikan Kritis (Jadwal Interval & Ganda): Memperbaiki bug jadwal interval yang gagal bunyi di jam kedua, serta bug jadwal berbunyi dua kali berturut-turut."),
+			("Versi 1.7.6.5", "- Perbaikan Bug (Habit Tracker Bisu): Memperbaiki masalah pada penundaan jadwal 'Sekali Saja' yang gagal membunyikan alarm satu jam kemudian jika NVDA sempat dimuat ulang (restart) atau detak komputer meleset. Kini data penundaan disimpan secara permanen di file konfigurasi.\n- Perbaikan Bug (Pengumuman Ganda): Memperbaiki anomali RAM Cache yang mengulang nama jadwal pertama saat 2 jadwal aktif bersamaan.\n- Pemadatan Irama Lonceng (Audio Engine): Target waktu presisi mutlak. Ayunan 16.5 detik dan jeda 1.8 detik tidak lagi melar.\n- Penyempurnaan UX Laporan TTS: Memangkas teks info 'Interval Aktif' pada pintasan NVDA + / lalu W agar lebih profesional (Terima kasih kepada Dedi Sanjaya atas laporannya).\n- Ketangguhan Mesin Suara (Anti-Freeze): Menambahkan batas waktu maksimal 5 detik pada TTS. Jika Neural Voice online gagal/lemot karena jaringan, JadwalKu akan langsung mengambil alih (fallback) menggunakan suara NVDA secara instan tanpa membuat sistem macet!\n- Perbaikan Bug (Jadwal Diedit): Memperbaiki anomali di mana jadwal yang sudah berbunyi hari ini tidak akan berbunyi lagi jika Anda hanya mengedit menit/jamnya.\n- Perbaikan Kritis (Auto-Updater): Memperbaiki bug pada kotak dialog Pembaruan, di mana menekan tombol 'Ya' justru dianggap sebagai 'Tidak' oleh sistem."),
+			("Versi 1.7.6.4.3 & 1.7.6.4.2 & 1.7.6.4.1", "- Hotfix Beruntun: Memperbaiki bug tombol Spasi/Enter pada Pelacak Kebiasaan, perbaikan bug RAM Cache yang memutar audio jam sebelumnya, dan memperbaiki fitur Auto-Updater yang mogok saat menemukan versi baru."),
+			("Versi 1.7.6.4", "- Optimasi Memori (RAM Cache): Mengimplementasikan optimasi C-Level audioop untuk performa volume tinggi dan menyematkan sistem caching audio di RAM agar NVDA tidak tersendat (lag) saat memutar suara berulang."),
+			("Versi 1.7.6.3", "- Fitur Gamifikasi & Lencana (Badge Showcase): Menambahkan Pelacak Kebiasaan (Habit Tracker) untuk membangun rutinitas. Dapatkan lencana dari Perunggu hingga Berlian Emas seiring ketekunan Anda! (Shortcut NVDA + / lalu J atau L)."),
+			("Versi 1.7.6.2", "- Pomodoro Timer: Teknik manajemen waktu populer kini hadir di JadwalKu. Fokus 25 menit, istirahat 5 menit secara otomatis berulang (Shortcut NVDA + / lalu 3)."),
+			("Versi 1.7.6.1", "- Auto-Updater: Mesin pengunduh latar belakang senyap (Silent Background Downloader). Add-on kini bisa memperbarui dirinya sendiri langsung dari GitHub."),
+			("Versi 1.7.5", "- Arsitektur Jeda/Lanjutkan (Pause/Resume): Timer dan Alarm kini dapat dijeda dan dilanjutkan tanpa kehilangan sisa waktu hitung mundur."),
+			("Versi 1.7.4 & 1.7.3 & 1.7.2", "- Restrukturisasi File: Pemisahan modul scheduler, audio, dan UI untuk meningkatkan performa NVDA (Lazy Loading)."),
+			("Versi 1.6.5", "- Voice Pack Store: Fitur pengunduh paket suara langsung dari aplikasi (Voice Pack) tanpa perlu mencari file secara manual."),
+			("Versi 1.6.2", "- Laporan Bug Aman (Web Proxy): Pengguna dapat mengirim laporan, kritik, dan bug yang terhubung langsung ke Telegram Developer via PHP Proxy, dilengkapi pembatasan kuota 1 laporan/hari per user."),
+			("Versi 1.6.1", "- Salin Tautan (Bagikan Add-on): Shortcut cepat NVDA + / lalu G untuk menyalin direct-link Add-on terbaru ke clipboard."),
+			("Versi 1.6.0", "- Mesin TTS Mandiri SAPI 5: Revolusi Notifikasi! JadwalKu kini membacakan jadwal menggunakan mesin suara (TTS) terpisah di latar belakang sehingga tidak pernah menumpuk atau mengganggu ucapan pembaca layar NVDA utama! (Shortcut NVDA + / lalu T)."),
+			("Versi 1.5.0", "- Kalender & Jam Dunia: Pengaturan lanjutan pada Tab 2. Menambahkan fitur Kalender Nasional (K), Jam Dunia (D), dan penimpaan pengumuman waktu bawaan NVDA F12."),
+			("Versi 1.4.2", "- Audio Routing Engine (WinMM): Suara alarm dan lonceng diputar tepat pada speaker pilihan Anda, bukan sekadar perangkat default Windows, dengan perulangan tanpa jeda (Infinite Looping)."),
+			("Versi 1.3.0", "- Quick Timer & Alarm Cepat: Fitur penghitung waktu mundur presisi tinggi (Jam, Menit, Detik) dan alarm sekali pakai."),
+			("Versi 1.2.0", "- Alarm Weker & Snooze: Penambahan mode alarm Weker tanpa henti yang bisa dihentikan dengan Spasi atau ditunda (Snooze 10 Menit) dengan tombol Z."),
+			("Versi 1.0.0", "- Rilis Perdana: JadwalKu lahir! Konsep murni antarmuka Combo Box Dropdown 100% ramah Screen Reader untuk menggantikan format ketikan manual yang rentan error.")
+		]
 		
-		self.textCtrl = wx.TextCtrl(self, value=changelog_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
-		sizer.Add(self.textCtrl, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		# ListBox untuk memilih versi
+		self.listVersions = wx.ListBox(self, choices=[v[0] for v in self.versions])
+		self.listVersions.SetSelection(0)
+		self.listVersions.Bind(wx.EVT_LISTBOX, self.onVersionSelect)
+		sizer.Add(self.listVersions, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
+		
+		detail_label = wx.StaticText(self, label="&Detail Pembaruan:")
+		sizer.Add(detail_label, 0, wx.ALL, 8)
+		
+		# TextCtrl readonly untuk menampilkan teks changelog versi tersebut
+		self.textCtrl = wx.TextCtrl(self, value=self.versions[0][1], style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2 | wx.HSCROLL)
+		sizer.Add(self.textCtrl, 2, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
 		
 		btnSizer = wx.StdDialogButtonSizer()
 		self.btnClose = wx.Button(self, wx.ID_CANCEL, label="&Tutup")
@@ -176,8 +149,12 @@ class ChangelogDialog(wx.Dialog):
 		
 		self.SetSizer(sizer)
 		self.Centre()
-		self.textCtrl.SetFocus()
+		self.listVersions.SetFocus()
 
+	def onVersionSelect(self, evt):
+		sel = self.listVersions.GetSelection()
+		if sel != wx.NOT_FOUND:
+			self.textCtrl.SetValue(self.versions[sel][1])
 
 class FeedbackDialog(wx.Dialog):
 	def __init__(self, parent, config_manager):
