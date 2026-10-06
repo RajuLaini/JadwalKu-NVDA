@@ -3377,6 +3377,7 @@ class VoiceStudioDialog(wx.Dialog):
 class ActiveTimerManagerDialog(wx.Dialog):
 	def __init__(self, parent, scheduler):
 		super().__init__(parent, title="Manajer Timer Aktif")
+		self.scheduler = scheduler
 		
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
 		
@@ -3461,6 +3462,7 @@ class ActiveTimerManagerDialog(wx.Dialog):
 class ActiveAlarmManagerDialog(wx.Dialog):
 	def __init__(self, parent, scheduler):
 		super().__init__(parent, title="Manajer Alarm Aktif")
+		self.scheduler = scheduler
 		
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
 		
