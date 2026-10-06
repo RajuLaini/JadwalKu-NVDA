@@ -673,8 +673,8 @@ class Scheduler:
 							last_triggered = evt.get("last_triggered_date", "")
 							if should_trigger and last_triggered != today_str:
 								msg = f"Pengingat Acara: {evt.get('title', '')}"
-								if self.tts:
-									self.tts.speak(msg)
+								if self.tts_manager:
+									self.tts_manager.speak(msg)
 								elif self.audio:
 									import ui
 									ui.message(msg)
@@ -684,8 +684,9 @@ class Scheduler:
 								if evt_type == "one-time":
 									evt["is_completed"] = True
 								self.config.save_data()
-					except Exception:
-						pass
+					except Exception as e:
+						from .logger import jk_log
+						jk_log.error(f"Error in time trigger: {e}")
 
 			# 2. Briefing Pagi
 			if events_config.get("briefing_enabled", True):
@@ -696,8 +697,8 @@ class Scheduler:
 					events_today = self.get_todays_events(now)
 					if events_today:
 						greeting = f"Selamat pagi. Anda memiliki {len(events_today)} acara peringatan. " + "; ".join(events_today)
-						if self.tts:
-							self.tts.speak(greeting)
+						if self.tts_manager:
+							self.tts_manager.speak(greeting)
 						elif self.audio:
 							import ui
 							ui.message(greeting)
