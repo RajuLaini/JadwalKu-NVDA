@@ -592,6 +592,10 @@ class Scheduler:
 						ke = evt_dt_obj.year - base_year
 						if ke > 0:
 							evt_title += f" yang ke-{ke}"
+							
+				evt_time = evt.get("time", "")
+				if evt_time and evt_time != "00:00":
+					evt_title += f", pada jam {evt_time}"
 						
 				diff_days = (evt_dt_obj - now.date()).days
 				if diff_days < 0:
@@ -651,7 +655,12 @@ class Scheduler:
 			
 			import datetime
 			# 1. Pemicu spesifik waktu
+			events_to_remove = []
 			for evt in events:
+				if evt.get("type", "one-time") == "one-time" and evt.get("date", "") < today_str:
+					events_to_remove.append(evt)
+					continue
+					
 				if evt.get("is_completed", False): continue
 				evt_time = evt.get("time", "")
 				if evt_time:
@@ -679,14 +688,20 @@ class Scheduler:
 									import ui
 									ui.message(msg)
 								
-								evt["last_triggered_date"] = today_str
-								# Jika one-time, tandai selesai
 								if evt_type == "one-time":
-									evt["is_completed"] = True
-								self.config.save_data()
+									events_to_remove.append(evt)
+								else:
+									evt["last_triggered_date"] = today_str
+									self.config.save_data()
 					except Exception as e:
 						from .logger import jk_log
 						jk_log.error(f"Error in time trigger: {e}")
+			
+			if events_to_remove:
+				for e in events_to_remove:
+					if e in events:
+						events.remove(e)
+				self.config.save_data()
 
 			# 2. Briefing Pagi
 			if events_config.get("briefing_enabled", True):
